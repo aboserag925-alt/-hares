@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>إستراحة أهل الأثر</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Reem+Kufi:wght@500;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0e0b08}
+html{scroll-behavior:smooth}
+.site{background:#0e0b08;color:#f3e9d6;font-family:'Cairo',sans-serif;overflow:hidden;position:relative}
+.site *{box-sizing:border-box}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px;position:relative}
+.gold{font-family:'Reem Kufi','Cairo',sans-serif;background:linear-gradient(90deg,#8a6420,#f6dc8e,#d4a24c,#f6dc8e,#8a6420);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite}
+@keyframes shine{to{background-position:-200% 0}}
+@keyframes up{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-22px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spinr{to{transform:rotate(-360deg)}}
+@keyframes marq{to{transform:translateX(-50%)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(212,162,76,.5)}100%{box-shadow:0 0 0 14px rgba(212,162,76,0)}}
+.in{animation:up .9s cubic-bezier(.2,.7,.2,1) both}
+.d1{animation-delay:.15s}.d2{animation-delay:.3s}.d3{animation-delay:.45s}.d4{animation-delay:.6s}
+@supports (animation-timeline:view()){.rv{animation:up linear both;animation-timeline:view();animation-range:entry 0% entry 35%}}
+.nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(14px);background:rgba(14,11,8,.7);border-bottom:1px solid #2c2216}
+.nav .wrap{display:flex;align-items:center;gap:28px;height:72px}
+.nav a{color:#c2b296;text-decoration:none;font-size:15px;transition:color .25s}
+.nav a:hover{color:#f6dc8e}
+.logo{font-family:'Reem Kufi',sans-serif;font-size:22px;font-weight:700;color:#f6dc8e!important;margin-inline-end:auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:48px;padding:0 26px;border-radius:26px;font-weight:700;font-size:15px;text-decoration:none;transition:transform .25s,box-shadow .25s}
+.btn:hover{transform:translateY(-3px)}
+.btn.fill{background:linear-gradient(135deg,#f6dc8e,#d4a24c 55%,#a8772a);color:#14100c;box-shadow:0 10px 30px rgba(212,162,76,.28)}
+.btn.line{border:1px solid #d4a24c;color:#f6dc8e}
+.hero{padding:90px 0 110px}
+.hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}
+.orb{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none;animation:float 9s ease-in-out infinite}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:14px;color:#f6dc8e;border:1px solid #3a2e20;border-radius:20px;padding:6px 16px;background:#1a1410}
+.dot{width:9px;height:9px;border-radius:50%;background:#d4a24c;animation:pulse 1.6s infinite}
+h1.big{font-size:84px;line-height:1.15;margin:22px 0 14px;font-weight:700}
+.lead{font-size:19px;line-height:1.9;color:#c2b296;max-width:520px;margin:0 0 30px}
+.cta{display:flex;gap:14px;flex-wrap:wrap}
+.emblem{position:relative;aspect-ratio:1;max-width:420px;width:100%;margin:0 auto;display:flex;align-items:center;justify-content:center}
+.ring{position:absolute;inset:0;border-radius:50%;border:1.5px dashed #6b5430;animation:spin 40s linear infinite}
+.ring.b{inset:12%;border:1.5px solid #3a2e20;border-top-color:#d4a24c;animation:spinr 14s linear infinite}
+.core{width:68%;aspect-ratio:1;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 35% 30%,#3a2a14,#17110b);border:2px solid #d4a24c;display:flex;align-items:center;justify-content:center;font-size:150px;box-shadow:0 0 80px rgba(212,162,76,.3);animation:float 7s ease-in-out infinite}
+.strip{border-block:1px solid #2c2216;background:#120e0a;padding:18px 0;direction:ltr;overflow:hidden}
+.track{display:flex;width:max-content;animation:marq 28s linear infinite}
+.track span{font-family:'Reem Kufi',sans-serif;font-size:26px;color:#8f7a55;padding:0 34px;white-space:nowrap;direction:rtl}
+.track span.g{color:#d4a24c}
+section.s{padding:100px 0 0}
+h2.t{font-size:44px;margin:0 0 10px;font-weight:700}
+.sub{color:#c2b296;font-size:17px;margin:0 0 40px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.card{position:relative;border-radius:22px;padding:30px;background:linear-gradient(160deg,#1f1812,#15100b);border:1px solid #2f2417;transition:transform .35s,border-color .35s,box-shadow .35s;overflow:hidden}
+.card:hover{transform:translateY(-8px);border-color:#d4a24c;box-shadow:0 24px 60px rgba(212,162,76,.14)}
+.card .n{font-family:'Reem Kufi',sans-serif;font-size:54px;color:#3a2e20;line-height:1;transition:color .35s}
+.card:hover .n{color:#d4a24c}
+.card h3{font-size:24px;margin:14px 0 8px}
+.card p{margin:0;color:#c2b296;line-height:1.8;font-size:15px}
+.row{display:grid;grid-template-columns:150px 1fr 1fr;gap:20px;align-items:center;padding:22px 26px;border-radius:16px;border:1px solid #2c2216;background:#15100b;margin-bottom:12px;transition:background .3s,border-color .3s,transform .3s}
+.row:hover{background:#1f1812;border-color:#d4a24c;transform:translateX(-6px)}
+.row b{font-family:'Reem Kufi',sans-serif;font-size:24px;color:#f6dc8e}
+.row span{font-size:17px}
+.tag{display:inline-block;font-size:12px;color:#14100c;background:#d4a24c;border-radius:12px;padding:2px 12px;font-weight:700}
+.thumb{height:170px;border-radius:14px;background:radial-gradient(circle at 70% 20%,#4a3518,#17110b);display:flex;align-items:center;justify-content:center;color:#f6dc8e;margin-bottom:16px;transition:transform .35s}
+.card:hover .thumb{transform:scale(1.03)}
+footer{margin-top:110px;border-top:1px solid #2c2216;padding:48px 0;color:#c2b296}
+footer .wrap{display:flex;gap:24px;flex-wrap:wrap;align-items:center}
+footer a{color:#f6dc8e;text-decoration:none}
+.majlis{display:grid;grid-template-columns:300px 1fr;gap:48px;align-items:center;padding:36px;border-radius:28px;border:1px solid #3a2e20;background:linear-gradient(160deg,#1f1812,#120e0a)}
+.mlogo{width:100%;border-radius:50%;box-shadow:0 0 70px rgba(212,162,76,.25);animation:float 8s ease-in-out infinite}
+@media (max-width:860px){.majlis{grid-template-columns:1fr;padding:24px}.mlogo{max-width:240px;margin:0 auto}}
+@media (max-width:860px){.hero .wrap{grid-template-columns:1fr}.emblem{max-width:280px}h1.big{font-size:56px}.row{grid-template-columns:1fr}.nav .nl{display:none}h2.t{font-size:34px}.hero{padding:50px 0 70px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+</head>
+<body>
+
+<div class="site">
+<div class="orb" style="width:420px;height:420px;background:rgba(212,162,76,.18);top:40px;right:-80px"></div>
+<div class="orb" style="width:340px;height:340px;background:rgba(138,100,32,.22);top:520px;left:-100px;animation-delay:-4s"></div>
+<header class="nav"><div class="wrap">
+<a class="logo" href="#top" style="display:flex;align-items:center;gap:12px"><img src="assets/logo.jpg" alt="" style="width:44px;height:44px;border-radius:50%;border:1px solid #d4a24c">إستراحة أهل الأثر</a>
+<a class="nl" href="#sections">الأقسام</a><a class="nl" href="#schedule">الجدول</a><a class="nl" href="#archive">الأرشيف</a><a class="nl" href="#majlis">المجلس</a>
+<a class="btn fill" href="#live" style="height:42px;padding:0 20px;color:#14100c">تابع البث</a>
+</div></header>
+<main id="top">
+<div class="hero"><div class="wrap">
+<div>
+<div class="eyebrow in"><span class="dot"></span>البث القادم: الإثنين 10 م بتوقيت مكة</div>
+<h1 class="big gold in d1">علم شرعي<br>بمنهج أهل السنة</h1>
+<p class="lead in d2">دروس في مصطلح الحديث والفقه والسيرة والعقيدة، وبثوث مباشرة على يوتيوب وتيك توك، وأرشيف مفتوح لكل ما فاتك. «لنصرة الحق ونشر الهدى»</p>
+<div class="cta in d3" id="live"><a class="btn fill" href="https://www.youtube.com/@Khaled_Najm">شاهد على يوتيوب</a><a class="btn line" href="https://www.tiktok.com/@d.khaled.4">تابع على تيك توك</a></div>
+</div>
+<div class="emblem in d2"><div class="ring"></div><div class="ring b"></div><div class="core"><img src="assets/logo.jpg" alt="شعار إستراحة أهل الأثر" style="width:100%;height:100%;border-radius:50%;object-fit:cover"></div></div>
+</div></div>
+<div class="strip"><div class="track">
+<span class="g">مصطلح الحديث</span><span>الفقه</span><span class="g">السيرة</span><span>العقيدة</span><span class="g">صحيح مسلم</span><span>أصول الفقه</span><span class="g">عظماء الإسلام</span><span>منوعات</span>
+<span class="g">مصطلح الحديث</span><span>الفقه</span><span class="g">السيرة</span><span>العقيدة</span><span class="g">صحيح مسلم</span><span>أصول الفقه</span><span class="g">عظماء الإسلام</span><span>منوعات</span>
+</div></div>
+<section class="s" id="sections"><div class="wrap">
+<h2 class="t gold rv">الأقسام</h2><p class="sub rv">اختر العلم الذي تريد أن تبدأ به.</p>
+<div class="grid">
+<div class="card rv"><div class="n">01</div><h3>مصطلح الحديث</h3><p>شرح علم المصطلح من الأساسيات إلى المتقدم.</p></div>
+<div class="card rv"><div class="n">02</div><h3>الفقه</h3><p>أصول الفقه وأحكام العبادات والمعاملات.</p></div>
+<div class="card rv"><div class="n">03</div><h3>السيرة</h3><p>سيرة النبي ﷺ وعظماء الإسلام بترتيب زمني.</p></div>
+<div class="card rv"><div class="n">04</div><h3>العقيدة والتفسير</h3><p>شرح العقيدة الواسطية وأصول التفسير.</p></div>
+<div class="card rv"><div class="n">05</div><h3>منوعات</h3><p>مقتطفات وحوارات وإجابات عن الأسئلة.</p></div>
+<div class="card rv"><div class="n">06</div><h3>الأرشيف</h3><p>كل البثوث السابقة مع بحث وفلترة.</p></div>
+</div></div></section>
+<section class="s" id="schedule"><div class="wrap">
+<h2 class="t gold rv">جدول الدورات العلمية</h2><p class="sub rv">يومياً من 7:00 إلى 10:00 مساءً.</p>
+<div class="row rv"><b>السبت</b><span>شرح علم مصطلح الحديث</span><span></span></div>
+<div class="row rv"><b>الأحد</b><span>مناهج البيان في أصول التفسير</span><span>قواعد عقائد أهل السنة والجماعة</span></div>
+<div class="row rv"><b>الإثنين</b><span>شرح صحيح الإمام مسلم</span><span>شرح علم مصطلح الحديث</span></div>
+<div class="row rv"><b>الثلاثاء</b><span>شرح العقيدة الواسطية</span><span>أصول الفقه</span></div>
+<div class="row rv"><b>الأربعاء</b><span>شرح صحيح الإمام مسلم</span><span>شرح علم مصطلح الحديث</span></div>
+<div class="row rv"><b>الخميس</b><span>عظماء الإسلام</span><span>منوعات ومقتطفات وحوارات</span></div>
+</div></section>
+<section class="s" id="archive"><div class="wrap">
+<h2 class="t gold rv">من الأرشيف</h2><p class="sub rv">أحدث ما نُشر على المنصات.</p>
+<div class="grid">
+<a class="card rv" href="#" style="text-decoration:none;color:inherit"><div class="thumb"><svg width="46" height="46" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div><span class="tag">ردود</span><h3>حقيقة حديث حجامة أم سلمة.. الرد على عمار الشويلي</h3><p>37:05 · يوتيوب</p></a>
+<a class="card rv" href="#" style="text-decoration:none;color:inherit"><div class="thumb"><svg width="46" height="46" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div><span class="tag">العقيدة</span><h3>جميل حليم يزعم أن الحسن البصري ينفي علو الله على عرشه</h3><p>19:21 · يوتيوب</p></a>
+<a class="card rv" href="#" style="text-decoration:none;color:inherit"><div class="thumb"><svg width="46" height="46" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div><span class="tag">العقيدة</span><h3>الفرق بين نسبة الخلق إلى الله ونسبته إلى الإنسان</h3><p>[التاريخ] · تيك توك</p></a>
+</div></div></section>
+<section class="s" id="majlis"><div class="wrap"><div class="majlis rv"><img class="mlogo" src="assets/logo.jpg" alt="شعار إستراحة أهل الأثر"><div><h2 class="t gold" style="margin:0 0 10px">إستراحة أهل الأثر</h2><p class="lead" style="margin:0 0 22px">مجلس تدارس العلم والأدب: مجموعة على تيليجرام لدروس في العلوم الشرعية والحديث، بإشراف الشيخ.</p><a class="btn fill" href="https://t.me/+H-Rpxhc371VhYzU0">انضم إلى المجلس</a></div></div></div></section>
+</main>
+<footer><div class="wrap"><b class="gold" style="font-size:24px">إستراحة أهل الأثر</b><span style="flex:1"></span><a href="https://www.youtube.com/@Khaled_Najm">يوتيوب</a><a href="https://www.tiktok.com/@d.khaled.4">تيك توك</a><a href="https://t.me/khaled_najm1">تيليجرام</a><a href="https://t.me/recrdings">التسجيلات</a></div></footer>
+</div>
+
+</body>
+</html>
