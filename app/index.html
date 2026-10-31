@@ -5,40 +5,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>إستراحة أهل الأثر</title>
 <style>
-:root{--accent:#A4FF70;--on-accent:#000;--bg:#F3F3F3;--surface:#fff;--text:#000;--muted:#5E5E5E;--hair:#EAE9E9;--border:#969696;--ok:#DEFFC8;--busy:#E1E9FB;--warn:#FEE9DE}
-@media(prefers-color-scheme:dark){:root{--bg:#1F1F1F;--surface:#333232;--text:#F3F3F3;--muted:#D2D2D2;--hair:#333232;--busy:#2B3550;--warn:#4a3a30;--ok:#2f4a2a}}
+:root{--wood:#3a1d14;--wood2:#5a2c1d;--gold:#d4af6a;--gold2:#f0d9a0;--cream:#fbf5e8;--bg:#2a140e;--text:#fbf5e8;--muted:#cdb994;--card:#4a2418;--line:#7a5a2e}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,'Segoe UI',sans-serif}
 .wrap{max-width:640px;margin:0 auto;padding:16px}
-h1{font-size:26px;margin:8px 0 4px}
-p{margin:0;color:var(--muted);font-size:14px}
-.live{background:var(--busy);border-radius:16px;padding:12px 14px;margin:12px 0;font-weight:500}
+header{text-align:center;padding:12px 0}
+.logo{width:84px;height:84px;border-radius:50%;border:2px solid var(--gold);display:inline-flex;align-items:center;justify-content:center;font-size:34px;color:var(--gold);background:var(--wood)}
+h1{font-size:26px;margin:10px 0 2px;color:var(--gold2)}
+header p{margin:0;color:var(--muted);font-size:14px}
+.live{border:1px solid var(--gold);border-radius:16px;padding:12px 14px;margin:12px 0;text-align:center;color:var(--gold2);background:var(--wood)}
 .tabs{display:flex;gap:8px;margin:8px 0 12px}
-.tab{flex:1;min-height:44px;border:1px solid var(--hair);background:var(--surface);color:var(--text);border-radius:999px;font:inherit;font-weight:500}
-.tab.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
-.card{background:var(--surface);border:1px solid var(--hair);border-radius:16px;padding:14px;margin-bottom:10px}
-.card h2{font-size:17px;margin:4px 0}
-.tag{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;background:var(--ok)}
-.tag.video{background:var(--busy)}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;border:0;background:var(--accent);color:var(--on-accent);font:inherit;font-weight:700;text-decoration:none;margin-top:10px}
-.note{background:var(--warn);border-radius:16px;padding:10px 12px;font-size:13px;margin-bottom:12px}
-textarea{width:100%;min-height:90px;border:1px solid var(--border);border-radius:12px;padding:10px 12px;font:inherit;background:var(--surface);color:var(--text)}
-.empty{text-align:center;color:var(--muted);padding:28px 8px}
+.tab{flex:1;min-height:44px;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:999px;font:inherit;font-weight:500}
+.tab.on{background:var(--gold);color:#2a140e;border-color:var(--gold);font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
+.card h2{font-size:17px;margin:4px 0;color:var(--gold2)}
+.day{font-weight:700;color:var(--gold);font-size:18px;margin-bottom:8px}
+.slot{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line)}
+.time{min-width:64px;background:var(--wood);border:1px solid var(--gold);border-radius:999px;text-align:center;padding:2px 8px;font-size:13px;color:var(--gold2)}
+.today{border:2px solid var(--gold)}
+.tag{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;background:var(--gold);color:#2a140e}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;border:0;background:var(--gold);color:#2a140e;font:inherit;font-weight:700;text-decoration:none;margin-top:10px}
+.note{border:1px solid var(--gold);border-radius:16px;padding:10px 12px;font-size:13px;margin-bottom:12px;color:var(--gold2)}
+textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;background:var(--wood);color:var(--text)}
+.empty{text-align:center;color:var(--muted);padding:20px 8px;font-size:14px}
 [hidden]{display:none!important}
 </style>
 </head>
 <body>
 <div class="wrap">
+<header>
+<div class="logo">📖</div>
 <h1>إستراحة أهل الأثر</h1>
-<p>صوتيات وفيديوهات البث من تيليجرام</p>
-<div class="live">البث المباشر كل يوم الساعة 7 مساءً</div>
+<p>مجلس تدارس العلم والأدب</p>
+</header>
+<div class="live">الدروس كل يوم الساعة 7 مساءً و10 مساءً</div>
 <div class="tabs">
-<button class="tab on" id="t1" onclick="show('media')">المكتبة</button>
-<button class="tab" id="t2" onclick="show('q')">الأسئلة</button>
+<button class="tab on" id="t1" onclick="show('sched')">الجدول</button>
+<button class="tab" id="t2" onclick="show('media')">المكتبة</button>
+<button class="tab" id="t3" onclick="show('q')">الأسئلة</button>
 </div>
-<section id="media">
+<section id="sched"></section>
+<section id="media" hidden>
 <div class="card"><span class="tag">صوتية</span><h2>عنوان المادة هنا</h2><a class="btn" href="#">افتح في تيليجرام</a></div>
-<div class="card"><span class="tag video">فيديو</span><h2>عنوان المادة هنا</h2><a class="btn" href="#">افتح في تيليجرام</a></div>
 <div class="empty">تضاف المواد يدويًا من رابط تيليجرام</div>
 </section>
 <section id="q" hidden>
@@ -47,7 +55,29 @@ textarea{width:100%;min-height:90px;border:1px solid var(--border);border-radius
 </section>
 </div>
 <script>
-function show(w){document.getElementById('media').hidden=w!=='media';document.getElementById('q').hidden=w!=='q';document.getElementById('t1').className='tab'+(w==='media'?' on':'');document.getElementById('t2').className='tab'+(w==='q'?' on':'')}
+var S=[
+['السبت','شرح صحيح الإمام مسلم','شرح علم مصطلح الحديث'],
+['الأحد','مناهج البيان في أصول التفسير وقواعد فهم القرآن','قواعد عقائد أهل السنة والجماعة'],
+['الإثنين','شرح صحيح الإمام مسلم','شرح علم مصطلح الحديث'],
+['الثلاثاء','شرح العقيدة الواسطية','أصول الفقه'],
+['الأربعاء','شرح صحيح الإمام مسلم','شرح علم مصطلح الحديث'],
+['الخميس','عظماء الإسلام','منوعات ومقتطفات وحوارات']
+];
+var names=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+var today=names[new Date().getDay()];
+var box=document.getElementById('sched');
+S.forEach(function(r){
+ var c=document.createElement('div');c.className='card'+(r[0]===today?' today':'');
+ var d=document.createElement('div');d.className='day';d.textContent=r[0]+(r[0]===today?' (اليوم)':'');c.appendChild(d);
+ [['7:00 مساءً',r[1]],['10:00 مساءً',r[2]]].forEach(function(s){
+  var row=document.createElement('div');row.className='slot';
+  var t=document.createElement('span');t.className='time';t.textContent=s[0];
+  var x=document.createElement('span');x.textContent=s[1];
+  row.appendChild(t);row.appendChild(x);c.appendChild(row);
+ });
+ box.appendChild(c);
+});
+function show(w){['sched','media','q'].forEach(function(id,i){document.getElementById(id).hidden=id!==w;document.getElementById('t'+(i+1)).className='tab'+(id===w?' on':'')})}
 </script>
 </body>
 </html>
