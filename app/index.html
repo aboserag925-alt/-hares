@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>إستراحة أهل الأثر</title>
+<style>
+:root{--accent:#A4FF70;--on-accent:#000;--bg:#F3F3F3;--surface:#fff;--text:#000;--muted:#5E5E5E;--hair:#EAE9E9;--border:#969696;--ok:#DEFFC8;--busy:#E1E9FB;--warn:#FEE9DE}
+@media(prefers-color-scheme:dark){:root{--bg:#1F1F1F;--surface:#333232;--text:#F3F3F3;--muted:#D2D2D2;--hair:#333232;--busy:#2B3550;--warn:#4a3a30;--ok:#2f4a2a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif}
+.wrap{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:26px;margin:8px 0 4px}
+p{margin:0;color:var(--muted);font-size:14px}
+.live{background:var(--busy);border-radius:16px;padding:12px 14px;margin:12px 0;font-weight:500}
+.tabs{display:flex;gap:8px;margin:8px 0 12px}
+.tab{flex:1;min-height:44px;border:1px solid var(--hair);background:var(--surface);color:var(--text);border-radius:999px;font:inherit;font-weight:500}
+.tab.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.card{background:var(--surface);border:1px solid var(--hair);border-radius:16px;padding:14px;margin-bottom:10px}
+.card h2{font-size:17px;margin:4px 0}
+.tag{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;background:var(--ok)}
+.tag.video{background:var(--busy)}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;border:0;background:var(--accent);color:var(--on-accent);font:inherit;font-weight:700;text-decoration:none;margin-top:10px}
+.note{background:var(--warn);border-radius:16px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+textarea{width:100%;min-height:90px;border:1px solid var(--border);border-radius:12px;padding:10px 12px;font:inherit;background:var(--surface);color:var(--text)}
+.empty{text-align:center;color:var(--muted);padding:28px 8px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>إستراحة أهل الأثر</h1>
+<p>صوتيات وفيديوهات البث من تيليجرام</p>
+<div class="live">البث المباشر كل يوم الساعة 7 مساءً</div>
+<div class="tabs">
+<button class="tab on" id="t1" onclick="show('media')">المكتبة</button>
+<button class="tab" id="t2" onclick="show('q')">الأسئلة</button>
+</div>
+<section id="media">
+<div class="card"><span class="tag">صوتية</span><h2>عنوان المادة هنا</h2><a class="btn" href="#">افتح في تيليجرام</a></div>
+<div class="card"><span class="tag video">فيديو</span><h2>عنوان المادة هنا</h2><a class="btn" href="#">افتح في تيليجرام</a></div>
+<div class="empty">تضاف المواد يدويًا من رابط تيليجرام</div>
+</section>
+<section id="q" hidden>
+<div class="note">الأسئلة الشرعية تصل إلى الدكتور خالد وحده، ولا يجيب عنها أحد غيره.</div>
+<div class="card"><h2>اكتب سؤالك</h2><textarea placeholder="سؤالك أو ملاحظتك"></textarea><button class="btn">إرسال</button></div>
+</section>
+</div>
+<script>
+function show(w){document.getElementById('media').hidden=w!=='media';document.getElementById('q').hidden=w!=='q';document.getElementById('t1').className='tab'+(w==='media'?' on':'');document.getElementById('t2').className='tab'+(w==='q'?' on':'')}
+</script>
+</body>
+</html>
