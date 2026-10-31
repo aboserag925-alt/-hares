@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2a140e">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
 <title>إستراحة أهل الأثر</title>
 <style>
 :root{--wood:#3a1d14;--gold:#d4af6a;--gold2:#f0d9a0;--bg:#2a140e;--text:#fbf5e8;--muted:#cdb994;--card:#4a2418;--line:#7a5a2e}
@@ -11,7 +14,7 @@
 body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,'Segoe UI',sans-serif;padding-bottom:env(safe-area-inset-bottom)}
 .wrap{max-width:640px;margin:0 auto;padding:16px}
 header{text-align:center;padding:12px 0}
-.logo{width:84px;height:84px;border-radius:50%;border:2px solid var(--gold);display:inline-flex;align-items:center;justify-content:center;font-size:34px;background:var(--wood)}
+.logo{width:84px;height:84px;border-radius:50%;border:2px solid var(--gold);display:block;margin:0 auto}
 h1{font-size:26px;margin:10px 0 2px;color:var(--gold2)}
 header p{margin:0;color:var(--muted);font-size:14px}
 .next{border:2px solid var(--gold);border-radius:18px;padding:14px;margin:12px 0;text-align:center;background:var(--wood)}
@@ -27,7 +30,7 @@ header p{margin:0;color:var(--muted);font-size:14px}
 .slot{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line)}
 .time{min-width:74px;background:var(--wood);border:1px solid var(--gold);border-radius:999px;text-align:center;padding:2px 8px;font-size:13px;color:var(--gold2)}
 .today{border:2px solid var(--gold)}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;border:0;background:var(--gold);color:#2a140e;font:inherit;font-weight:700;text-decoration:none;margin-top:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;border:0;background:var(--gold);color:#2a140e;font:inherit;font-weight:700;text-decoration:none;margin:10px 6px 0 0}
 .note{border:1px solid var(--gold);border-radius:16px;padding:10px 12px;font-size:13px;margin-bottom:12px;color:var(--gold2)}
 textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;background:var(--wood);color:var(--text)}
 .empty{text-align:center;color:var(--muted);padding:20px 8px;font-size:14px}
@@ -37,7 +40,7 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:1
 <body>
 <div class="wrap">
 <header>
-<div class="logo">📖</div>
+<img class="logo" src="icon.svg" alt="">
 <h1>إستراحة أهل الأثر</h1>
 <p>مجلس تدارس العلم والأدب</p>
 </header>
@@ -57,7 +60,7 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:1
 <div class="card"><h2>اكتب سؤالك</h2><textarea id="qt" placeholder="سؤالك أو ملاحظتك"></textarea><button class="btn" onclick="copyQ()">انسخ السؤال</button><p class="empty" id="qm">انسخ سؤالك وأرسله في المجموعة. الإرسال المباشر يتفعّل بعد ربط قاعدة البيانات.</p></div>
 </section>
 <section id="about" hidden>
-<div class="card"><h2>عن المجلس</h2><p>مجلس لتدارس العلم والأدب، فيه دروس يومية في الحديث والعقيدة والتفسير والفقه.</p><p>الدروس: السبت إلى الخميس، الساعة 7:00 والساعة 10:00 مساءً. الجمعة بلا دروس.</p><button class="btn" onclick="share()">شارك التطبيق</button></div>
+<div class="card"><h2>عن المجلس</h2><p>مجلس لتدارس العلم والأدب، فيه دروس يومية في الحديث والعقيدة والتفسير والفقه.</p><p>الدروس: السبت إلى الخميس، الساعة 7:00 والساعة 10:00 مساءً. الجمعة بلا دروس.</p><button class="btn" onclick="share()">شارك التطبيق</button><button class="btn" id="inst" hidden onclick="install()">ثبّت على الهاتف</button></div>
 </section>
 </div>
 <script>
@@ -75,16 +78,19 @@ var box=document.getElementById('sched');
 function build(){box.textContent='';var t=names[cairo().d];
 S.forEach(function(r){var c=document.createElement('div');c.className='card'+(r[0]===t?' today':'');var d=document.createElement('div');d.className='day';d.textContent=r[0]+(r[0]===t?' (اليوم)':'');c.appendChild(d);
 [['7:00 مساءً',r[1]],['10:00 مساءً',r[2]]].forEach(function(s){var row=document.createElement('div');row.className='slot';var a=document.createElement('span');a.className='time';a.textContent=s[0];var x=document.createElement('span');x.textContent=s[1];row.appendChild(a);row.appendChild(x);c.appendChild(row)});box.appendChild(c)});
-var f=document.createElement('div');f.className='card';f.textContent='الجمعة: لا دروس';box.appendChild(f)}
+var f=document.createElement('div');f.className='card'+(t==='الجمعة'?' today':'');f.textContent='الجمعة: لا دروس';box.appendChild(f)}
 function pad(n){return n<10?'0'+n:''+n}
-function tick(){var c=cairo(),slots=[19*3600,22*3600];
+function tick(){var c=cairo(),slots=[19*3600,22*3600],order=['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس'];
 for(var k=0;k<8;k++){var day=(c.d+k)%7;if(day===5)continue;
-for(var i=0;i<2;i++){var diff=k*86400+slots[i]-c.s;if(diff>0){var row=S[['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس'].indexOf(names[day])];
+for(var i=0;i<2;i++){var diff=k*86400+slots[i]-c.s;if(diff>0){var row=S[order.indexOf(names[day])];
 document.getElementById('nx').textContent=names[day]+' '+(i?'10:00':'7:00')+' مساءً: '+row[1+i];
 var h=Math.floor(diff/3600),m=Math.floor(diff%3600/60),s=diff%60;document.getElementById('cd').textContent=pad(h)+':'+pad(m)+':'+pad(s);return}}}}
 function show(w){['sched','media','q','about'].forEach(function(id,i){document.getElementById(id).hidden=id!==w;document.getElementById('t'+(i+1)).className='tab'+(id===w?' on':'')})}
 function copyQ(){var v=document.getElementById('qt').value;if(!v)return;if(navigator.clipboard){navigator.clipboard.writeText(v).then(function(){document.getElementById('qm').textContent='تم نسخ السؤال'})}}
 function share(){var u=location.href;if(navigator.share){navigator.share({title:'إستراحة أهل الأثر',url:u})}else if(navigator.clipboard){navigator.clipboard.writeText(u)}}
+var dp=null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;document.getElementById('inst').hidden=false});
+function install(){if(dp){dp.prompt();dp=null;document.getElementById('inst').hidden=true}}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){})}
 build();tick();setInterval(tick,1000);
 </script>
 </body>
