@@ -3,27 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2a140e">
 <title>إستراحة أهل الأثر</title>
 <style>
-:root{--wood:#3a1d14;--wood2:#5a2c1d;--gold:#d4af6a;--gold2:#f0d9a0;--cream:#fbf5e8;--bg:#2a140e;--text:#fbf5e8;--muted:#cdb994;--card:#4a2418;--line:#7a5a2e}
+:root{--wood:#3a1d14;--gold:#d4af6a;--gold2:#f0d9a0;--bg:#2a140e;--text:#fbf5e8;--muted:#cdb994;--card:#4a2418;--line:#7a5a2e}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,'Segoe UI',sans-serif}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,'Segoe UI',sans-serif;padding-bottom:env(safe-area-inset-bottom)}
 .wrap{max-width:640px;margin:0 auto;padding:16px}
 header{text-align:center;padding:12px 0}
-.logo{width:84px;height:84px;border-radius:50%;border:2px solid var(--gold);display:inline-flex;align-items:center;justify-content:center;font-size:34px;color:var(--gold);background:var(--wood)}
+.logo{width:84px;height:84px;border-radius:50%;border:2px solid var(--gold);display:inline-flex;align-items:center;justify-content:center;font-size:34px;background:var(--wood)}
 h1{font-size:26px;margin:10px 0 2px;color:var(--gold2)}
 header p{margin:0;color:var(--muted);font-size:14px}
-.live{border:1px solid var(--gold);border-radius:16px;padding:12px 14px;margin:12px 0;text-align:center;color:var(--gold2);background:var(--wood)}
-.tabs{display:flex;gap:8px;margin:8px 0 12px}
-.tab{flex:1;min-height:44px;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:999px;font:inherit;font-weight:500}
+.next{border:2px solid var(--gold);border-radius:18px;padding:14px;margin:12px 0;text-align:center;background:var(--wood)}
+.next small{color:var(--muted);display:block}
+.next b{display:block;color:var(--gold2);font-size:18px;margin:6px 0}
+.count{font-size:30px;font-weight:700;color:var(--gold);direction:ltr;letter-spacing:2px}
+.tabs{display:flex;gap:6px;margin:8px 0 12px}
+.tab{flex:1;min-height:44px;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:999px;font:inherit;font-size:14px}
 .tab.on{background:var(--gold);color:#2a140e;border-color:var(--gold);font-weight:700}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
 .card h2{font-size:17px;margin:4px 0;color:var(--gold2)}
 .day{font-weight:700;color:var(--gold);font-size:18px;margin-bottom:8px}
 .slot{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line)}
-.time{min-width:64px;background:var(--wood);border:1px solid var(--gold);border-radius:999px;text-align:center;padding:2px 8px;font-size:13px;color:var(--gold2)}
+.time{min-width:74px;background:var(--wood);border:1px solid var(--gold);border-radius:999px;text-align:center;padding:2px 8px;font-size:13px;color:var(--gold2)}
 .today{border:2px solid var(--gold)}
-.tag{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;background:var(--gold);color:#2a140e}
 .btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;border:0;background:var(--gold);color:#2a140e;font:inherit;font-weight:700;text-decoration:none;margin-top:10px}
 .note{border:1px solid var(--gold);border-radius:16px;padding:10px 12px;font-size:13px;margin-bottom:12px;color:var(--gold2)}
 textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;background:var(--wood);color:var(--text)}
@@ -38,20 +41,23 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:1
 <h1>إستراحة أهل الأثر</h1>
 <p>مجلس تدارس العلم والأدب</p>
 </header>
-<div class="live">الدروس كل يوم الساعة 7 مساءً و10 مساءً</div>
+<div class="next"><small>الدرس القادم</small><b id="nx"></b><div class="count" id="cd"></div></div>
 <div class="tabs">
 <button class="tab on" id="t1" onclick="show('sched')">الجدول</button>
 <button class="tab" id="t2" onclick="show('media')">المكتبة</button>
 <button class="tab" id="t3" onclick="show('q')">الأسئلة</button>
+<button class="tab" id="t4" onclick="show('about')">عن المجلس</button>
 </div>
 <section id="sched"></section>
 <section id="media" hidden>
-<div class="card"><span class="tag">صوتية</span><h2>عنوان المادة هنا</h2><a class="btn" href="#">افتح في تيليجرام</a></div>
-<div class="empty">تضاف المواد يدويًا من رابط تيليجرام</div>
+<div class="card"><h2>المكتبة</h2><p class="empty">تُضاف الصوتيات والفيديوهات من روابط تيليجرام. ستظهر هنا بعد ربط قاعدة البيانات.</p></div>
 </section>
 <section id="q" hidden>
 <div class="note">الأسئلة الشرعية تصل إلى الدكتور خالد وحده، ولا يجيب عنها أحد غيره.</div>
-<div class="card"><h2>اكتب سؤالك</h2><textarea placeholder="سؤالك أو ملاحظتك"></textarea><button class="btn">إرسال</button></div>
+<div class="card"><h2>اكتب سؤالك</h2><textarea id="qt" placeholder="سؤالك أو ملاحظتك"></textarea><button class="btn" onclick="copyQ()">انسخ السؤال</button><p class="empty" id="qm">انسخ سؤالك وأرسله في المجموعة. الإرسال المباشر يتفعّل بعد ربط قاعدة البيانات.</p></div>
+</section>
+<section id="about" hidden>
+<div class="card"><h2>عن المجلس</h2><p>مجلس لتدارس العلم والأدب، فيه دروس يومية في الحديث والعقيدة والتفسير والفقه.</p><p>الدروس: السبت إلى الخميس، الساعة 7:00 والساعة 10:00 مساءً. الجمعة بلا دروس.</p><button class="btn" onclick="share()">شارك التطبيق</button></div>
 </section>
 </div>
 <script>
@@ -64,20 +70,22 @@ var S=[
 ['الخميس','عظماء الإسلام','منوعات ومقتطفات وحوارات']
 ];
 var names=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-var today=names[new Date().getDay()];
+function cairo(){var p=new Intl.DateTimeFormat('en-US',{timeZone:'Africa/Cairo',weekday:'short',hour:'numeric',minute:'numeric',second:'numeric',hour12:false}).formatToParts(new Date()),o={};p.forEach(function(x){o[x.type]=x.value});var w=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(o.weekday);return{d:w,s:(+o.hour%24)*3600+(+o.minute)*60+(+o.second)}}
 var box=document.getElementById('sched');
-S.forEach(function(r){
- var c=document.createElement('div');c.className='card'+(r[0]===today?' today':'');
- var d=document.createElement('div');d.className='day';d.textContent=r[0]+(r[0]===today?' (اليوم)':'');c.appendChild(d);
- [['7:00 مساءً',r[1]],['10:00 مساءً',r[2]]].forEach(function(s){
-  var row=document.createElement('div');row.className='slot';
-  var t=document.createElement('span');t.className='time';t.textContent=s[0];
-  var x=document.createElement('span');x.textContent=s[1];
-  row.appendChild(t);row.appendChild(x);c.appendChild(row);
- });
- box.appendChild(c);
-});
-function show(w){['sched','media','q'].forEach(function(id,i){document.getElementById(id).hidden=id!==w;document.getElementById('t'+(i+1)).className='tab'+(id===w?' on':'')})}
+function build(){box.textContent='';var t=names[cairo().d];
+S.forEach(function(r){var c=document.createElement('div');c.className='card'+(r[0]===t?' today':'');var d=document.createElement('div');d.className='day';d.textContent=r[0]+(r[0]===t?' (اليوم)':'');c.appendChild(d);
+[['7:00 مساءً',r[1]],['10:00 مساءً',r[2]]].forEach(function(s){var row=document.createElement('div');row.className='slot';var a=document.createElement('span');a.className='time';a.textContent=s[0];var x=document.createElement('span');x.textContent=s[1];row.appendChild(a);row.appendChild(x);c.appendChild(row)});box.appendChild(c)});
+var f=document.createElement('div');f.className='card';f.textContent='الجمعة: لا دروس';box.appendChild(f)}
+function pad(n){return n<10?'0'+n:''+n}
+function tick(){var c=cairo(),slots=[19*3600,22*3600];
+for(var k=0;k<8;k++){var day=(c.d+k)%7;if(day===5)continue;
+for(var i=0;i<2;i++){var diff=k*86400+slots[i]-c.s;if(diff>0){var row=S[['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس'].indexOf(names[day])];
+document.getElementById('nx').textContent=names[day]+' '+(i?'10:00':'7:00')+' مساءً: '+row[1+i];
+var h=Math.floor(diff/3600),m=Math.floor(diff%3600/60),s=diff%60;document.getElementById('cd').textContent=pad(h)+':'+pad(m)+':'+pad(s);return}}}}
+function show(w){['sched','media','q','about'].forEach(function(id,i){document.getElementById(id).hidden=id!==w;document.getElementById('t'+(i+1)).className='tab'+(id===w?' on':'')})}
+function copyQ(){var v=document.getElementById('qt').value;if(!v)return;if(navigator.clipboard){navigator.clipboard.writeText(v).then(function(){document.getElementById('qm').textContent='تم نسخ السؤال'})}}
+function share(){var u=location.href;if(navigator.share){navigator.share({title:'إستراحة أهل الأثر',url:u})}else if(navigator.clipboard){navigator.clipboard.writeText(u)}}
+build();tick();setInterval(tick,1000);
 </script>
 </body>
 </html>
