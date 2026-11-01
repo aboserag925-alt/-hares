@@ -896,7 +896,7 @@ async function sendQuestion() {
 function share() {
   var url = location.href;
   if (navigator.share) {
-    navigator.share({ title: 'إستراحة أهل الأثر', url: url }).catch(function (error) {
+    navigator.share({ title: 'استراحة أهل الأثر', url: url }).catch(function (error) {
       if (error.name !== 'AbortError') setStatus(prayerStatus, 'تعذرت مشاركة التطبيق.', true);
     });
   } else if (navigator.clipboard) {
