@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0e0d">
+<title>إدارة المحاضرات | استراحة أهل الأثر</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Aref+Ruqaa:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#0b0e0d;--panel:#151c18;--panel2:#1b241f;--gold:#d5ab64;--gold2:#f2d9a4;--text:#f4f0e7;--muted:#a9ada2;--line:rgba(213,171,100,.2);--red:#e59a8d}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 90% 0,rgba(213,171,100,.12),transparent 34%),var(--bg);color:var(--text);font-family:Cairo,system-ui,sans-serif}.wrap{width:min(1100px,calc(100% - 32px));margin:auto;padding:32px 0 70px}header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:28px}h1{font:700 clamp(26px,4vw,38px) 'Aref Ruqaa',serif;color:var(--gold2);margin:0}header p{color:var(--muted);margin:4px 0}.panel{border:1px solid var(--line);border-radius:22px;background:linear-gradient(145deg,rgba(27,36,31,.96),rgba(18,23,21,.98));padding:clamp(18px,3vw,28px);box-shadow:0 20px 60px #0005;margin-bottom:18px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}label{color:var(--gold2);font-size:13px;font-weight:700}input,textarea,select{width:100%;padding:12px 14px;border:1px solid #3b463e;border-radius:12px;background:#0e1310;color:var(--text);font:inherit;outline:none}input:focus,textarea:focus,select:focus{border-color:var(--gold)}textarea{min-height:90px;resize:vertical}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}button,.link{border:1px solid var(--line);border-radius:12px;padding:10px 16px;background:#202a23;color:var(--gold2);font:700 14px Cairo;cursor:pointer;text-decoration:none}button.primary{background:linear-gradient(135deg,#e2bd7e,#b98b48);color:#17140e;border:0}button.danger{color:#ffc0b5}button:disabled{opacity:.5;cursor:not-allowed}.status{color:var(--muted);min-height:26px;margin:12px 0 0}.status.error{color:var(--red)}.items{display:grid;gap:10px}.item{padding:16px;border:1px solid var(--line);border-radius:15px;background:#111713;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}.item h3{margin:0;color:var(--gold2);font-size:17px}.item p{margin:5px 0 0;color:var(--muted);font-size:13px}.pill{font-size:11px;color:var(--gold2);border:1px solid var(--line);border-radius:99px;padding:4px 9px}.muted{color:var(--muted)}@media(max-width:650px){.grid{grid-template-columns:1fr}.item{grid-template-columns:1fr}.wrap{padding-top:22px}header{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body><main class="wrap">
+<header><div><h1>لوحة إدارة أهل الأثر</h1><p>إدارة المحاضرات ومواعيد البث والتسجيلات</p></div><a class="link" href="./">العودة للتطبيق</a></header>
+<section class="panel" id="loginPanel"><h2>دخول المشرف</h2><p class="muted">يلزم حساب أُضيف مسبقًا إلى قائمة المشرفين في Supabase.</p><form id="loginForm" class="grid"><div class="field"><label for="email">البريد الإلكتروني</label><input id="email" type="email" autocomplete="username" required></div><div class="field"><label for="password">كلمة المرور</label><input id="password" type="password" autocomplete="current-password" required></div><div class="field full"><button class="primary" type="submit">تسجيل الدخول</button></div></form><p class="status" id="loginStatus" role="status"></p></section>
+<section class="panel" id="adminPanel" hidden>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h2 id="formTitle">إضافة محاضرة جديدة</h2><button id="logoutBtn" type="button">تسجيل الخروج</button></div>
+<form id="lectureForm">
+<input id="lectureId" type="hidden">
+<div class="grid">
+<div class="field"><label for="title">عنوان المحاضرة *</label><input id="title" maxlength="180" required></div>
+<div class="field"><label for="category">التصنيف</label><input id="category" maxlength="80" value="محاضرة"></div>
+<div class="field"><label for="startsAt">موعد المحاضرة</label><input id="startsAt" type="datetime-local"></div>
+<div class="field"><label for="status">حالة النشر</label><select id="status"><option value="draft">مسودة</option><option value="published">منشورة</option><option value="archived">أرشيف</option></select></div>
+<div class="field"><label for="streamUrl">رابط البث (HTTPS)</label><input id="streamUrl" type="url" placeholder="https://..."></div>
+<div class="field"><label for="recordingUrl">رابط التسجيل (HTTPS)</label><input id="recordingUrl" type="url" placeholder="https://..."></div>
+<div class="field full"><label for="description">وصف المحاضرة</label><textarea id="description" maxlength="4000"></textarea></div>
+</div><div class="actions"><button class="primary" type="submit" id="saveBtn">حفظ المحاضرة</button><button type="button" id="resetBtn">تفريغ النموذج</button></div>
+</form><p class="status" id="adminStatus" role="status"></p>
+</section>
+<section class="panel" id="listPanel" hidden><h2>المحاضرات المنشورة</h2><div class="items" id="lectureList"><p class="muted">جارٍ التحميل…</p></div></section>
+</main>
+<script src="supabase-config.js"></script><script src="auth-client.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const api='/api/lectures';let items=[];
+function status(id,message,error){$(id).textContent=message;$(id).classList.toggle('error',!!error)}
+async function token(){const value=await window.ahlAuth.getAccessToken();if(!value)throw Error('انتهت جلسة الدخول. سجّل الدخول مجددًا.');return value}
+async function request(url,options={}){const access=await token();const response=await fetch(url,{...options,headers:{'Content-Type':'application/json','Authorization':'Bearer '+access,...options.headers}});const data=await response.json().catch(()=>({}));if(!response.ok)throw Error(data.error||'تعذر تنفيذ الطلب');return data}
+function resetForm(){$('lectureForm').reset();$('lectureId').value='';$('category').value='محاضرة';$('status').value='draft';$('formTitle').textContent='إضافة محاضرة جديدة';$('saveBtn').textContent='حفظ المحاضرة'}
+function fillForm(item){$('lectureId').value=item.id;$('title').value=item.title;$('category').value=item.category||'';$('description').value=item.description||'';$('streamUrl').value=item.stream_url||'';$('recordingUrl').value=item.recording_url||'';$('status').value=item.status;$('startsAt').value=item.starts_at?new Date(item.starts_at).toISOString().slice(0,16):'';$('formTitle').textContent='تعديل المحاضرة';$('saveBtn').textContent='حفظ التعديلات';window.scrollTo({top:0,behavior:'smooth'})}
+function render(){const list=$('lectureList');list.textContent='';if(!items.length){list.textContent='لا توجد محاضرات منشورة حاليًا.';return}items.forEach(item=>{const article=document.createElement('article');article.className='item';const content=document.createElement('div');const title=document.createElement('h3');title.textContent=item.title;const meta=document.createElement('p');meta.textContent=(item.starts_at?new Date(item.starts_at).toLocaleString('ar-EG')+' · ':'')+(item.category||'محاضرة')+' · '+item.status;content.append(title,meta);const actions=document.createElement('div');actions.className='actions';const edit=document.createElement('button');edit.textContent='تعديل';edit.onclick=()=>fillForm(item);const remove=document.createElement('button');remove.textContent='حذف';remove.className='danger';remove.onclick=async()=>{if(!confirm('هل تريد حذف هذه المحاضرة؟'))return;try{await request(api+'/'+item.id,{method:'DELETE'});await load()}catch(e){status('adminStatus',e.message,true)}};actions.append(edit,remove);article.append(content,actions);list.append(article)})}
+async function load(){const result=await request(api);items=result.items||[];render()}
+$('loginForm').addEventListener('submit',async event=>{event.preventDefault();try{const result=await window.ahlAuth.signIn($('email').value.trim(),$('password').value);if(result.error)throw result.error;await showAdmin()}catch(error){status('loginStatus',error.message,true)}});
+async function showAdmin(){try{await load();$('loginPanel').hidden=true;$('adminPanel').hidden=false;$('listPanel').hidden=false;status('adminStatus','تم التحقق من صلاحيات المشرف.')}catch(error){status('loginStatus',error.message,true);await window.ahlAuth.signOut()}}
+$('lectureForm').addEventListener('submit',async event=>{event.preventDefault();const id=$('lectureId').value;const starts=$('startsAt').value;const payload={title:$('title').value.trim(),category:$('category').value.trim(),description:$('description').value,starts_at:starts?new Date(starts).toISOString():null,stream_url:$('streamUrl').value.trim()||null,recording_url:$('recordingUrl').value.trim()||null,status:$('status').value};$('saveBtn').disabled=true;try{await request(id?api+'/'+id:api,{method:id?'PATCH':'POST',body:JSON.stringify(payload)});status('adminStatus','تم حفظ المحاضرة.');resetForm();await load()}catch(error){status('adminStatus',error.message,true)}finally{$('saveBtn').disabled=false}});
+$('resetBtn').onclick=resetForm;$('logoutBtn').onclick=async()=>{await window.ahlAuth.signOut();location.reload()};
+if(!window.ahlAuth||!window.ahlAuth.configured){status('loginStatus','إعداد Supabase غير مكتمل. أضف الرابط والمفتاح العام إلى app/supabase-config.js.',true)}else{window.ahlAuth.init(state=>{if(state.user)showAdmin()})}
+</script></body></html>
