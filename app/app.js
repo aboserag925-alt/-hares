@@ -114,6 +114,7 @@ function cairo() {
 function buildSchedule() {
   var box = document.getElementById('sched');
   var today = names[cairo().day];
+  var managedLectures = document.getElementById('managedLectures');
   box.textContent = '';
   S.forEach(function (row) {
     var card = document.createElement('div');
@@ -140,6 +141,7 @@ function buildSchedule() {
   friday.className = 'card' + (today === 'الجمعة' ? ' today' : '');
   friday.textContent = 'الجمعة: لا دروس';
   box.appendChild(friday);
+  if (managedLectures) box.appendChild(managedLectures);
 }
 
 function updateLessonCountdown() {
@@ -172,11 +174,29 @@ function updateLessonCountdown() {
 function show(sectionId) {
   prayerSections.forEach(function (id, index) {
     var active = id === sectionId;
-    document.getElementById(id).hidden = !active;
+    var section = document.getElementById(id);
+    section.hidden = !active;
     var tab = document.getElementById(prayerTabs[index]);
     tab.className = 'tab' + (active ? ' on' : '');
     tab.setAttribute('aria-pressed', active ? 'true' : 'false');
   });
+
+  var isSchedule = sectionId === 'sched';
+  var scheduleHeading = document.querySelector('.section-heading');
+  var nextLesson = document.querySelector('.next');
+  if (scheduleHeading) scheduleHeading.hidden = !isSchedule;
+  if (nextLesson) nextLesson.hidden = !isSchedule;
+
+  var target = document.getElementById(sectionId);
+  if (target) {
+    target.setAttribute('tabindex', '-1');
+    target.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'start'
+    });
+    target.focus({ preventScroll: true });
+  }
+
   if (sectionId === 'qibla') updateQibla();
   if (sectionId === 'adhkar') renderAdhkar();
   if (sectionId === 'media') loadMediaLibrary();

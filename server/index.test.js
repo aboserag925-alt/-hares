@@ -299,7 +299,7 @@ test('handles allowlisted CORS preflight requests for API endpoints', async func
     });
     assert.equal(response.status, 204);
     assert.equal(response.headers.get('access-control-allow-origin'), 'https://app.example');
-    assert.equal(response.headers.get('access-control-allow-methods'), 'GET, HEAD, POST, OPTIONS');
+    assert.equal(response.headers.get('access-control-allow-methods'), 'GET, HEAD, POST, PATCH, DELETE, OPTIONS');
     assert.match(response.headers.get('access-control-allow-headers'), /Content-Type/i);
     assert.equal(response.headers.get('vary'), 'Origin');
   });
@@ -342,5 +342,163 @@ test('adds allowlisted CORS headers to library and media responses', async funct
     assert.equal(file.status, 200);
     assert.equal(file.headers.get('access-control-allow-origin'), 'https://app.example');
     assert.match(file.headers.get('access-control-expose-headers'), /Content-Range/i);
+  });
+});
+
+
+test('lecture API returns published lectures using the public anon key', async function () {
+  const calls = [];
+  const env = {
+    SUPABASE_URL: 'https://project.example',
+    SUPABASE_ANON_KEY: 'public-test-key',
+    SUPABASE_SERVICE_ROLE_KEY: 'server-only-test-key'
+  };
+  const fetchMock = async function (url, options) {
+    calls.push({ url: url, options: options });
+    return {
+      ok: true,
+      status: 200,
+      json: async function () {
+        return [{ id: '123e4567-e89b-42d3-a456-426614174000', title: 'درس منشور', status: 'published' }];
+      }
+    };
+  };
+  await withServer({ env: env, fetch: fetchMock }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/lectures');
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).items[0].title, 'درس منشور');
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].url, 'https://project.example/rest/v1/lectures?select=id,title,description,starts_at,category,stream_url,recording_url,status,created_at,updated_at&status=eq.published&order=starts_at.asc.nullslast');
+    assert.equal(calls[0].options.headers.Authorization, 'Bearer public-test-key');
+    assert.equal(calls[0].options.headers.apikey, 'public-test-key');
+  });
+});
+
+test('lecture API can serve published lectures without exposing or requiring the service-role key', async function () {
+  const env = {
+    SUPABASE_URL: 'https://project.example',
+    SUPABASE_ANON_KEY: 'public-test-key'
+  };
+  let requestOptions;
+  const fetchMock = async function (url, options) {
+    requestOptions = options;
+    return {
+      ok: true,
+      status: 200,
+      json: async function () {
+        return [{ id: '123e4567-e89b-42d3-a456-426614174000', title: 'درس عام', status: 'published' }];
+      }
+    };
+  };
+  await withServer({ env: env, fetch: fetchMock }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/lectures');
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).items[0].title, 'درس عام');
+    assert.equal(requestOptions.headers.Authorization, 'Bearer public-test-key');
+    assert.equal(requestOptions.headers.apikey, 'public-test-key');
+  });
+});
+
+test('lecture API rejects writes from visitors without a verified admin account', async function () {
+  let restCalled = false;
+  const env = {
+    SUPABASE_URL: 'https://project.example',
+    SUPABASE_ANON_KEY: 'public-test-key',
+    SUPABASE_SERVICE_ROLE_KEY: 'server-only-test-key'
+  };
+  const fetchMock = async function () {
+    restCalled = true;
+    return { ok: false, status: 401, json: async function () { return {}; } };
+  };
+  await withServer({ env: env, fetch: fetchMock }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/lectures', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'محاضرة تجريبية' })
+    });
+    assert.equal(response.status, 403);
+    assert.equal(restCalled, false);
+    assert.match((await response.json()).error, /المشرفين/);
+  });
+});
+
+test('lecture API requires server-side Supabase credentials before serving admin features', async function () {
+  await withServer({ env: {}, fetch: mockFetch().fetch }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/lectures');
+    assert.equal(response.status, 503);
+  });
+});
+
+
+test('lecture API permits a verified administrator to create a valid HTTPS lecture', async function () {
+  const adminId = '123e4567-e89b-42d3-a456-426614174000';
+  const env = {
+    SUPABASE_URL: 'https://project.example',
+    SUPABASE_ANON_KEY: 'public-test-key',
+    SUPABASE_SERVICE_ROLE_KEY: 'server-only-test-key'
+  };
+  const calls = [];
+  const fetchMock = async function (url, options) {
+    calls.push({ url: url, options: options });
+    if (url.endsWith('/auth/v1/user')) {
+      return { ok: true, status: 200, json: async function () { return { id: adminId, email: 'admin@example.com' }; } };
+    }
+    if (url.includes('/rest/v1/admin_users?')) {
+      return { ok: true, status: 200, json: async function () { return [{ user_id: adminId }]; } };
+    }
+    return {
+      ok: true,
+      status: 201,
+      json: async function () { return [{ id: adminId, title: 'درس التوحيد', status: 'published' }]; }
+    };
+  };
+  await withServer({ env: env, fetch: fetchMock }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/lectures', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-session-token'
+      },
+      body: JSON.stringify({
+        title: 'درس التوحيد',
+        starts_at: '2026-11-05T18:00:00.000Z',
+        stream_url: 'https://youtube.com/live/example',
+        status: 'published'
+      })
+    });
+    assert.equal(response.status, 201);
+    assert.equal((await response.json()).item.title, 'درس التوحيد');
+    assert.equal(calls.length, 3);
+    assert.equal(calls[0].options.headers.Authorization, 'Bearer test-session-token');
+    assert.equal(calls[1].options.headers.Authorization, 'Bearer server-only-test-key');
+    assert.equal(calls[2].options.method, 'POST');
+  });
+});
+
+test('lecture API rejects insecure stream URLs before database writes', async function () {
+  let writeAttempted = false;
+  const env = {
+    SUPABASE_URL: 'https://project.example',
+    SUPABASE_ANON_KEY: 'public-test-key',
+    SUPABASE_SERVICE_ROLE_KEY: 'server-only-test-key'
+  };
+  const fetchMock = async function (url) {
+    if (url.endsWith('/auth/v1/user')) {
+      return { ok: true, status: 200, json: async function () { return { id: '123e4567-e89b-42d3-a456-426614174000' }; } };
+    }
+    if (url.includes('/rest/v1/admin_users?')) {
+      return { ok: true, status: 200, json: async function () { return [{ user_id: '123e4567-e89b-42d3-a456-426614174000' }]; } };
+    }
+    writeAttempted = true;
+    return { ok: true, status: 201, json: async function () { return []; } };
+  };
+  await withServer({ env: env, fetch: fetchMock }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/lectures', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-session-token' },
+      body: JSON.stringify({ title: 'درس تجريبي', stream_url: 'javascript:alert(1)' })
+    });
+    assert.equal(response.status, 400);
+    assert.equal(writeAttempted, false);
   });
 });
