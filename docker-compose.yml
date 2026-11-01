@@ -4,7 +4,7 @@ services:
       context: .
       args:
         SUPABASE_URL: ${SUPABASE_URL:-}
-        SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+        SUPABASE_ANON_PUBLIC: ${SUPABASE_ANON_KEY:-}
     ports:
       - "${HOST_PORT:-8080}:8080"
     env_file:
