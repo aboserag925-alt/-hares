@@ -24,6 +24,10 @@ await build({
 const supabaseUrl = (process.env.SUPABASE_URL || '').trim();
 const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || '').trim();
 
+if (Boolean(supabaseUrl) !== Boolean(supabaseAnonKey)) {
+  throw new Error('Set both SUPABASE_URL and SUPABASE_ANON_KEY, or leave both unset.');
+}
+
 if (supabaseUrl && supabaseAnonKey) {
   const parsedUrl = new URL(supabaseUrl);
   if (parsedUrl.protocol !== 'https:' || parsedUrl.pathname !== '/' ||
