@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
 const { createMediaLibrary } = require('./media-library');
+const { createVisitorAnalytics } = require('./visitor-analytics');
 
 const PUBLIC_ROOT = path.resolve(__dirname, '..');
 const MAX_BODY_BYTES = 16 * 1024;
@@ -279,6 +280,10 @@ function createServer(options) {
     fetch: fetchImpl,
     storageDirectory: options.storageDirectory
   });
+  const visitorAnalytics = options.visitorAnalytics || createVisitorAnalytics({
+    storageDirectory: options.storageDirectory,
+    timeZone: env.ANALYTICS_TIME_ZONE || 'Africa/Cairo'
+  });
 
   return http.createServer(async function (request, response) {
     response.setHeader('X-Content-Type-Options', 'nosniff');
@@ -299,6 +304,51 @@ function createServer(options) {
     }
     if (requestUrl.pathname === '/api/health' && request.method === 'GET') {
       sendJson(response, 200, { ok: true });
+      return;
+    }
+
+    if (requestUrl.pathname === '/api/analytics/summary' && request.method === 'GET') {
+      try {
+        const requestedDays = Number(requestUrl.searchParams.get('days') || 7);
+        const summary = await visitorAnalytics.getSummary(
+          Number.isInteger(requestedDays) ? requestedDays : 7
+        );
+        sendJson(response, 200, summary);
+      } catch {
+        console.error('Visitor analytics summary could not be loaded');
+        sendJson(response, 500, { error: 'تعذر تحميل إحصاءات الزوار الآن.' });
+      }
+      return;
+    }
+
+    if (requestUrl.pathname === '/api/analytics/visit') {
+      if (request.method !== 'POST') {
+        response.setHeader('Allow', 'POST, OPTIONS');
+        sendJson(response, 405, { error: 'طريقة الطلب غير مدعومة.' });
+        return;
+      }
+      if (request.headers.origin && !isAllowedOrigin(request, env)) {
+        sendJson(response, 403, { error: 'مصدر الطلب غير مسموح.' });
+        return;
+      }
+      if (!/^application\\/json(?:\\s*;|$)/i.test(request.headers['content-type'] || '')) {
+        request.resume();
+        sendJson(response, 415, { error: 'صيغة الطلب يجب أن تكون JSON.' });
+        return;
+      }
+      const body = await readJsonBody(request, response);
+      if (body === null) return;
+      try {
+        const result = await visitorAnalytics.recordVisit(body && body.visitorId);
+        sendJson(response, 200, result);
+      } catch (error) {
+        if (error instanceof TypeError) {
+          sendJson(response, 400, { error: error.message });
+          return;
+        }
+        console.error('Visitor analytics event could not be stored');
+        sendJson(response, 500, { error: 'تعذر تسجيل الزيارة الآن.' });
+      }
       return;
     }
     if (requestUrl.pathname === '/api/library' && request.method === 'GET') {
