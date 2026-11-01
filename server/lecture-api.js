@@ -91,7 +91,21 @@ function createAdminApi(options) {
     }
 
     try {
-      if (pathname === '/api/admin/session') {\n        if (request.method !== 'GET') { response.setHeader('Allow', 'GET'); sendJson(response, 405, { error: 'طريقة الطلب غير مدعومة.' }); return true; }\n        const admin = await authenticate(request);\n        if (!admin) { sendJson(response, 403, { error: 'هذا الحساب غير مسجل كمشرف.' }); return true; }\n        sendJson(response, 200, { user: { id: admin.id, email: admin.email || null } });\n        return true;\n      }\n      if (request.method === 'GET') {
+      if (pathname === '/api/admin/session') {
+        if (request.method !== 'GET') {
+          response.setHeader('Allow', 'GET');
+          sendJson(response, 405, { error: 'طريقة الطلب غير مدعومة.' });
+          return true;
+        }
+        const admin = await authenticate(request);
+        if (!admin) {
+          sendJson(response, 403, { error: 'هذا الحساب غير مسجل كمشرف.' });
+          return true;
+        }
+        sendJson(response, 200, { user: { id: admin.id, email: admin.email || null } });
+        return true;
+      }
+      if (request.method === 'GET') {
         const rows = await supabase('/rest/v1/lectures?select=id,title,description,starts_at,category,stream_url,recording_url,status,created_at,updated_at&status=eq.published&order=starts_at.asc.nullslast');
         sendJson(response, 200, { items: rows });
         return true;
@@ -127,7 +141,17 @@ function createAdminApi(options) {
       }
       if (!id) { sendJson(response, 400, { error: 'معرّف المحاضرة غير صالح.' }); return true; }
       if (request.method === 'PATCH') {
-        const body = await readBody(request);
+        if (!String(request.headers['content-type'] || '').toLowerCase().startsWith('application/json')) {
+          sendJson(response, 415, { error: 'يجب إرسال البيانات بصيغة JSON.' });
+          return true;
+        }
+        let body;
+        try {
+          body = await readBody(request);
+        } catch {
+          sendJson(response, 400, { error: 'بيانات الطلب غير صالحة.' });
+          return true;
+        }
         const error = validateLecture(body, true);
         if (error) { sendJson(response, 400, { error }); return true; }
         const rows = await supabase('/rest/v1/lectures?id=eq.' + id[1] + '&select=*', {
