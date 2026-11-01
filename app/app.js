@@ -217,7 +217,7 @@ prayerSections.forEach(function (id) {
   var section = document.getElementById(id);
   section.addEventListener('click', function (event) {
     var contentSelector = [
-      '.card', 'button', 'a', 'input', 'select', 'textarea', 'label',
+      '.card', '.note', 'button', 'a', 'input', 'select', 'textarea', 'label',
       'audio', '[role="button"]', '[contenteditable="true"]'
     ].join(', ');
     if (!event.target.closest(contentSelector)) closeTopSection();
