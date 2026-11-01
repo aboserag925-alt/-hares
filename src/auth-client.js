@@ -75,5 +75,47 @@ window.ahlAuth = {
         { onConflict: 'user_id' }
       );
     if (result.error) throw result.error;
+  },
+  isSiteAdmin: function (user) {
+    return Boolean(user && user.app_metadata && user.app_metadata.role === 'site_admin');
+  },
+  listPublishedSiteContent: async function (contentType) {
+    let query = requireClient()
+      .from('site_content')
+      .select('content_key, content_type, title, data, published, updated_at')
+      .eq('published', true)
+      .order('updated_at', { ascending: false });
+    if (contentType) query = query.eq('content_type', contentType);
+    const result = await query;
+    if (result.error) throw result.error;
+    return result.data || [];
+  },
+  listManageableSiteContent: async function () {
+    const result = await requireClient()
+      .from('site_content')
+      .select('content_key, content_type, title, data, published, updated_at')
+      .order('updated_at', { ascending: false });
+    if (result.error) throw result.error;
+    return result.data || [];
+  },
+  saveSiteContent: async function (item) {
+    const result = await requireClient()
+      .from('site_content')
+      .upsert({
+        content_key: item.content_key,
+        content_type: item.content_type,
+        title: item.title,
+        data: item.data || {},
+        published: Boolean(item.published),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'content_key' });
+    if (result.error) throw result.error;
+  },
+  deleteSiteContent: async function (contentKey) {
+    const result = await requireClient()
+      .from('site_content')
+      .delete()
+      .eq('content_key', contentKey);
+    if (result.error) throw result.error;
   }
 };
