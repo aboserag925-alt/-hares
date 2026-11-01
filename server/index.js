@@ -294,7 +294,7 @@ function createServer(options) {
         return;
       }
       if (request.method === 'OPTIONS') {
-        response.writeHead(204, { 'Allow': 'GET, HEAD, POST, OPTIONS' });
+        response.writeHead(204, { 'Allow': 'GET, HEAD, POST, PATCH, DELETE, OPTIONS' });
         response.end();
         return;
       }
