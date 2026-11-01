@@ -13,7 +13,7 @@
 
 ينشئ سير العمل صفحة `404.html` من الصفحة الرئيسية، ويبني موارد التطبيق ويتحقق من وجود الملفات المطلوبة قبل رفعها إلى Pages. عند غياب `AHL_API_BASE_URL` تبقى الصفحات الثابتة متاحة دون إرسال طلبات إلى API غير مهيأ.
 
-GitHub Pages لا يشغّل خادم Node.js؛ لذلك تحتاج الأسئلة ومكتبة ملفات Telegram إلى خادم HTTPS عام مستقل. بعد نشر الخادم أضف متغير المستودع `AHL_API_BASE_URL` من **Settings → Secrets and variables → Actions → Variables**، بقيمة أصل الخادم فقط مثل `https://api.example.com`، ثم أعد تشغيل سير عمل Pages. اضبط `ALLOWED_ORIGINS` في الخادم ليشمل أصل GitHub Pages `https://aboserag925-alt.github.io` (وأي نطاق مخصص تستخدمه). تبقى مفاتيح Gemini وTelegram وملفات المكتبة على الخادم ولا تُرفع إلى Pages.
+GitHub Pages لا يشغّل خادم Node.js؛ لذلك تحتاج الأسئلة ومكتبة ملفات Telegram إلى خادم HTTPS عام مستقل. بعد نشر الخادم أضف متغير المستودع `AHL_API_BASE_URL` من **Settings → Secrets and variables → Actions → Variables**، بقيمة أصل الخادم فقط مثل `https://api.example.com`، ثم أعد تشغيل سير عمل Pages. لتمكين المصادقة ولوحة الإدارة أضف أيضًا متغيري `SUPABASE_URL` و`SUPABASE_ANON_KEY` العامين في المكان نفسه؛ يحقن سير العمل المفتاح العام فقط في ملفات التطبيق. اضبط `ALLOWED_ORIGINS` في الخادم ليشمل أصل GitHub Pages `https://aboserag925-alt.github.io` (وأي نطاق مخصص تستخدمه). تبقى مفاتيح Gemini وTelegram وملفات المكتبة على الخادم ولا تُرفع إلى Pages.
 
 إن لم تضبط `AHL_API_BASE_URL` فستُنشر الواجهة وحدها، وستبقى ميزات API غير متاحة حتى ربط الخادم. لن يتم نشر ملف `.env` أو مجلد `storage/`.
 
@@ -73,8 +73,8 @@ TELEGRAM_MEDIA_GROUP_ID=-100...
 
 1. أنشئ مشروعًا في Supabase، واترك تأكيد البريد الإلكتروني مفعّلًا.
 2. نفّذ `supabase/schema.sql` في SQL Editor داخل مشروع Supabase. سيُنشئ جدول المزامنة مع سياسات RLS التي تمنع كل مستخدم من قراءة بيانات غيره.
-3. انسخ عنوان المشروع و`anon`/publishable key فقط إلى `app/supabase-config.js` في `url` و`anonKey`. لا تستخدم `service_role` أو أي مفتاح سري في المتصفح.
-4. أضف عنوان الموقع إلى إعدادات Site URL وRedirect URLs في Supabase، ثم نفّذ `npm.cmd run build:app` وأعد نشر مجلد `app/`.
+3. أضف `SUPABASE_URL` و`SUPABASE_ANON_KEY` إلى متغيرات GitHub Actions العامة لإعداد Pages، أو عرّفهما في بيئة البناء المحلية. ينشئ `build:app` إعداد المتصفح منهما. لا تستخدم `service_role` أو أي مفتاح سري في المتصفح.
+4. أضف عنوان الموقع إلى إعدادات Site URL وRedirect URLs في Supabase، ثم نفّذ `npm.cmd run build:app` عند البناء المحلي أو أعد تشغيل سير عمل Pages.
 
 تُحفظ جلسة الدخول باستعمال Supabase Auth، وتُزامَن طريقة حساب الصلاة ومذهب العصر وتقدم الأذكار اليومي. إحداثيات الموقع لا تغادر الجهاز. يبقى استخدام الصلاة والقبلة والأذكار متاحًا دون حساب.
 
@@ -94,11 +94,16 @@ npm.cmd run build:css
 
 ## Docker
 
-```sh
+```powershell
+Copy-Item .env.example .env
 docker compose up --build
 ```
 
-يفتح الموقع والتطبيق والخادم الخلفي على `http://localhost:8080/`.
+أضف قيم الخادم المطلوبة إلى `.env` قبل تشغيل الخدمة.
+
+يبني Docker موارد الواجهة قبل إنشاء الصورة، ويفتح الموقع والتطبيق والخادم الخلفي على `http://localhost:8080/`. يمرر Compose `SUPABASE_URL` و`SUPABASE_ANON_KEY` العامين للبناء، بينما تبقى المفاتيح السرية في إعدادات تشغيل الخادم فقط. لتغيير منفذ المضيف استخدم `HOST_PORT`؛ تبقى واجهة الحاوية على المنفذ 8080.
+
+تطبيق الويب التقدمي في `app/` يدعم التثبيت من Safari عبر «إضافة إلى الشاشة الرئيسية»، ويضم أيقونة PNG مخصصة لـ iOS وبيانات manifest وService Worker. هذا لا ينتج تطبيق iOS أصليًا أو ملف IPA؛ يتطلب ذلك أدوات وبيئة Apple.
 
 ## اختبارات الخادم
 
@@ -116,6 +121,6 @@ insert into public.admin_users (user_id)
 select id from auth.users where email = 'admin@example.com';
 ```
 
-اضبط متغيرات البيئة السرية على خادم Node.js فقط: `SUPABASE_URL` و`SUPABASE_ANON_KEY` و`SUPABASE_SERVICE_ROLE_KEY`. مفتاح `service_role` سري ولا يوضع في المتصفح أو GitHub Pages أو ملفات المشروع. أضف أصل الموقع إلى `ALLOWED_ORIGINS`. إذا كان الخادم على نطاق منفصل عن GitHub Pages، اضبط `AHL_API_BASE_URL` في إعدادات بناء Pages على أصل الخادم، وأعد تشغيل النشر. ويجب إعداد `app/supabase-config.js` برابط Supabase ومفتاح anon/public فقط ثم بناء التطبيق.
+اضبط متغيرات البيئة على خادم Node.js: `SUPABASE_URL` و`SUPABASE_ANON_KEY` و`SUPABASE_SERVICE_ROLE_KEY`. مفتاح `service_role` سري ولا يوضع في المتصفح أو GitHub Pages أو ملفات المشروع. أضف أصل الموقع إلى `ALLOWED_ORIGINS`. إذا كان الخادم على نطاق منفصل عن GitHub Pages، اضبط `AHL_API_BASE_URL` في إعدادات بناء Pages على أصل الخادم، وأعد تشغيل النشر. يحتاج بناء واجهة المصادقة إلى `SUPABASE_URL` و`SUPABASE_ANON_KEY` العامين؛ ينشئ `build:app` ملف إعداد المتصفح منهما، ولا يضمّن مفتاح `service_role`.
 
 تسمح واجهة القراءة العامة بعرض المحاضرات المنشورة فقط. إنشاء المحاضرات وتعديلها وحذفها يتطلبان جلسة Supabase صالحة ووجود المستخدم في `admin_users`؛ يتحقق الخادم من الاثنين في كل طلب. روابط البث والتسجيل تقبل HTTPS فقط. لا تعتبر اللوحة جاهزة للإنتاج قبل إضافة مفاتيح الخادم، وتسجيل مشرف موثوق، واختبار النشر على بيئة فعلية.

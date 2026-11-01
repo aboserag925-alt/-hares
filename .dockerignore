@@ -1,1 +1,10 @@
-.git<<<<<<< app-design
+.git
+.github
+node_modules
+storage
+.env
+.env.*
+!.env.example
+_site
+coverage
+npm-debug.log*

@@ -17,6 +17,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -28,6 +29,9 @@ jobs:
           cache: npm
 
       - name: Build application assets
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
         run: |
           npm ci
           npm test
@@ -43,7 +47,7 @@ jobs:
           cp -R app assets screens _site/
           touch _site/.nojekyll
           node -e 'const fs = require("node:fs"); const value = (process.env.AHL_API_BASE_URL || "").trim().replace(/\/+$/, ""); if (value) { const url = new URL(value); if (url.protocol !== "https:" || url.origin !== value) throw new Error("AHL_API_BASE_URL must be an HTTPS origin without a trailing path."); } fs.writeFileSync("_site/runtime-config.js", "window.AHL_API_BASE_URL = " + JSON.stringify(value) + ";\n", "utf8"); fs.writeFileSync("_site/app/runtime-config.js", "window.AHL_API_BASE_URL = " + JSON.stringify(value) + ";\n", "utf8");'
-          for asset in index.html 404.html app/tailwind.css app/supabase-config.js app/auth-client.js app/runtime-config.js assets/lectures.js assets/logo.jpg runtime-config.js; do
+          for asset in index.html 404.html app/tailwind.css app/supabase-config.js app/auth-client.js app/runtime-config.js app/manifest.json app/sw.js app/icon.svg app/apple-touch-icon.png assets/lectures.js assets/logo.jpg runtime-config.js; do
             test -s "_site/$asset" || { echo "Missing Pages asset: $asset" >&2; exit 1; }
           done
 
@@ -64,4 +68,5 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
+        timeout-minutes: 15
         uses: actions/deploy-pages@v4
