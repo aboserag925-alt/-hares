@@ -385,5 +385,28 @@ textarea::placeholder{color:#777e75}
 <script src="vendor/adhan.umd.min.js"></script>
 <script src="auth-client.js"></script>
 <script src="app.js"></script>
+<script>
+(function () {
+  'use strict';
+  if (navigator.doNotTrack === '1' || window.doNotTrack === '1') return;
+  var base = typeof window.AHL_API_BASE_URL === 'string' ? window.AHL_API_BASE_URL.replace(/\/+$/, '') : '';
+  var visitorId;
+  try {
+    visitorId = localStorage.getItem('ahl-visitor-id');
+    if (!/^[a-f0-9-]{32,36}$/i.test(visitorId || '')) {
+      visitorId = crypto.randomUUID();
+      localStorage.setItem('ahl-visitor-id', visitorId);
+    }
+  } catch (_) {
+    return;
+  }
+  fetch(base + '/api/analytics/visit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ visitorId: visitorId }),
+    keepalive: true
+  }).catch(function () {});
+})();
+</script>
 </body>
 </html>
