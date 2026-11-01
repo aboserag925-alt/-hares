@@ -4,6 +4,7 @@ ENV PORT=8080
 ENV HOST=0.0.0.0
 WORKDIR /srv/ahl-athar
 COPY --chown=node:node index.html ./index.html
+COPY --chown=node:node runtime-config.js ./runtime-config.js
 COPY --chown=node:node app/ ./app/
 COPY --chown=node:node assets/ ./assets/
 COPY --chown=node:node screens/ ./screens/
