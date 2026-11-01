@@ -158,6 +158,25 @@ textarea::placeholder{color:#777e75}
 @media(max-width:680px){.wrap{width:min(100% - 28px,560px);padding-top:18px}header{grid-template-columns:58px 1fr;column-gap:13px;padding-bottom:18px}.logo{width:56px;height:56px;padding:6px;border-radius:18px}.next{padding:22px 18px;gap:8px 12px;border-radius:22px}.next b{font-size:17px}.count{font-size:clamp(28px,7vw,40px)}#sched{gap:10px}.card{padding:17px;border-radius:18px}.slot{gap:8px}.time{min-width:76px;padding-inline:7px}.tabs{display:flex;gap:5px;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tab{flex:0 0 auto;min-width:86px}.panel-grid,.media-grid{grid-template-columns:1fr}.prayer-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.wrap{width:min(100% - 24px,420px);padding-top:12px}.tabs{gap:4px;padding:5px;border-radius:17px}.tab{min-height:44px;padding:7px 8px;font-size:12px;border-radius:12px}.next{grid-template-columns:1fr;gap:6px}.count{grid-column:1;grid-row:auto;margin-top:8px;font-size:38px}.next b{line-height:1.65}#sched{grid-template-columns:1fr}.card{padding:15px}.day{font-size:16px}.slot{flex-direction:row;gap:8px}.time{min-width:76px}.btn{margin-inline:0 6px}.settings-grid{grid-template-columns:1fr 1fr}.prayer-time{padding:12px 10px}.prayer-time time{font-size:14px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* Refined home dashboard */
+.welcome-hero{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:12px 24px;align-items:center;overflow:hidden;padding:clamp(24px,4.5vw,42px);margin:2px 0 14px;border:1px solid rgba(213,171,100,.27);border-radius:30px;background:linear-gradient(115deg,#19241f 0%,#121916 58%,#211d14 100%);box-shadow:0 22px 65px rgba(0,0,0,.24);animation:enter .75s .04s both}
+.welcome-hero:before{position:absolute;inset:0;z-index:-1;background:radial-gradient(circle at 88% 35%,rgba(213,171,100,.15),transparent 34%),repeating-linear-gradient(135deg,transparent 0 34px,rgba(213,171,100,.025) 35px 36px);content:""}
+.hero-copy{max-width:650px}.hero-kicker{display:inline-flex;align-items:center;gap:9px;color:var(--green);font-size:12px;font-weight:700;letter-spacing:.04em}.hero-kicker i{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 13px rgba(213,171,100,.7)}
+.hero-copy h2{margin:13px 0 8px;color:var(--gold2);font-family:'Aref Ruqaa','Cairo',serif;font-size:clamp(27px,4vw,42px);line-height:1.4}.hero-copy p{max-width:570px;margin:0;color:#c4c9bf;font-size:14px;line-height:2}
+.hero-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}.hero-primary,.hero-secondary{min-height:44px;padding:0 17px;border-radius:13px;font:inherit;font-size:12px;font-weight:750;transition:transform .2s,background .2s,border-color .2s}.hero-primary{border:1px solid var(--gold);background:linear-gradient(120deg,#e0bd7c,#c99a52);color:#171a15}.hero-primary span{margin-right:8px}.hero-secondary{border:1px solid rgba(213,171,100,.3);background:rgba(255,255,255,.035);color:var(--gold2)}.hero-primary:hover,.hero-secondary:hover{transform:translateY(-2px)}
+.hero-emblem{position:relative;display:grid;place-content:center;justify-items:center;width:158px;height:158px;margin:auto;border:1px solid rgba(213,171,100,.42);border-radius:50%;background:radial-gradient(circle,rgba(213,171,100,.13),rgba(11,14,13,.1) 68%);color:var(--gold2);box-shadow:inset 0 0 0 9px rgba(213,171,100,.035),0 0 45px rgba(213,171,100,.08);transform:rotate(-7deg)}.hero-emblem:before,.hero-emblem:after{position:absolute;inset:12px;border:1px solid rgba(213,171,100,.2);border-radius:50%;content:""}.hero-emblem:after{inset:23px;border-style:dashed;opacity:.6}.hero-emblem span{font-family:'Aref Ruqaa',serif;font-size:25px;line-height:1.1}.hero-emblem b{font-family:'Reem Kufi',sans-serif;font-size:23px}.hero-emblem i{width:28px;height:2px;margin-top:7px;background:var(--gold)}
+.hero-foot{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;padding-top:15px;margin-top:4px;border-top:1px solid rgba(213,171,100,.16);color:#aeb7aa;font-size:11px}
+.quick-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin:0 0 28px}.quick-item{display:flex;align-items:center;gap:11px;min-width:0;padding:14px;border:1px solid rgba(255,255,255,.07);border-radius:17px;background:linear-gradient(145deg,rgba(25,32,29,.9),rgba(18,23,21,.92));color:var(--text);text-align:right;transition:transform .25s,border-color .25s}.quick-item:hover{transform:translateY(-3px);border-color:rgba(213,171,100,.32)}.quick-icon{display:grid;flex:0 0 38px;width:38px;height:38px;place-items:center;border:1px solid rgba(213,171,100,.23);border-radius:12px;background:rgba(213,171,100,.08);color:var(--gold2);font-size:21px}.quick-item>span:nth-child(2){display:grid;gap:2px;min-width:0}.quick-item b{font-size:12px;color:var(--gold2)}.quick-item small{color:var(--muted);font-size:10px}.quick-item>i{margin-right:auto;color:var(--gold);font-style:normal}
+.section-heading{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:0 0 14px}.section-heading span{color:var(--green);font-size:11px;font-weight:700}.section-heading h2{margin:3px 0 0;color:var(--gold2);font-family:'Reem Kufi','Cairo',sans-serif;font-size:20px}.section-heading>small{color:var(--muted);font-size:11px}
+.tabs{border-color:rgba(213,171,100,.13)}
+.tab:before{display:block;margin-bottom:2px;color:var(--gold);font-size:15px;line-height:1.1;opacity:.8}
+#t1:before{content:"⌂"}#t2:before{content:"◷"}#t3:before{content:"✥"}#t4:before{content:"۞"}#t5:before{content:"▤"}#t6:before{content:"؟"}#t7:before{content:"◇"}#t8:before{content:"♙"}
+@media(max-width:680px){.welcome-hero{grid-template-columns:minmax(0,1fr) 94px;gap:8px 10px;padding:22px 18px;border-radius:23px}.hero-emblem{width:90px;height:90px}.hero-emblem:before{inset:7px}.hero-emblem:after{inset:13px}.hero-emblem span{font-size:17px}.hero-emblem b{font-size:14px}.hero-emblem i{width:18px;margin-top:4px}.hero-copy h2{font-size:26px}.hero-copy p{font-size:12px}.hero-actions{gap:7px;margin-top:14px}.hero-primary,.hero-secondary{min-height:40px;padding:0 11px;font-size:11px}.quick-strip{gap:7px;margin-bottom:22px}.quick-item{flex-wrap:wrap;gap:7px;padding:10px}.quick-icon{width:32px;height:32px;flex-basis:32px}.quick-item>span:nth-child(2){width:100%}.quick-item>i{display:none}.section-heading h2{font-size:18px}
+.tabs{position:fixed;top:auto;right:0;bottom:0;left:0;z-index:20;display:flex;justify-content:flex-start;gap:3px;overflow-x:auto;overflow-y:hidden;margin:0;padding:7px max(10px,env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));border:0;border-top:1px solid rgba(213,171,100,.2);border-radius:18px 18px 0 0;background:rgba(11,14,13,.94);backdrop-filter:blur(22px);box-shadow:0 -12px 35px rgba(0,0,0,.35);scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tab{flex:1 0 68px;min-width:68px;min-height:54px;padding:5px 3px;font-size:10px;border-radius:11px}.tab:before{font-size:16px;margin-bottom:3px}.wrap{padding-bottom:calc(92px + env(safe-area-inset-bottom))}}
+@media(max-width:390px){.welcome-hero{grid-template-columns:minmax(0,1fr) 72px;padding:18px 14px}.hero-emblem{width:70px;height:70px}.hero-emblem span{font-size:14px}.hero-emblem b{font-size:12px}.hero-copy h2{font-size:23px}.hero-copy p{font-size:11px}.hero-foot{font-size:10px}.quick-item{padding:8px}.quick-item b{font-size:11px}.quick-item small{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.welcome-hero,.quick-item,.hero-primary,.hero-secondary{animation:none!important;transition:none!important}}
+
 </style>
 </head>
 <body>
@@ -183,8 +202,27 @@ textarea::placeholder{color:#777e75}
 </nav>
 <div class="support-prompt"><button class="support-button" type="button" onclick="document.getElementById('supportDialog').showModal()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15.9V20h-2v-2.1a5.5 5.5 0 0 1-4-2.7l1.7-1a3.7 3.7 0 0 0 3.3 1.8c1.5 0 2.5-.7 2.5-1.8 0-1-.8-1.5-2.9-2-2.6-.6-4-1.6-4-3.7 0-1.9 1.3-3.2 3.4-3.6V5h2v1.9a5.1 5.1 0 0 1 3.5 2.3l-1.6 1.1a3.4 3.4 0 0 0-3-1.6c-1.4 0-2.2.6-2.2 1.6s.7 1.4 2.8 1.9c2.8.7 4.1 1.7 4.1 3.8 0 2-1.4 3.5-3.6 3.9Z"/></svg>ادعم تطوير المنصة</button></div>
 </header>
+<section class="welcome-hero" aria-labelledby="welcomeTitle">
+  <div class="hero-copy">
+    <span class="hero-kicker"><i></i> مجلس علمي • أدب • أثر</span>
+    <h2 id="welcomeTitle">أهلًا بك في استراحة أهل الأثر</h2>
+    <p>مساحة تجمعنا على مدارسة العلم النافع، وصحبة الكلمة الطيبة، ومجالس الذكر.</p>
+    <div class="hero-actions">
+      <button class="hero-primary" type="button" onclick="show('sched')">اكتشف جدول الدروس <span aria-hidden="true">←</span></button>
+      <button class="hero-secondary" type="button" onclick="show('media')">تصفّح المكتبة</button>
+    </div>
+  </div>
+  <div class="hero-emblem" aria-hidden="true"><span>أهل</span><b>الأثر</b><i></i></div>
+  <div class="hero-foot"><span>بإشراف الدكتور خالد الحارس</span><span>من السبت إلى الخميس</span></div>
+</section>
+<section class="quick-strip" aria-label="محتويات المجلس">
+  <button type="button" class="quick-item" onclick="show('sched')"><span class="quick-icon">◷</span><span><b>مجالس العلم</b><small>مواعيد ودروس</small></span><i>←</i></button>
+  <button type="button" class="quick-item" onclick="show('media')"><span class="quick-icon">▤</span><span><b>المكتبة</b><small>صوتيات ومرئيات</small></span><i>←</i></button>
+  <button type="button" class="quick-item" onclick="show('adhkar')"><span class="quick-icon">۞</span><span><b>زاد المسلم</b><small>الأذكار اليومية</small></span><i>←</i></button>
+</section>
+<div class="section-heading"><div><span>برنامج المجلس</span><h2>مجالس هذا الأسبوع</h2></div><small>العلم يُطلب بالمداومة</small></div>
 <div class="next"><small>الدرس القادم</small><b id="nx"></b><div class="count" id="cd"></div></div>
-<div class="tabs" role="group" aria-label="أقسام التطبيق">
+<nav class="tabs" aria-label="التنقل بين أقسام التطبيق">
 <button class="tab on" id="t1" type="button" aria-pressed="true" onclick="show('sched')">الجدول</button>
 <button class="tab" id="t2" type="button" aria-pressed="false" onclick="show('prayers')">الصلاة</button>
 <button class="tab" id="t3" type="button" aria-pressed="false" onclick="show('qibla')">القبلة</button>
@@ -193,8 +231,8 @@ textarea::placeholder{color:#777e75}
 <button class="tab" id="t6" type="button" aria-pressed="false" onclick="show('q')">الأسئلة</button>
 <button class="tab" id="t7" type="button" aria-pressed="false" onclick="show('about')">عن المجلس</button>
 <button class="tab" id="t8" type="button" aria-pressed="false" onclick="show('account')">حسابي</button>
-</div>
-<section id="sched"></section>
+</nav>
+<section id="sched" aria-label="جدول الدروس الأسبوعي"></section>
 <section id="prayers" hidden>
 <div class="card">
 <h2 class="section-title">مواقيت الصلاة</h2>
