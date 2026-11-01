@@ -57,7 +57,11 @@ test('serves the app and health status without exposing environment values', asy
 
     const app = await fetch(baseUrl + '/app/');
     assert.equal(app.status, 200);
-    assert.match(await app.text(), /استراحة أهل الأثر/);
+    assert.match(await app.text(), /إستراحة أهل الأثر/);
+
+    const runtimeConfig = await fetch(baseUrl + '/runtime-config.js');
+    assert.equal(runtimeConfig.status, 200);
+    assert.match(await runtimeConfig.text(), /window\.AHL_API_BASE_URL/);
 
     const envFile = await fetch(baseUrl + '/.env');
     assert.equal(envFile.status, 404);
@@ -418,7 +422,7 @@ test('lecture API rejects writes from visitors without a verified admin account'
     });
     assert.equal(response.status, 403);
     assert.equal(restCalled, false);
-    assert.match((await response.json()).error, /المشرفين/);
+    assert.match((await response.json()).error, /للمشرفين/);
   });
 });
 
