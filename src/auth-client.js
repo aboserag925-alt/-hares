@@ -59,7 +59,8 @@ window.ahlAuth = {
     const result = await requireClient().auth.getSession();
     if (result.error) throw result.error;
     return result.data.session ? result.data.session.access_token : null;
-  },\n  signOut: function () {
+  },
+  signOut: function () {
     return requireClient().auth.signOut();
   },
   loadUserData: async function (userId) {
