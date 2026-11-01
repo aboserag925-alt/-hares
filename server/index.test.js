@@ -7,6 +7,7 @@ const { createServer } = require('./index');
 
 const configuredEnv = {
   GEMINI_API_KEY: 'test-gemini-key',
+  GROK_API_KEY: 'test-grok-key',
   TELEGRAM_BOT_TOKEN: 'test-telegram-token',
   TELEGRAM_CHAT_ID: '-1002660217755'
 };
@@ -40,9 +41,10 @@ function mockFetch() {
     fetch: async function (url, options) {
       calls.push({ url: url, options: options });
       if (url.includes('generativelanguage.googleapis.com')) {
-        return jsonResponse({
-          candidates: [{ content: { parts: [{ text: 'هذه مسودة للمراجعة.' }] } }]
-        });
+        return jsonResponse({ candidates: [{ content: { parts: [{ text: 'مسودة Gemini للمراجعة.' }] } }] });
+      }
+      if (url.includes('api.x.ai/v1/responses')) {
+        return jsonResponse({ output: [{ type: 'message', content: [{ type: 'output_text', text: 'مسودة Grok للمراجعة.' }] }] });
       }
       return jsonResponse({ ok: true });
     }
@@ -142,7 +144,7 @@ test('rejects question bodies that are not valid UTF-8', async function () {
   });
 });
 
-test('sends an Arabic question to Gemini and the draft to the configured Telegram chat', async function () {
+test('sends every Arabic question to Gemini and Grok in parallel and forwards both drafts to Telegram', async function () {
   const provider = mockFetch();
   await withServer({ env: configuredEnv, fetch: provider.fetch }, async function (baseUrl) {
     const response = await fetch(baseUrl + '/api/questions', {
@@ -156,17 +158,24 @@ test('sends an Arabic question to Gemini and the draft to the configured Telegra
 
     assert.equal(response.status, 200);
     assert.deepEqual(await response.json(), {
-      draft: 'هذه مسودة للمراجعة.',
+      geminiDraft: 'مسودة Gemini للمراجعة.',
+      grokDraft: 'مسودة Grok للمراجعة.',
       telegramSent: true
     });
-    assert.equal(provider.calls.length, 2);
-    assert.equal(provider.calls[0].options.headers['x-goog-api-key'], configuredEnv.GEMINI_API_KEY);
-    assert.equal(provider.calls[0].options.headers.Accept, 'application/json; charset=utf-8');
-    assert.equal(provider.calls[1].options.headers.Accept, 'application/json; charset=utf-8');
-    const telegramBody = JSON.parse(provider.calls[1].options.body);
+    assert.equal(provider.calls.length, 3);
+    const geminiCall = provider.calls.find(function (call) { return call.url.includes('generativelanguage.googleapis.com'); });
+    const grokCall = provider.calls.find(function (call) { return call.url.includes('api.x.ai/v1/responses'); });
+    const telegramCall = provider.calls.find(function (call) { return call.url.includes('api.telegram.org'); });
+    assert.equal(geminiCall.options.headers['x-goog-api-key'], configuredEnv.GEMINI_API_KEY);
+    assert.equal(grokCall.options.headers.Authorization, 'Bearer ' + configuredEnv.GROK_API_KEY);
+    assert.equal(grokCall.url, 'https://api.x.ai/v1/responses');
+    assert.equal(geminiCall.options.headers.Accept, 'application/json; charset=utf-8');
+    assert.equal(grokCall.options.headers.Accept, 'application/json; charset=utf-8');
+    const telegramBody = JSON.parse(telegramCall.options.body);
     assert.equal(telegramBody.chat_id, configuredEnv.TELEGRAM_CHAT_ID);
     assert.match(telegramBody.text, /ما حكم هذا السؤال؟/);
-    assert.match(telegramBody.text, /هذه مسودة للمراجعة/);
+    assert.match(telegramBody.text, /مسودة Gemini للمراجعة/);
+    assert.match(telegramBody.text, /مسودة Grok للمراجعة/);
   });
 });
 
@@ -201,14 +210,14 @@ test('reports Telegram delivery failure while preserving the generated draft', a
   const provider = mockFetch();
   provider.fetch = async function (url) {
     if (url.includes('generativelanguage.googleapis.com')) {
-      return {
-        ok: true,
-        arrayBuffer: async function () {
-          return Buffer.from(JSON.stringify({
-            candidates: [{ content: { parts: [{ text: 'مسودة صالحة للمراجعة.' }] } }]
-          }), 'utf8');
-        }
-      };
+      return { ok: true, arrayBuffer: async function () {
+        return Buffer.from(JSON.stringify({ candidates: [{ content: { parts: [{ text: 'مسودة Gemini صالحة للمراجعة.' }] } }] }), 'utf8');
+      } };
+    }
+    if (url.includes('api.x.ai/v1/responses')) {
+      return { ok: true, arrayBuffer: async function () {
+        return Buffer.from(JSON.stringify({ output: [{ type: 'message', content: [{ type: 'output_text', text: 'مسودة Grok صالحة للمراجعة.' }] }] }), 'utf8');
+      } };
     }
     return { ok: false, status: 503 };
   };
@@ -225,7 +234,8 @@ test('reports Telegram delivery failure while preserving the generated draft', a
     assert.equal(response.status, 502);
     assert.deepEqual(await response.json(), {
       error: 'تعذر تأكيد إرسال السؤال إلى Telegram.',
-      draft: 'مسودة صالحة للمراجعة.',
+      geminiDraft: 'مسودة Gemini صالحة للمراجعة.',
+      grokDraft: 'مسودة Grok صالحة للمراجعة.',
       telegramSent: false
     });
   });
@@ -264,7 +274,7 @@ test('limits each client to five question requests per fifteen-minute window', a
     }
 
     assert.deepEqual(statuses, [200, 200, 200, 200, 200, 429]);
-    assert.equal(provider.calls.length, 10);
+    assert.equal(provider.calls.length, 15);
   });
 });
 
