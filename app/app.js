@@ -114,6 +114,7 @@ function cairo() {
 function buildSchedule() {
   var box = document.getElementById('sched');
   var today = names[cairo().day];
+  var managedLectures = document.getElementById('managedLectures');
   box.textContent = '';
   S.forEach(function (row) {
     var card = document.createElement('div');
@@ -140,6 +141,7 @@ function buildSchedule() {
   friday.className = 'card' + (today === 'الجمعة' ? ' today' : '');
   friday.textContent = 'الجمعة: لا دروس';
   box.appendChild(friday);
+  if (managedLectures) box.appendChild(managedLectures);
 }
 
 function updateLessonCountdown() {
