@@ -30,3 +30,40 @@ create policy "Users can update their own data"
   to authenticated
   using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
+
+
+-- Lecture publishing and administrator authorization.
+create table if not exists public.admin_users (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.lectures (
+  id uuid primary key default gen_random_uuid(),
+  title text not null check (char_length(trim(title)) between 1 and 180),
+  description text not null default '' check (char_length(description) <= 4000),
+  starts_at timestamptz,
+  category text not null default 'محاضرة' check (char_length(category) <= 80),
+  stream_url text,
+  recording_url text,
+  status text not null default 'draft' check (status in ('draft', 'published', 'archived')),
+  created_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.admin_users enable row level security;
+alter table public.lectures enable row level security;
+revoke all on public.admin_users from anon, authenticated, public;
+revoke all on public.lectures from anon, authenticated, public;
+grant select on public.lectures to anon, authenticated;
+
+drop policy if exists "Public can read published lectures" on public.lectures;
+create policy "Public can read published lectures"
+  on public.lectures for select to anon, authenticated
+  using (status = 'published');
+
+-- The service role is used only by the server. No browser role can grant itself admin.
+-- Add administrators manually from the Supabase SQL Editor, after creating their Auth account:
+-- insert into public.admin_users (user_id)
+-- select id from auth.users where email = 'admin@example.com';
