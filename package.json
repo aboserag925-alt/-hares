@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "start": "node server/index.js",
-    "test": "node --test server",
+    "test": "node --test server/index.test.js server/media-library.test.js",
     "build:adhan": "node scripts/copy-adhan.mjs",
     "build:auth": "node scripts/build-auth.mjs",
     "build:app": "npm run build:adhan && npm run build:auth && npm run build:css",
