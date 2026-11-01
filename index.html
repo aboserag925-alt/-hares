@@ -241,7 +241,10 @@ function openSupportDialog(){
 const supportDialog=document.getElementById('supportDialog');
 if(supportDialog){
   supportDialog.addEventListener('click',event=>{
-    if(event.target===supportDialog)supportDialog.close();
+    if(event.target!==supportDialog)return;
+    const bounds=supportDialog.getBoundingClientRect();
+    const inside=event.clientX>=bounds.left&&event.clientX<=bounds.right&&event.clientY>=bounds.top&&event.clientY<=bounds.bottom;
+    if(!inside)supportDialog.close();
   });
   supportDialog.addEventListener('close',()=>{
     if(history.state&&history.state.supportDialogOpen)history.back();
