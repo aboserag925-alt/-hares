@@ -56,6 +56,7 @@ alter table public.admin_users enable row level security;
 alter table public.lectures enable row level security;
 revoke all on public.admin_users from anon, authenticated, public;
 revoke all on public.lectures from anon, authenticated, public;
+grant all on public.admin_users, public.lectures to service_role;
 grant select on public.lectures to anon, authenticated;
 
 drop policy if exists "Public can read published lectures" on public.lectures;
