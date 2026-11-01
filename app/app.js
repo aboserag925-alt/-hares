@@ -169,21 +169,56 @@ function updateLessonCountdown() {
   }
 }
 
-function show(sectionId) {
-  if (accountUser && window.ahlAuth && window.ahlAuth.configured) {
-    window.ahlAuth.logActivity(accountUser.id, 'section_view', { section: sectionId }).catch(function () {});
-  }
+var sectionStack = ['sched'];
+
+function renderSectionStack() {
   prayerSections.forEach(function (id, index) {
-    var active = id === sectionId;
-    document.getElementById(id).hidden = !active;
+    var position = sectionStack.indexOf(id);
+    var visible = position !== -1;
+    var section = document.getElementById(id);
+    section.hidden = !visible;
+    section.classList.toggle('app-section-overlay', visible && position > 0);
+    if (visible && position > 0) section.style.zIndex = String(15 + position);
+    else section.style.removeProperty('z-index');
+    var active = id === sectionStack[sectionStack.length - 1];
     var tab = document.getElementById(prayerTabs[index]);
     tab.className = 'tab' + (active ? ' on' : '');
     tab.setAttribute('aria-pressed', active ? 'true' : 'false');
   });
+}
+
+function closeTopSection() {
+  if (sectionStack.length <= 1) return;
+  sectionStack.pop();
+  renderSectionStack();
+}
+
+function show(sectionId) {
+  if (prayerSections.indexOf(sectionId) === -1) return;
+  var top = sectionStack[sectionStack.length - 1];
+  if (sectionId === 'sched') {
+    sectionStack = ['sched'];
+  } else if (sectionId !== top) {
+    var existing = sectionStack.indexOf(sectionId);
+    if (existing >= 0) sectionStack = sectionStack.slice(0, existing + 1);
+    else sectionStack.push(sectionId);
+  }
+  renderSectionStack();
+  if (accountUser && window.ahlAuth && window.ahlAuth.configured) {
+    window.ahlAuth.logActivity(accountUser.id, 'section_view', { section: sectionId }).catch(function () {});
+  }
   if (sectionId === 'qibla') updateQibla();
   if (sectionId === 'adhkar') renderAdhkar();
   if (sectionId === 'media') loadMediaLibrary();
 }
+
+prayerSections.forEach(function (id) {
+  if (id === 'sched') return;
+  var section = document.getElementById(id);
+  section.addEventListener('click', function (event) {
+    if (event.target === section) closeTopSection();
+  });
+});
 
 function renderMediaLibrary() {
   var container = document.getElementById('mediaItems');
