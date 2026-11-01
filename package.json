@@ -1,0 +1,22 @@
+{
+  "name": "ahl-athar",
+  "private": true,
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test server",
+    "build:adhan": "node scripts/copy-adhan.mjs",
+    "build:auth": "node scripts/build-auth.mjs",
+    "build:app": "npm run build:adhan && npm run build:auth && npm run build:css",
+    "build:css": "tailwindcss -i ./src/tailwind.css -o ./app/tailwind.css",
+    "dev:css": "tailwindcss -i ./src/tailwind.css -o ./app/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.0",
+    "esbuild": "^0.28.2",
+    "tailwindcss": "^4.1.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
+    "adhan": "^4.4.6"
+  }
+}
