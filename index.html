@@ -231,6 +231,33 @@ function closeSiteMenu(){
   if(button){button.setAttribute('aria-expanded','false');button.setAttribute('aria-label','فتح قائمة التنقل');}
 }
 document.addEventListener('keydown',event=>{if(event.key==='Escape')closeSiteMenu();});
+
+function openSupportDialog(){
+  const dialog=document.getElementById('supportDialog');
+  if(!dialog||dialog.open)return;
+  dialog.showModal();
+  history.pushState({supportDialogOpen:true},'',location.pathname+location.search+'#support');
+}
+const supportDialog=document.getElementById('supportDialog');
+if(supportDialog){
+  supportDialog.addEventListener('click',event=>{
+    if(event.target===supportDialog)supportDialog.close();
+  });
+  supportDialog.addEventListener('close',()=>{
+    if(history.state&&history.state.supportDialogOpen)history.back();
+  });
+}
+document.addEventListener('click',event=>{
+  const menu=document.getElementById('mobileSiteMenu');
+  const toggle=document.querySelector('.mobile-menu-toggle');
+  if(menu&&!menu.hidden&&!menu.contains(event.target)&&!(toggle&&toggle.contains(event.target)))closeSiteMenu();
+});
+window.addEventListener('popstate',()=>{
+  const dialog=document.getElementById('supportDialog');
+  if(dialog&&dialog.open)dialog.close();
+  closeSiteMenu();
+});
+
 </script>
 
 </body>
