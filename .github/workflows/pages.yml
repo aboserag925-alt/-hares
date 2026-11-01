@@ -41,7 +41,7 @@ jobs:
           cp index.html 404.html _site/
           cp -R app assets screens _site/
           touch _site/.nojekyll
-          node -e 'const fs = require("node:fs"); const value = (process.env.AHL_API_BASE_URL || "").trim().replace(/\/+$/, ""); if (value) { const url = new URL(value); if (url.protocol !== "https:" || url.origin !== value) throw new Error("AHL_API_BASE_URL must be an HTTPS origin without a trailing path."); } fs.writeFileSync("_site/runtime-config.js", "window.AHL_API_BASE_URL = " + JSON.stringify(value) + ";\\n", "utf8"); fs.writeFileSync("_site/app/runtime-config.js", "window.AHL_API_BASE_URL = " + JSON.stringify(value) + ";\\n", "utf8");'
+          node -e 'const fs = require("node:fs"); const value = (process.env.AHL_API_BASE_URL || "").trim().replace(/\/+$/, ""); if (value) { const url = new URL(value); if (url.protocol !== "https:" || url.origin !== value) throw new Error("AHL_API_BASE_URL must be an HTTPS origin without a trailing path."); } fs.writeFileSync("_site/runtime-config.js", "window.AHL_API_BASE_URL = " + JSON.stringify(value) + ";\n", "utf8"); fs.writeFileSync("_site/app/runtime-config.js", "window.AHL_API_BASE_URL = " + JSON.stringify(value) + ";\n", "utf8");'
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
