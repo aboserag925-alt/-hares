@@ -9,8 +9,8 @@ var S = [
   ['الخميس', 'عظماء الإسلام', 'منوعات ومقتطفات وحوارات']
 ];
 var names = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-var prayerSections = ['sched', 'prayers', 'qibla', 'adhkar', 'media', 'q', 'account', 'about'];
-var prayerTabs = ['t1', 't2', 't3', 't4', 't5', 't6', 't8', 't7'];
+var prayerSections = ['sched', 'quran', 'prayers', 'qibla', 'adhkar', 'media', 'q', 'account', 'about'];
+var prayerTabs = ['t1', 't9', 't2', 't3', 't4', 't5', 't6', 't8', 't7'];
 var prayerNames = {
   fajr: 'الفجر',
   sunrise: 'الشروق',
@@ -33,6 +33,11 @@ var accountSyncTimer = null;
 var activeSyncUserId = null;
 var mediaItems = [];
 var activeMediaCategory = 'all';
+var quranData = null;
+var quranLoadPromise = null;
+var quranSurahNumber = 1;
+var quranAyahNumber = 1;
+var savedQuranPosition = null;
 var prayerStatus = document.getElementById('locationStatus');
 var compassStatus = document.getElementById('compassStatus');
 var audioStatus = document.getElementById('audioStatus');
@@ -180,6 +185,7 @@ function show(sectionId) {
   if (sectionId === 'qibla') updateQibla();
   if (sectionId === 'adhkar') renderAdhkar();
   if (sectionId === 'media') loadMediaLibrary();
+  if (sectionId === 'quran') loadQuran();
 }
 
 function renderMediaLibrary() {
@@ -256,6 +262,220 @@ async function loadMediaLibrary() {
       : 'تعذر تحميل المكتبة الآن. حاول مرة أخرى.';
     status.classList.add('error');
   }
+}
+
+function updateQuranBookmark() {
+  var status = document.getElementById('quranBookmark');
+  var resumeButton = document.getElementById('quranResume');
+  if (!savedQuranPosition || !quranData) {
+    status.textContent = 'لم يُحفظ موضع قراءة بعد.';
+    resumeButton.hidden = true;
+    return;
+  }
+  var surah = quranData.surahs[savedQuranPosition.surah - 1];
+  status.textContent = surah
+    ? 'آخر موضع محفوظ: ' + surah.name + ' — الآية ' + savedQuranPosition.ayah
+    : 'لم يُحفظ موضع قراءة بعد.';
+  resumeButton.hidden = !surah;
+}
+
+function readSavedQuranPosition() {
+  try {
+    var value = localStorage.getItem('ahl-athar-quran-position-v1');
+    if (!value) return null;
+    var position = JSON.parse(value);
+    if (!position || !Number.isInteger(position.surah) || position.surah < 1 ||
+        position.surah > 114 || !Number.isInteger(position.ayah) || position.ayah < 1) {
+      return null;
+    }
+    return { surah: position.surah, ayah: position.ayah };
+  } catch (error) {
+    setStatus(document.getElementById('quranStatus'), 'تعذر قراءة موضع القرآن المحفوظ.', true);
+    return null;
+  }
+}
+
+async function loadQuran() {
+  var status = document.getElementById('quranStatus');
+  if (quranData) {
+    renderQuranSurah(quranSurahNumber, quranAyahNumber);
+    return;
+  }
+  if (!quranLoadPromise) {
+    status.classList.remove('error');
+    status.textContent = 'جارٍ تحميل المصحف كاملًا…';
+    quranLoadPromise = fetch('quran.json', { cache: 'force-cache' }).then(async function (response) {
+      if (!response.ok) throw new Error('تعذر تحميل ملف المصحف.');
+      var text = new TextDecoder('utf-8', { fatal: true }).decode(await response.arrayBuffer());
+      var data = JSON.parse(text);
+      if (!data || data.edition !== 'quran-uthmani' ||
+          !Array.isArray(data.surahs) || data.surahs.length !== 114) {
+        throw new Error('بيانات المصحف غير مكتملة.');
+      }
+      var ayahCount = 0;
+      data.surahs.forEach(function (surah, index) {
+        if (surah.number !== index + 1 || typeof surah.name !== 'string' ||
+            !Array.isArray(surah.ayahs) || surah.ayahs.length === 0) {
+          throw new Error('بيانات السورة غير مكتملة.');
+        }
+        surah.ayahs.forEach(function (ayah, ayahIndex) {
+          if (ayah.number !== ayahIndex + 1 || typeof ayah.text !== 'string' || !ayah.text) {
+            throw new Error('نص إحدى الآيات غير مكتمل.');
+          }
+        });
+        ayahCount += surah.ayahs.length;
+      });
+      if (ayahCount !== 6236) throw new Error('عدد آيات المصحف غير مكتمل.');
+      quranData = data;
+      return data;
+    });
+  }
+  try {
+    await quranLoadPromise;
+    savedQuranPosition = readSavedQuranPosition();
+    quranSurahNumber = savedQuranPosition ? savedQuranPosition.surah : 1;
+    quranAyahNumber = savedQuranPosition ? savedQuranPosition.ayah : 1;
+    setStatus(status, 'المصحف كاملًا جاهز للقراءة دون اتصال.');
+    renderQuranSurah(quranSurahNumber, savedQuranPosition ? savedQuranPosition.ayah : null);
+    if (savedQuranPosition) {
+      requestAnimationFrame(function () {
+        var savedVerse = document.getElementById('quran-ayah-' + savedQuranPosition.ayah);
+        if (savedVerse) savedVerse.scrollIntoView({ block: 'center' });
+      });
+    }
+  } catch (error) {
+    quranLoadPromise = null;
+    setStatus(status, 'تعذر تحميل المصحف كاملًا. تحقق من اتصالك ثم أعد فتح القسم.', true);
+  }
+}
+
+function renderQuranSurah(number, ayahToFocus) {
+  if (!quranData) return;
+  var surah = quranData.surahs[number - 1];
+  if (!surah) return;
+  quranSurahNumber = number;
+  var select = document.getElementById('quranSurah');
+  select.replaceChildren();
+  quranData.surahs.forEach(function (item) {
+    var option = document.createElement('option');
+    option.value = String(item.number);
+    option.textContent = item.number + '. ' + item.name;
+    select.appendChild(option);
+  });
+  select.value = String(number);
+  document.getElementById('quranPrevious').disabled = number === 1;
+  document.getElementById('quranNext').disabled = number === 114;
+  document.getElementById('quranSearchResults').hidden = true;
+  var heading = document.getElementById('quranSurahHeading');
+  heading.replaceChildren();
+  var title = document.createElement('h3');
+  title.textContent = surah.name;
+  var detail = document.createElement('p');
+  detail.textContent = 'السورة ' + surah.number + ' · ' + surah.ayahs.length +
+    ' آية · ' + (surah.revelationType === 'Meccan' ? 'مكية' : 'مدنية');
+  heading.append(title, detail);
+  heading.hidden = false;
+
+  var container = document.getElementById('quranText');
+  container.replaceChildren();
+  surah.ayahs.forEach(function (ayah) {
+    var verse = document.createElement('button');
+    verse.type = 'button';
+    verse.className = 'quran-ayah';
+    verse.id = 'quran-ayah-' + ayah.number;
+    verse.dataset.ayah = String(ayah.number);
+    verse.textContent = ayah.text;
+    var marker = document.createElement('span');
+    marker.className = 'quran-ayah-mark';
+    marker.textContent = '﴿' + new Intl.NumberFormat('ar-EG').format(ayah.number) + '﴾';
+    verse.appendChild(marker);
+    if (savedQuranPosition && savedQuranPosition.surah === number &&
+        savedQuranPosition.ayah === ayah.number) {
+      verse.setAttribute('aria-current', 'location');
+    }
+    container.appendChild(verse);
+  });
+  quranAyahNumber = Math.min(Math.max(ayahToFocus || 1, 1), surah.ayahs.length);
+  updateQuranBookmark();
+}
+
+function saveQuranPosition(ayah) {
+  var surah = quranData && quranData.surahs[quranSurahNumber - 1];
+  if (!surah) return;
+  quranAyahNumber = Math.min(Math.max(ayah, 1), surah.ayahs.length);
+  savedQuranPosition = { surah: quranSurahNumber, ayah: quranAyahNumber };
+  try {
+    localStorage.setItem('ahl-athar-quran-position-v1', JSON.stringify(savedQuranPosition));
+  } catch (error) {
+    setStatus(document.getElementById('quranStatus'), 'تعذر حفظ موضع القراءة على هذا الجهاز.', true);
+    return;
+  }
+  document.querySelectorAll('.quran-ayah[aria-current="location"]').forEach(function (verse) {
+    verse.removeAttribute('aria-current');
+  });
+  var current = document.getElementById('quran-ayah-' + quranAyahNumber);
+  if (current) current.setAttribute('aria-current', 'location');
+  updateQuranBookmark();
+  setStatus(document.getElementById('quranStatus'),
+    'حُفظ موضع القراءة: ' + surah.name + ' — الآية ' + quranAyahNumber + '.');
+}
+
+function normalizeQuranSearch(value) {
+  return value.normalize('NFD')
+    .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, '')
+    .replace(/[أإآٱ]/g, 'ا')
+    .replace(/ى/g, 'ي')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function searchQuran() {
+  if (!quranData) return;
+  var query = normalizeQuranSearch(document.getElementById('quranSearch').value);
+  var results = document.getElementById('quranSearchResults');
+  results.replaceChildren();
+  if (query.length < 2) {
+    setStatus(document.getElementById('quranStatus'), 'اكتب حرفين على الأقل للبحث في المصحف.');
+    results.hidden = true;
+    return;
+  }
+  var matches = [];
+  quranData.surahs.some(function (surah) {
+    return surah.ayahs.some(function (ayah) {
+      if (normalizeQuranSearch(ayah.text).includes(query)) {
+        matches.push({ surah: surah, ayah: ayah });
+        return matches.length >= 50;
+      }
+      return false;
+    });
+  });
+  results.hidden = false;
+  if (matches.length === 0) {
+    setStatus(document.getElementById('quranStatus'), 'لا توجد آيات مطابقة لعبارة البحث.');
+    return;
+  }
+  matches.forEach(function (match) {
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'quran-result';
+    button.dataset.surah = String(match.surah.number);
+    button.dataset.ayah = String(match.ayah.number);
+    var label = document.createElement('b');
+    label.textContent = match.surah.name + ' · الآية ' + match.ayah.number;
+    button.append(label, document.createTextNode(match.ayah.text));
+    results.appendChild(button);
+  });
+  setStatus(document.getElementById('quranStatus'),
+    'نتائج البحث: ' + matches.length + (matches.length === 50 ? ' (أول 50 نتيجة).' : '.'));
+}
+
+function resumeQuranPosition() {
+  if (!savedQuranPosition || !quranData) return;
+  renderQuranSurah(savedQuranPosition.surah, savedQuranPosition.ayah);
+  requestAnimationFrame(function () {
+    var verse = document.getElementById('quran-ayah-' + savedQuranPosition.ayah);
+    if (verse) verse.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
 }
 
 function methodForTimezone() {
@@ -641,12 +861,18 @@ function scheduleAccountSync() {
   }, 600);
 }
 
+function isCurrentAccount(user) {
+  return Boolean(user && accountUser && accountUser.id === user.id &&
+    activeSyncUserId === user.id);
+}
+
 async function syncAccountData(user, mergeRemote) {
-  if (!user || !window.ahlAuth.configured) return;
+  if (!isCurrentAccount(user) || !window.ahlAuth.configured) return;
   var status = document.getElementById('syncStatus');
   setStatus(status, 'جاري مزامنة الأذكار وطريقة الحساب…');
   try {
     var remote = await window.ahlAuth.loadUserData(user.id);
+    if (!isCurrentAccount(user)) return;
     var remoteData = remote && remote.data && typeof remote.data === 'object'
       ? remote.data
       : {};
@@ -686,9 +912,11 @@ async function syncAccountData(user, mergeRemote) {
       asrMadhab: document.getElementById('asrMadhab').value,
       dhikr: currentDhikrData()
     });
+    if (!isCurrentAccount(user)) return;
     renderAdhkar();
     setStatus(status, 'تمت المزامنة. الموقع الدقيق محفوظ على هذا الجهاز فقط.');
   } catch (error) {
+    if (!isCurrentAccount(user)) return;
     setStatus(status, 'تعذرت المزامنة: ' + error.message, true);
   }
 }
@@ -945,6 +1173,44 @@ document.getElementById('questionConsent').addEventListener('change', function (
   document.getElementById('sendQuestionBtn').disabled = !this.checked;
 });
 document.getElementById('sendQuestionBtn').addEventListener('click', sendQuestion);
+document.getElementById('quranSurah').addEventListener('change', function () {
+  renderQuranSurah(Number(this.value));
+});
+document.getElementById('quranPrevious').addEventListener('click', function () {
+  if (quranSurahNumber > 1) renderQuranSurah(quranSurahNumber - 1);
+});
+document.getElementById('quranNext').addEventListener('click', function () {
+  if (quranSurahNumber < 114) renderQuranSurah(quranSurahNumber + 1);
+});
+document.getElementById('quranSavePosition').addEventListener('click', function () {
+  saveQuranPosition(quranAyahNumber);
+});
+document.getElementById('quranResume').addEventListener('click', resumeQuranPosition);
+document.getElementById('quranSearchButton').addEventListener('click', searchQuran);
+document.getElementById('quranSearch').addEventListener('keydown', function (event) {
+  if (event.key === 'Enter') searchQuran();
+});
+document.getElementById('quranSearchResults').addEventListener('click', function (event) {
+  var result = event.target.closest('[data-surah][data-ayah]');
+  if (!result) return;
+  quranSurahNumber = Number(result.dataset.surah);
+  quranAyahNumber = Number(result.dataset.ayah);
+  renderQuranSurah(quranSurahNumber, quranAyahNumber);
+  saveQuranPosition(quranAyahNumber);
+  requestAnimationFrame(function () {
+    var verse = document.getElementById('quran-ayah-' + quranAyahNumber);
+    if (verse) verse.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+});
+document.getElementById('quranText').addEventListener('click', function (event) {
+  var verse = event.target.closest('[data-ayah]');
+  if (!verse) return;
+  quranAyahNumber = Number(verse.dataset.ayah);
+  document.querySelectorAll('.quran-ayah[aria-current="location"]').forEach(function (item) {
+    item.removeAttribute('aria-current');
+  });
+  verse.setAttribute('aria-current', 'location');
+});
 document.getElementById('mediaFilters').addEventListener('click', function (event) {
   var button = event.target.closest('[data-media-category]');
   if (!button) return;
@@ -970,6 +1236,54 @@ document.getElementById('adhanAudio').addEventListener('play', function () {
 });
 document.getElementById('adhanAudio').addEventListener('ended', function () {
   setStatus(audioStatus, 'انتهى التسجيل.');
+});
+var radioAudio = document.getElementById('radioAudio');
+var radioToggle = document.getElementById('radioToggle');
+var radioToggleLabel = document.getElementById('radioToggleLabel');
+var radioMute = document.getElementById('radioMute');
+var radioStatus = document.getElementById('radioStatus');
+
+function updateRadioButton(isPlaying) {
+  radioToggle.classList.toggle('is-playing', isPlaying);
+  radioToggle.setAttribute('aria-pressed', isPlaying ? 'true' : 'false');
+  radioToggle.setAttribute('aria-label', isPlaying
+    ? 'إيقاف بث إذاعة القرآن الكريم من القاهرة'
+    : 'تشغيل بث إذاعة القرآن الكريم من القاهرة');
+  radioToggleLabel.textContent = isPlaying
+    ? 'مباشر الآن — اضغط للإيقاف'
+    : 'بث مباشر — إذاعة القرآن الكريم من القاهرة';
+}
+
+radioToggle.addEventListener('click', function () {
+  radioStatus.hidden = true;
+  if (!radioAudio.paused) {
+    radioAudio.pause();
+    return;
+  }
+  radioAudio.play().catch(function () {
+    radioStatus.textContent = 'تعذر تشغيل البث. تحقق من اتصال الإنترنت أو جرّب لاحقًا.';
+    radioStatus.classList.add('error');
+    radioStatus.hidden = false;
+  });
+});
+radioMute.addEventListener('click', function () {
+  radioAudio.muted = !radioAudio.muted;
+  this.textContent = radioAudio.muted ? '🔇' : '🔊';
+  this.setAttribute('aria-label', radioAudio.muted ? 'إلغاء كتم صوت الإذاعة' : 'كتم صوت الإذاعة');
+  this.setAttribute('title', radioAudio.muted ? 'إلغاء كتم الصوت' : 'كتم الصوت');
+  this.setAttribute('aria-pressed', radioAudio.muted ? 'true' : 'false');
+});
+radioAudio.addEventListener('play', function () {
+  updateRadioButton(true);
+});
+radioAudio.addEventListener('pause', function () {
+  updateRadioButton(false);
+});
+radioAudio.addEventListener('error', function () {
+  radioStatus.textContent = 'تعذر تشغيل البث. تحقق من اتصال الإنترنت أو جرّب لاحقًا.';
+  radioStatus.classList.add('error');
+  radioStatus.hidden = false;
+  updateRadioButton(false);
 });
 
 if ('serviceWorker' in navigator) {

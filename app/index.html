@@ -40,9 +40,6 @@ dialog.support-dialog{width:min(480px,calc(100% - 32px));max-height:min(80vh,600
 dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(5px)}
 .support-dialog h2{margin:0 0 8px;font-size:26px}
 .support-dialog>p{margin:0 0 18px;color:var(--muted);line-height:1.8}
-.wallet-detail{margin:10px 0;padding:15px;border:1px solid var(--line);border-radius:16px;background:rgba(213,171,100,.04)}
-.wallet-detail summary{color:var(--gold2);font-weight:700;cursor:pointer}
-.wallet-detail p{margin:12px 0 0;color:var(--muted);line-height:1.8}
 .support-dialog form{margin-top:16px}
 .next{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 24px;align-items:center;overflow:hidden;padding:clamp(22px,4vw,36px);margin:0 0 18px;text-align:right;border:1px solid rgba(213,171,100,.27);border-radius:26px;background:linear-gradient(115deg,rgba(25,32,29,.97),rgba(18,23,21,.94) 56%,rgba(37,34,25,.92));box-shadow:0 20px 70px rgba(0,0,0,.24);animation:enter .8s .08s cubic-bezier(.2,.7,.2,1) both}
 .next::before{position:absolute;inset:-1px;z-index:-1;background:radial-gradient(ellipse at 0% 50%,rgba(213,171,100,.14),transparent 48%);content:"";pointer-events:none}
@@ -52,8 +49,20 @@ dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(
 .next small::before{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 16px rgba(153,185,162,.65);content:""}
 .next b{display:block;max-width:700px;color:var(--gold2);font-size:clamp(17px,2.4vw,22px);line-height:1.75;margin:4px 0 0}
 .count{grid-column:2;grid-row:1/3;color:var(--gold2);direction:ltr;font-size:clamp(32px,5.5vw,54px);font-weight:750;letter-spacing:.045em;font-variant-numeric:tabular-nums;text-shadow:0 0 36px rgba(213,171,100,.18);white-space:nowrap}
-.tabs{position:sticky;top:10px;z-index:5;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;margin:0 0 18px;padding:7px;border:1px solid rgba(255,255,255,.055);border-radius:20px;background:rgba(16,21,19,.78);backdrop-filter:blur(18px);box-shadow:0 10px 36px rgba(0,0,0,.16)}
+.radio-quick{display:flex;align-items:center;gap:8px;margin:-6px 0 16px}
+.radio-toggle,.radio-mute{display:inline-flex;min-height:40px;align-items:center;justify-content:center;gap:8px;padding:8px 13px;border:1px solid rgba(213,171,100,.32);border-radius:999px;background:rgba(213,171,100,.07);color:var(--gold2);font:inherit;font-size:12px;font-weight:700;transition:background .2s,border-color .2s,transform .2s}
+.radio-toggle{width:auto;max-width:100%;text-align:right}
+.radio-toggle:hover,.radio-mute:hover{transform:translateY(-1px);border-color:rgba(213,171,100,.6);background:rgba(213,171,100,.14)}
+.radio-live-dot{width:8px;height:8px;flex:0 0 auto;border-radius:50%;background:#ed625b;box-shadow:0 0 10px rgba(237,98,91,.65)}
+.radio-toggle.is-playing{border-color:rgba(153,185,162,.45);color:#c6e2cd}
+.radio-toggle.is-playing .radio-live-dot{background:#75d38b;box-shadow:0 0 10px rgba(117,211,139,.65)}
+.radio-mute{width:40px;padding:8px;border-radius:50%;font-size:15px}
+.radio-status{margin:0 0 12px}
+.tabs{position:sticky;top:10px;z-index:5;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:5px;margin:0 0 18px;padding:7px;border:1px solid rgba(255,255,255,.055);border-radius:20px;background:rgba(16,21,19,.78);backdrop-filter:blur(18px);box-shadow:0 10px 36px rgba(0,0,0,.16)}
 .tab{position:relative;min-width:0;min-height:46px;padding:8px 5px;border:1px solid transparent;border-radius:14px;background:transparent;color:var(--muted);font-size:12px;font-weight:600;white-space:nowrap;transition:color .25s,background .25s,border-color .25s,transform .25s}
+.tab{display:flex;align-items:center;justify-content:center;gap:6px}
+.tab svg{width:17px;height:17px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tab-emoji{font-size:16px;line-height:1}
 .tab:hover{color:var(--text);background:rgba(255,255,255,.045)}
 .tab:active{transform:scale(.97)}
 .tab.on{border-color:rgba(213,171,100,.23);background:linear-gradient(135deg,rgba(213,171,100,.18),rgba(213,171,100,.07));color:var(--gold2);box-shadow:inset 0 1px rgba(255,255,255,.055)}
@@ -122,6 +131,24 @@ textarea::placeholder{color:#777e75}
 .media-category{display:inline-flex;padding:4px 9px;border:1px solid rgba(213,171,100,.24);border-radius:999px;color:var(--gold2);font-size:11px}
 .media-date{display:block;margin-top:8px;color:var(--muted);font-size:11px}
 .media-download{color:var(--gold2);font-weight:700}
+.quran-toolbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,1fr);gap:12px;margin:18px 0}
+.quran-toolbar .field input{min-height:44px;padding:9px 12px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:#101513;color:var(--text);font:inherit}
+.quran-toolbar .field input:focus{border-color:rgba(213,171,100,.55);outline:2px solid rgba(213,171,100,.12)}
+.quran-controls{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:14px 0}
+.quran-controls .btn{margin:0}
+.quran-surah-heading{margin:22px 0;padding:16px;border:1px solid rgba(213,171,100,.25);border-radius:16px;background:rgba(213,171,100,.06);color:var(--gold2);text-align:center}
+.quran-surah-heading h3{margin:0 0 6px;font-size:23px}
+.quran-surah-heading p{margin:0;color:var(--muted);font-size:12px}
+.quran-text{display:grid;gap:8px}
+.quran-ayah{display:block;width:100%;padding:14px 16px;border:1px solid rgba(255,255,255,.055);border-radius:14px;background:rgba(255,255,255,.018);color:var(--text);font-family:'Noto Naskh Arabic','Amiri',serif;font-size:clamp(21px,3vw,28px);line-height:2.2;text-align:justify;transition:border-color .2s,background .2s}
+.quran-ayah:hover,.quran-ayah:focus-visible{border-color:rgba(213,171,100,.35);background:rgba(213,171,100,.045);outline:none}
+.quran-ayah[aria-current="location"]{border-color:rgba(213,171,100,.6);background:rgba(213,171,100,.09)}
+.quran-ayah-mark{display:inline-block;margin-inline:8px;color:var(--gold2);font-family:system-ui,sans-serif;font-size:.58em;white-space:nowrap;vertical-align:middle}
+.quran-results{display:grid;gap:8px;margin-top:12px}
+.quran-result{padding:12px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025);color:var(--text);font:inherit;line-height:1.9;text-align:right}
+.quran-result b{display:block;margin-bottom:4px;color:var(--gold2);font-size:12px}
+.quran-bookmark{color:var(--muted);font-size:12px}
+.quran-search-btn{grid-column:2;justify-self:start;margin:0}
 .compass-wrap{display:grid;justify-items:center;gap:18px;padding:12px 0}
 .compass{position:relative;width:min(72vw,280px);aspect-ratio:1;border:1px solid rgba(213,171,100,.3);border-radius:50%;background:radial-gradient(circle,rgba(213,171,100,.07),rgba(18,23,21,.6) 68%);box-shadow:inset 0 0 40px rgba(213,171,100,.05),0 0 50px rgba(0,0,0,.18)}
 .compass::before,.compass::after{position:absolute;background:rgba(213,171,100,.16);content:""}
@@ -154,7 +181,7 @@ textarea::placeholder{color:#777e75}
 @keyframes today-glow{0%,100%{box-shadow:0 0 0 1px rgba(213,171,100,.06),0 12px 38px rgba(0,0,0,.18)}50%{box-shadow:0 0 0 1px rgba(213,171,100,.13),0 16px 42px rgba(213,171,100,.08)}}
 @keyframes gold-sweep{0%,25%{left:-38%;opacity:0}38%{opacity:1}62%{left:118%;opacity:.65}75%,100%{left:118%;opacity:0}}
 @keyframes logo-aura{0%,100%{box-shadow:0 8px 28px rgba(0,0,0,.24),0 0 0 rgba(213,171,100,0)}50%{box-shadow:0 8px 28px rgba(0,0,0,.24),0 0 24px rgba(213,171,100,.13)}}
-@media(max-width:680px){.wrap{width:min(100% - 28px,560px);padding-top:18px}header{grid-template-columns:58px 1fr;column-gap:13px;padding-bottom:18px}.logo{width:56px;height:56px;padding:6px;border-radius:18px}.next{padding:22px 18px;gap:8px 12px;border-radius:22px}.next b{font-size:17px}.count{font-size:clamp(28px,7vw,40px)}#sched{gap:10px}.card{padding:17px;border-radius:18px}.slot{gap:8px}.time{min-width:76px;padding-inline:7px}.tabs{display:flex;gap:5px;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tab{flex:0 0 auto;min-width:86px}.panel-grid,.media-grid{grid-template-columns:1fr}.prayer-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){.wrap{width:min(100% - 28px,560px);padding-top:18px}header{grid-template-columns:58px 1fr;column-gap:13px;padding-bottom:18px}.logo{width:56px;height:56px;padding:6px;border-radius:18px}.next{padding:22px 18px;gap:8px 12px;border-radius:22px}.next b{font-size:17px}.count{font-size:clamp(28px,7vw,40px)}#sched{gap:10px}.card{padding:17px;border-radius:18px}.slot{gap:8px}.time{min-width:76px;padding-inline:7px}.tabs{display:flex;gap:5px;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tab{flex:0 0 auto;min-width:86px}.panel-grid,.media-grid{grid-template-columns:1fr}.quran-toolbar{grid-template-columns:1fr}.quran-search-btn{grid-column:1}.quran-ayah{padding:12px;font-size:23px}.prayer-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.wrap{width:min(100% - 24px,420px);padding-top:12px}.tabs{gap:4px;padding:5px;border-radius:17px}.tab{min-height:44px;padding:7px 8px;font-size:12px;border-radius:12px}.next{grid-template-columns:1fr;gap:6px}.count{grid-column:1;grid-row:auto;margin-top:8px;font-size:38px}.next b{line-height:1.65}#sched{grid-template-columns:1fr}.card{padding:15px}.day{font-size:16px}.slot{flex-direction:row;gap:8px}.time{min-width:76px}.btn{margin-inline:0 6px}.settings-grid{grid-template-columns:1fr 1fr}.prayer-time{padding:12px 10px}.prayer-time time{font-size:14px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
@@ -183,17 +210,53 @@ textarea::placeholder{color:#777e75}
 <div class="support-prompt"><button class="support-button" type="button" onclick="document.getElementById('supportDialog').showModal()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15.9V20h-2v-2.1a5.5 5.5 0 0 1-4-2.7l1.7-1a3.7 3.7 0 0 0 3.3 1.8c1.5 0 2.5-.7 2.5-1.8 0-1-.8-1.5-2.9-2-2.6-.6-4-1.6-4-3.7 0-1.9 1.3-3.2 3.4-3.6V5h2v1.9a5.1 5.1 0 0 1 3.5 2.3l-1.6 1.1a3.4 3.4 0 0 0-3-1.6c-1.4 0-2.2.6-2.2 1.6s.7 1.4 2.8 1.9c2.8.7 4.1 1.7 4.1 3.8 0 2-1.4 3.5-3.6 3.9Z"/></svg>ادعم تطوير المنصة</button></div>
 </header>
 <div class="next"><small>الدرس القادم</small><b id="nx"></b><div class="count" id="cd"></div></div>
+<div class="radio-quick">
+<button id="radioToggle" class="radio-toggle" type="button" aria-pressed="false" aria-label="تشغيل بث إذاعة القرآن الكريم من القاهرة" title="البث الرسمي عبر ماسبيرو">
+<span class="radio-live-dot" aria-hidden="true"></span><span id="radioToggleLabel">بث مباشر — إذاعة القرآن الكريم من القاهرة</span>
+</button>
+<button id="radioMute" class="radio-mute" type="button" aria-pressed="false" aria-label="كتم صوت الإذاعة" title="كتم الصوت">🔊</button>
+<audio id="radioAudio" preload="none" src="https://stream.radiojar.com/8s5u5tpdtwzuv" aria-label="بث إذاعة القرآن الكريم المصرية"></audio>
+</div>
+<p id="radioStatus" class="status radio-status" role="status" aria-live="polite" hidden></p>
 <div class="tabs" role="group" aria-label="أقسام التطبيق">
-<button class="tab on" id="t1" type="button" aria-pressed="true" onclick="show('sched')">الجدول</button>
-<button class="tab" id="t2" type="button" aria-pressed="false" onclick="show('prayers')">الصلاة</button>
-<button class="tab" id="t3" type="button" aria-pressed="false" onclick="show('qibla')">القبلة</button>
-<button class="tab" id="t4" type="button" aria-pressed="false" onclick="show('adhkar')">الأذكار</button>
-<button class="tab" id="t5" type="button" aria-pressed="false" onclick="show('media')">المكتبة</button>
-<button class="tab" id="t6" type="button" aria-pressed="false" onclick="show('q')">الأسئلة</button>
-<button class="tab" id="t7" type="button" aria-pressed="false" onclick="show('about')">عن المجلس</button>
-<button class="tab" id="t8" type="button" aria-pressed="false" onclick="show('account')">حسابي</button>
+<button class="tab on" id="t1" type="button" aria-pressed="true" onclick="show('sched')"><span class="tab-emoji" aria-hidden="true">📅</span><span>الجدول</span></button>
+<button class="tab" id="t9" type="button" aria-pressed="false" onclick="show('quran')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v14M12 7C9 4.5 5.5 4 3 5v14c3-1 6.5-.5 9 2M12 7c3-2.5 6.5-3 9-2v14c-3-1-6.5-.5-9 2"/></svg><span>القرآن الكريم</span></button>
+<button class="tab" id="t2" type="button" aria-pressed="false" onclick="show('prayers')"><span class="tab-emoji" aria-hidden="true">🕌</span><span>الصلاة</span></button>
+<button class="tab" id="t3" type="button" aria-pressed="false" onclick="show('qibla')"><span class="tab-emoji" aria-hidden="true">🧭</span><span>القبلة</span></button>
+<button class="tab" id="t4" type="button" aria-pressed="false" onclick="show('adhkar')"><span class="tab-emoji" aria-hidden="true">📿</span><span>الأذكار</span></button>
+<button class="tab" id="t5" type="button" aria-pressed="false" onclick="show('media')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5v-12Z"/><path d="M4 6h13M8 10h8M8 14h6M4 17.5A2.5 2.5 0 0 1 6.5 15H20"/></svg><span>المكتبة</span></button>
+<button class="tab" id="t6" type="button" aria-pressed="false" onclick="show('q')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9.5 9.5 0 0 1-4-.9L3 21l1.7-4.1A8 8 0 0 1 3 11.5 8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5Z"/><path d="M9.8 9a2.3 2.3 0 1 1 4.2 1.3c-.8 1-2 1.1-2 2.7M12 16h.01"/></svg><span>الأسئلة</span></button>
+<button class="tab" id="t7" type="button" aria-pressed="false" onclick="show('about')"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>عن المجلس</span></button>
+<button class="tab" id="t8" type="button" aria-pressed="false" onclick="show('account')"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>حسابي</span></button>
 </div>
 <section id="sched"></section>
+<section id="quran" hidden>
+<div class="card">
+<h2 class="section-title">القرآن الكريم كاملًا</h2>
+<p class="section-subtitle">نص المصحف العثماني كاملًا: 114 سورة و6236 آية. يُحفظ موضع قراءتك على هذا الجهاز.</p>
+<p id="quranStatus" class="status" role="status" aria-live="polite">جارٍ تجهيز المصحف…</p>
+<div class="quran-toolbar">
+<label class="field" for="quranSurah">اختر السورة
+<select id="quranSurah"></select>
+</label>
+<label class="field" for="quranSearch">ابحث في آيات المصحف
+<input id="quranSearch" type="search" enterkeyhint="search" autocomplete="off" placeholder="اكتب كلمة أو عبارة">
+</label>
+<button id="quranSearchButton" class="btn quran-search-btn" type="button">بحث</button>
+</div>
+<div class="quran-controls">
+<button id="quranPrevious" class="btn" type="button">السورة السابقة</button>
+<span id="quranBookmark" class="quran-bookmark">لم يُحفظ موضع قراءة بعد.</span>
+<button id="quranNext" class="btn" type="button">السورة التالية</button>
+<button id="quranResume" class="btn" type="button" hidden>متابعة آخر موضع</button>
+</div>
+<button id="quranSavePosition" class="btn" type="button">حفظ موضع القراءة</button>
+<div id="quranSearchResults" class="quran-results" hidden></div>
+<div id="quranSurahHeading" class="quran-surah-heading" hidden></div>
+<div id="quranText" class="quran-text" lang="ar" dir="rtl"></div>
+<p class="notice">النص للقراءة والتصفح، ويُستحسن الرجوع إلى مصحف موثوق عند الحفظ أو الاستشهاد. مصدر البيانات: <a href="https://alquran.cloud/" target="_blank" rel="noopener noreferrer">AlQuran Cloud API</a>، طبعة quran-uthmani.</p>
+</div>
+</section>
 <section id="prayers" hidden>
 <div class="card">
 <h2 class="section-title">مواقيت الصلاة</h2>
@@ -336,9 +399,8 @@ textarea::placeholder{color:#777e75}
 </div>
 <dialog class="support-dialog" id="supportDialog" aria-labelledby="supportDialogTitle">
 <h2 class="section-title" id="supportDialogTitle">ادعم تطوير المنصة</h2>
-<p>اختر المحفظة واضغط على اسمها لعرض بيانات التحويل عند إضافتها.</p>
-<details class="wallet-detail"><summary>فودافون كاش</summary><p>لم تتم إضافة بيانات هذه المحفظة بعد.</p></details>
-<details class="wallet-detail"><summary>اتصالات كاش</summary><p>لم تتم إضافة بيانات هذه المحفظة بعد.</p></details>
+<p>نشكرك على رغبتك في دعم المنصة. لا تتوفر حاليًا وسيلة دفع داخل التطبيق، ولن نعرض بيانات محفظة شخصية دون موافقة صريحة.</p>
+<a class="social-link" href="https://t.me/khaled_najm1" target="_blank" rel="noopener noreferrer">قناة المجلس على تيليجرام للاستفسار</a>
 <form method="dialog"><button class="btn" type="submit">إغلاق</button></form>
 </dialog>
 <script src="supabase-config.js"></script>
