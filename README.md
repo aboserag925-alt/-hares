@@ -19,7 +19,7 @@ GitHub Pages لا يشغّل خادم Node.js؛ لذلك تحتاج الأسئل
 
 توجد لوحة الإدارة في `app/admin.html`. تعتمد على Supabase Auth وقاعدة بيانات Supabase، ولا تستخدم كلمة مرور ثابتة أو مفتاح `service_role` في المتصفح.
 
-1. أنشئ مشروع Supabase وأضف رابط المشروع و`anon`/publishable key إلى `app/supabase-config.js` (يُنشأ من `src/supabase-config.example.js` عند البناء).
+1. أنشئ مشروع Supabase. أضف متغيري GitHub Actions التاليين من **Settings → Secrets and variables → Actions → Variables**: `SUPABASE_URL` (رابط مشروع HTTPS) و`SUPABASE_ANON_KEY` (المفتاح العام anon/publishable). يستخدمهما بناء GitHub Pages لإنشاء `app/supabase-config.js`. للتطوير المحلي، أنشئ هذا الملف داخل `app/` باستخدام `src/supabase-config.example.js` وأدخل القيم العامة. لا تستخدم `service_role`.
 2. نفّذ `supabase/schema.sql` ثم `supabase/site-content.sql` في SQL Editor.
 3. أنشئ حساب المشرف من لوحة Supabase Authentication، ثم امنحه الدور الإداري من SQL Editor بعد استبدال UUID بمعرّف المستخدم الفعلي:
    ```sql
