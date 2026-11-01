@@ -76,7 +76,10 @@ function createAdminApi(options) {
   }
 
   return async function handle(request, response, pathname) {
-    if (pathname !== '/api/admin/session' && pathname !== '/api/lectures' && !/^\\/api\\/lectures\\/[0-9a-f-]{36}$/i.test(pathname)) return false;
+    const isLecturePath = pathname === '/api/lectures' ||
+      (pathname.startsWith('/api/lectures/') &&
+       /^[0-9a-f-]{36}$/i.test(pathname.slice('/api/lectures/'.length)));
+    if (pathname !== '/api/admin/session' && !isLecturePath) return false;
     if (!['GET', 'POST', 'PATCH', 'DELETE'].includes(request.method)) {
       response.setHeader('Allow', 'GET, POST, PATCH, DELETE, OPTIONS');
       sendJson(response, 405, { error: 'طريقة الطلب غير مدعومة.' });
@@ -101,7 +104,17 @@ function createAdminApi(options) {
       }
       const id = pathname.match(/^\/api\/lectures\/([0-9a-f-]{36})$/i);
       if (request.method === 'POST') {
-        if (!/^application\\/json(?:\\s*;|$)/i.test(request.headers['content-type'] || '')) { sendJson(response, 415, { error: 'يجب إرسال البيانات بصيغة JSON.' }); return true; }\n        let body;\n        try { body = await readBody(request); } catch { sendJson(response, 400, { error: 'بيانات الطلب غير صالحة.' }); return true; }
+        if (!String(request.headers['content-type'] || '').toLowerCase().startsWith('application/json')) {
+          sendJson(response, 415, { error: 'يجب إرسال البيانات بصيغة JSON.' });
+          return true;
+        }
+        let body;
+        try {
+          body = await readBody(request);
+        } catch {
+          sendJson(response, 400, { error: 'بيانات الطلب غير صالحة.' });
+          return true;
+        }
         const error = validateLecture(body, false);
         if (error) { sendJson(response, 400, { error }); return true; }
         const rows = await supabase('/rest/v1/lectures?select=*', {
