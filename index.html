@@ -26,7 +26,14 @@ html{scroll-behavior:smooth}
 .d1{animation-delay:.15s}.d2{animation-delay:.3s}.d3{animation-delay:.45s}.d4{animation-delay:.6s}
 @supports (animation-timeline:view()){.rv{animation:up linear both;animation-timeline:view();animation-range:entry 0% entry 35%}}
 .nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(14px);background:rgba(14,11,8,.7);border-bottom:1px solid #29332d}
-.nav .wrap{display:flex;align-items:center;gap:28px;height:72px}
+.nav .wrap{display:flex;align-items:center;gap:18px;height:72px}
+.trial-badge{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border:1px solid rgba(213,171,100,.4);border-radius:999px;background:rgba(213,171,100,.08);color:#f2d9a4;font-size:11px;font-weight:700;white-space:nowrap}
+.trial-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:#d5ab64;box-shadow:0 0 10px rgba(213,171,100,.65)}
+.footer-support{display:flex;justify-content:center;padding:30px 0 34px;margin:0 0 24px;border-bottom:1px solid #29332d}
+.footer-support .support-button{min-height:58px;padding:0 34px;font-size:17px;box-shadow:0 12px 34px rgba(212,162,76,.25),inset 0 0 18px rgba(212,162,76,.08)}
+.visitor-count{display:none;width:100%;margin-top:8px;color:#d5ab64;font-size:11px;text-align:center}.visitor-count:not([hidden]){display:block}
+.footer-credit{width:100%;margin-top:20px;text-align:center;color:#778078;font-size:10px;letter-spacing:.2px}
+@media(max-width:480px){.trial-badge{font-size:10px;padding:4px 8px}.footer-support .support-button{width:100%;max-width:320px}}
 .nav a{color:#a9ada2;text-decoration:none;font-size:15px;transition:color .25s}
 .nav a:hover{color:#f2d9a4}
 .logo{font-family:'Reem Kufi',sans-serif;font-size:22px;font-weight:700;color:#f2d9a4!important;margin-inline-end:auto}
@@ -116,6 +123,28 @@ dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(
 @media(max-width:380px){.logo{font-size:14px}.logo img{width:34px!important;height:34px!important}.nav-cta{padding:0 10px!important;font-size:11px}}
 @media(prefers-reduced-motion:reduce){.mobile-menu-toggle span{transition:none}}
 
+
+/* Refined motion and interaction layer */
+:root{scroll-behavior:smooth;scroll-padding-top:88px}
+::selection{background:rgba(213,171,100,.28);color:#fff}
+.card,.majlis,.support-prompt,.row{transition:transform .28s ease,border-color .28s ease,box-shadow .28s ease}
+.card{position:relative;overflow:hidden}
+.card:before{content:"";position:absolute;inset:0 auto 0 0;width:2px;background:linear-gradient(180deg,transparent,#d5ab64,transparent);opacity:0;transition:opacity .3s}
+.card:hover{transform:translateY(-6px);border-color:rgba(213,171,100,.65);box-shadow:0 18px 42px rgba(0,0,0,.22)}
+.card:hover:before{opacity:1}
+.archive-card{cursor:default}
+.archive-note{display:inline-flex;margin-top:12px;padding:6px 10px;border:1px solid rgba(213,171,100,.24);border-radius:999px;color:#d5ab64;font-size:11px}
+.btn,.social-icon,.mobile-menu-toggle{transition:transform .22s ease,box-shadow .22s ease,background .22s ease,border-color .22s ease}
+.btn:hover,.social-icon:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(213,171,100,.12)}
+.mobile-site-menu{transform-origin:top right;animation:menuReveal .2s ease both}
+@keyframes menuReveal{from{opacity:0;transform:translateY(-7px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.support-dialog{border:1px solid rgba(213,171,100,.35);box-shadow:0 28px 90px rgba(0,0,0,.55);max-width:min(92vw,520px)}
+.support-dialog::backdrop{background:rgba(3,7,5,.76);backdrop-filter:blur(7px)}
+.support-dialog[open]{animation:dialogReveal .22s ease both}
+@keyframes dialogReveal{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+:focus-visible{outline:2px solid #d5ab64;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){:root{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
 </style>
 
 </head>
@@ -125,7 +154,7 @@ dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(
 <div class="orb" style="width:420px;height:420px;background:rgba(212,162,76,.18);top:40px;right:-80px"></div>
 <div class="orb" style="width:340px;height:340px;background:rgba(138,100,32,.22);top:520px;left:-100px;animation-delay:-4s"></div>
 <header class="nav"><div class="wrap">
-<a class="logo" href="#top" style="display:flex;align-items:center;gap:12px"><img src="assets/logo.jpg" alt="" style="width:44px;height:44px;border-radius:50%;border:1px solid #d5ab64">استراحة أهل الأثر</a>
+<a class="logo" href="#top" style="display:flex;align-items:center;gap:12px"><img src="assets/logo.jpg" alt="" style="width:44px;height:44px;border-radius:50%;border:1px solid #d5ab64">استراحة أهل الأثر</a><span class="trial-badge">نسخة تجريبية</span>
 <nav class="desktop-links" aria-label="التنقل الرئيسي"><a class="nl" href="#sections">الأقسام</a><a class="nl" href="#schedule">الجدول</a><a class="nl" href="#archive">الأرشيف</a><a class="nl" href="#majlis">المجلس</a></nav>
 <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobileSiteMenu" onclick="toggleSiteMenu()" aria-label="فتح قائمة التنقل"><span></span><span></span><span></span></button>
 <a class="btn fill nav-cta" href="#live" style="height:42px;padding:0 20px;color:#0b0e0d">تابع البث</a>
@@ -145,7 +174,7 @@ dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(
 <a class="social-icon" href="https://www.tiktok.com/@d.khaled.4" target="_blank" rel="noopener noreferrer" aria-label="حساب تيك توك" title="تيك توك"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 6.2a5.5 5.5 0 0 1-3.4-4.8V1h-4.1v15.4a3.3 3.3 0 1 1-2.8-3.2v-4.2a7.5 7.5 0 1 0 6.9 7.4V8.5a9.5 9.5 0 0 0 5.5 1.8V6.2a5.5 5.5 0 0 1-2.1 0Z"/></svg></a>
 <a class="social-icon" href="https://t.me/khaled_najm1" target="_blank" rel="noopener noreferrer" aria-label="قناة تيليجرام" title="تيليجرام"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 3.2a1.5 1.5 0 0 0-1.6-.2L2.1 10.1c-1.3.5-1.3 1.2-.2 1.6l4.7 1.5 1.8 5.6c.2.6.1.8.7.8.5 0 .7-.2 1-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.2-15c.2-.7-.1-1.1-.2-1.4ZM8.1 12.9l10.3-6.5c.5-.3.9-.1.5.2l-8.5 7.7-.3 3.1-2-4.5Z"/></svg></a>
 </nav>
-<div class="support-prompt in d4"><button class="support-button" type="button" onclick="document.getElementById('supportDialog').showModal()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15.9V20h-2v-2.1a5.5 5.5 0 0 1-4-2.7l1.7-1a3.7 3.7 0 0 0 3.3 1.8c1.5 0 2.5-.7 2.5-1.8 0-1-.8-1.5-2.9-2-2.6-.6-4-1.6-4-3.7 0-1.9 1.3-3.2 3.4-3.6V5h2v1.9a5.1 5.1 0 0 1 3.5 2.3l-1.6 1.1a3.4 3.4 0 0 0-3-1.6c-1.4 0-2.2.6-2.2 1.6s.7 1.4 2.8 1.9c2.8.7 4.1 1.7 4.1 3.8 0 2-1.4 3.5-3.6 3.9Z"/></svg>ادعم تطوير المنصة</button></div>
+
 </div>
 <div class="emblem in d2"><div class="ring"></div><div class="ring b"></div><div class="core"><img src="assets/logo.jpg" alt="شعار استراحة أهل الأثر" style="width:100%;height:100%;border-radius:50%;object-fit:cover"></div></div>
 </div></div>
@@ -164,7 +193,7 @@ dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(
 <div class="card rv"><div class="n">06</div><h3>الأرشيف</h3><p>كل البثوث السابقة مع بحث وفلترة.</p></div>
 </div></div></section>
 <section class="s" id="schedule"><div class="wrap">
-<h2 class="t gold rv">جدول الدورات العلمية</h2><p class="sub rv">يومياً من 7:00 إلى 10:00 مساءً.</p>
+<h2 class="t gold rv">جدول الدروس والمحاضرات</h2><p class="sub rv">يومياً من 7:00 إلى 10:00 مساءً.</p>
 <div class="row rv"><b>السبت</b><span>شرح علم مصطلح الحديث</span><span></span></div>
 <div class="row rv"><b>الأحد</b><span>مناهج البيان في أصول التفسير</span><span>قواعد عقائد أهل السنة والجماعة</span></div>
 <div class="row rv"><b>الإثنين</b><span>شرح صحيح الإمام مسلم</span><span>شرح علم مصطلح الحديث</span></div>
@@ -175,9 +204,9 @@ dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(
 <section class="s" id="archive"><div class="wrap">
 <h2 class="t gold rv">من الأرشيف</h2><p class="sub rv">أحدث ما نُشر على المنصات.</p>
 <div class="grid">
-<a class="card rv" href="#" style="text-decoration:none;color:inherit"><div class="thumb"><svg width="46" height="46" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div><span class="tag">ردود</span><h3>حقيقة حديث حجامة أم سلمة.. الرد على عمار الشويلي</h3><p>37:05 · يوتيوب</p></a>
-<a class="card rv" href="#" style="text-decoration:none;color:inherit"><div class="thumb"><svg width="46" height="46" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div><span class="tag">العقيدة</span><h3>جميل حليم يزعم أن الحسن البصري ينفي علو الله على عرشه</h3><p>19:21 · يوتيوب</p></a>
-<a class="card rv" href="#" style="text-decoration:none;color:inherit"><div class="thumb"><svg width="46" height="46" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div><span class="tag">العقيدة</span><h3>الفرق بين نسبة الخلق إلى الله ونسبته إلى الإنسان</h3><p>[التاريخ] · تيك توك</p></a>
+<article class="card rv archive-card"><div class="thumb"><svg width="46" height="46" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div><span class="tag">ردود</span><h3>حقيقة حديث حجامة أم سلمة.. الرد على عمار الشويلي</h3><p>37:05 · يوتيوب</p><span class="archive-note">رابط التسجيل غير متاح حاليًا</span></article>
+<article class="card rv archive-card"><div class="thumb"><svg width="46" height="46" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div><span class="tag">العقيدة</span><h3>جميل حليم يزعم أن الحسن البصري ينفي علو الله على عرشه</h3><p>19:21 · يوتيوب</p><span class="archive-note">رابط التسجيل غير متاح حاليًا</span></article>
+<article class="card rv archive-card"><div class="thumb"><svg width="46" height="46" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div><span class="tag">العقيدة</span><h3>الفرق بين نسبة الخلق إلى الله ونسبته إلى الإنسان</h3><p>[التاريخ] · تيك توك</p><span class="archive-note">رابط التسجيل غير متاح حاليًا</span></article>
 </div></div></section>
 <section class="s" id="majlis"><div class="wrap"><div class="majlis rv"><img class="mlogo" src="assets/logo.jpg" alt="شعار استراحة أهل الأثر"><div><h2 class="t gold" style="margin:0 0 10px">استراحة أهل الأثر</h2><p class="lead" style="margin:0 0 22px">مجلس تدارس العلم والأدب: مجموعة على تيليجرام لدروس في العلوم الشرعية والحديث، بإشراف الشيخ.</p><a class="btn fill" href="https://t.me/+H-Rpxhc371VhYzU0">انضم إلى المجلس</a></div></div></div></section>
 </main>
@@ -188,7 +217,7 @@ dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(
 <details class="wallet-detail"><summary>اتصالات كاش</summary><p>لم تتم إضافة بيانات هذه المحفظة بعد.</p></details>
 <form method="dialog"><button class="btn line" type="submit">إغلاق</button></form>
 </dialog>
-<footer><div class="wrap"><b class="gold" style="font-size:24px">استراحة أهل الأثر</b><span style="flex:1"></span><nav class="social-links" aria-label="حسابات المجلس على المنصات"><a class="social-icon" href="https://www.youtube.com/@Khaled_Najm" target="_blank" rel="noopener noreferrer" aria-label="قناة يوتيوب"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg></a><a class="social-icon" href="https://www.tiktok.com/@d.khaled.4" target="_blank" rel="noopener noreferrer" aria-label="حساب تيك توك"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 6.2a5.5 5.5 0 0 1-3.4-4.8V1h-4.1v15.4a3.3 3.3 0 1 1-2.8-3.2v-4.2a7.5 7.5 0 1 0 6.9 7.4V8.5a9.5 9.5 0 0 0 5.5 1.8V6.2a5.5 5.5 0 0 1-2.1 0Z"/></svg></a><a class="social-icon" href="https://t.me/khaled_najm1" target="_blank" rel="noopener noreferrer" aria-label="قناة تيليجرام"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 3.2a1.5 1.5 0 0 0-1.6-.2L2.1 10.1c-1.3.5-1.3 1.2-.2 1.6l4.7 1.5 1.8 5.6c.2.6.1.8.7.8.5 0 .7-.2 1-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.2-15c.2-.7-.1-1.1-.2-1.4ZM8.1 12.9l10.3-6.5c.5-.3.9-.1.5.2l-8.5 7.7-.3 3.1-2-4.5Z"/></svg></a><a href="https://t.me/recrdings">التسجيلات</a></nav></div></footer>
+<footer><div class="footer-support"><button class="support-button" type="button" onclick="openSupportDialog()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15.9V20h-2v-2.1a5.5 5.5 0 0 1-4-2.7l1.7-1a3.7 3.7 0 0 0 3.3 1.8c1.5 0 2.5-.7 2.5-1.8 0-1-.8-1.5-2.9-2-2.6-.6-4-1.6-4-3.7 0-1.9 1.3-3.2 3.4-3.6V5h2v1.9a5.1 5.1 0 0 1 3.5 2.3l-1.6 1.1a3.4 3.4 0 0 0-3-1.6c-1.4 0-2.2.6-2.2 1.6s.7 1.4 2.8 1.9c2.8.7 4.1 1.7 4.1 3.8 0 2-1.4 3.5-3.6 3.9Z"/></svg>ادعم تطوير المنصة</button></div><div class="wrap"><b class="gold" style="font-size:24px">استراحة أهل الأثر</b><span style="flex:1"></span><nav class="social-links" aria-label="حسابات المجلس على المنصات"><a class="social-icon" href="https://www.youtube.com/@Khaled_Najm" target="_blank" rel="noopener noreferrer" aria-label="قناة يوتيوب"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg></a><a class="social-icon" href="https://www.tiktok.com/@d.khaled.4" target="_blank" rel="noopener noreferrer" aria-label="حساب تيك توك"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 6.2a5.5 5.5 0 0 1-3.4-4.8V1h-4.1v15.4a3.3 3.3 0 1 1-2.8-3.2v-4.2a7.5 7.5 0 1 0 6.9 7.4V8.5a9.5 9.5 0 0 0 5.5 1.8V6.2a5.5 5.5 0 0 1-2.1 0Z"/></svg></a><a class="social-icon" href="https://t.me/khaled_najm1" target="_blank" rel="noopener noreferrer" aria-label="قناة تيليجرام"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 3.2a1.5 1.5 0 0 0-1.6-.2L2.1 10.1c-1.3.5-1.3 1.2-.2 1.6l4.7 1.5 1.8 5.6c.2.6.1.8.7.8.5 0 .7-.2 1-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.2-15c.2-.7-.1-1.1-.2-1.4ZM8.1 12.9l10.3-6.5c.5-.3.9-.1.5.2l-8.5 7.7-.3 3.1-2-4.5Z"/></svg></a><a href="https://t.me/recrdings">التسجيلات</a></nav><div class="visitor-count" id="dailyVisitorCount" hidden aria-live="polite" title="يُحتسب المتصفح مرة واحدة يوميًا دون حفظ عنوان IP">زوار اليوم: —</div><div class="footer-credit">تصميم محمد سراج</div></div></footer>
 </div>
 
 
@@ -209,7 +238,71 @@ function closeSiteMenu(){
   if(button){button.setAttribute('aria-expanded','false');button.setAttribute('aria-label','فتح قائمة التنقل');}
 }
 document.addEventListener('keydown',event=>{if(event.key==='Escape')closeSiteMenu();});
+
+function openSupportDialog(){
+  const dialog=document.getElementById('supportDialog');
+  if(!dialog||dialog.open)return;
+  dialog.showModal();
+  history.pushState({supportDialogOpen:true},'',location.pathname+location.search+'#support');
+}
+const supportDialog=document.getElementById('supportDialog');
+if(supportDialog){
+  supportDialog.addEventListener('click',event=>{
+    if(event.target!==supportDialog)return;
+    const bounds=supportDialog.getBoundingClientRect();
+    const inside=event.clientX>=bounds.left&&event.clientX<=bounds.right&&event.clientY>=bounds.top&&event.clientY<=bounds.bottom;
+    if(!inside)supportDialog.close();
+  });
+  supportDialog.addEventListener('close',()=>{
+    if(history.state&&history.state.supportDialogOpen)history.back();
+  });
+}
+document.addEventListener('click',event=>{
+  const menu=document.getElementById('mobileSiteMenu');
+  const toggle=document.querySelector('.mobile-menu-toggle');
+  if(menu&&!menu.hidden&&!menu.contains(event.target)&&!(toggle&&toggle.contains(event.target)))closeSiteMenu();
+});
+window.addEventListener('popstate',()=>{
+  const dialog=document.getElementById('supportDialog');
+  if(dialog&&dialog.open)dialog.close();
+  closeSiteMenu();
+});
+
 </script>
 
+<script src="runtime-config.js"></script>
+<script>
+(function () {
+  'use strict';
+  if (navigator.doNotTrack === '1' || window.doNotTrack === '1') return;
+  var base = typeof window.AHL_API_BASE_URL === 'string' ? window.AHL_API_BASE_URL.replace(/\/+$/, '') : '';
+  var visitorId;
+  try {
+    visitorId = localStorage.getItem('ahl-visitor-id');
+    if (!/^[a-f0-9-]{32,36}$/i.test(visitorId || '')) {
+      visitorId = crypto.randomUUID();
+      localStorage.setItem('ahl-visitor-id', visitorId);
+    }
+  } catch (_) {
+    return;
+  }
+  fetch(base + '/api/analytics/visit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ visitorId: visitorId }),
+    keepalive: true
+  }).then(function (response) {
+    if (!response.ok) throw new Error('analytics unavailable');
+    return response.json();
+  }).then(function (result) {
+    var output = document.getElementById('dailyVisitorCount');
+    if (!output || !Number.isFinite(result.todayCount)) return;
+    output.textContent = 'زوار اليوم: ' + result.todayCount.toLocaleString('ar-EG');
+    output.hidden = false;
+  }).catch(function () {
+    /* Analytics is optional; never interrupt the website when the API is offline. */
+  });
+})();
+</script>
 </body>
 </html>
