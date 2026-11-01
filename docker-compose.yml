@@ -3,5 +3,12 @@ services:
     build: .
     container_name: ahl-athar
     ports:
-      - "8080:80"
+      - "8080:8080"
+    env_file:
+      - .env
+    volumes:
+      - media_storage:/srv/ahl-athar/storage
     restart: unless-stopped
+
+volumes:
+  media_storage:

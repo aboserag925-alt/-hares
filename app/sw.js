@@ -1,4 +1,4 @@
-var C='ahl-athar-v1';var F=['./','./index.html','./manifest.json','./icon.svg'];
+var C='ahl-athar-v13';var F=['./','./index.html','./manifest.json','./icon.svg','./tailwind.css','./app.js','./auth-client.js','./supabase-config.js','./runtime-config.js','./vendor/adhan.umd.min.js','./vendor/ADHAN-LICENSE.txt','./vendor/SUPABASE-LICENSE.txt'];
 self.addEventListener('install',function(e){e.waitUntil(caches.open(C).then(function(c){return c.addAll(F)}));self.skipWaiting()});
 self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(k){return Promise.all(k.filter(function(x){return x!==C}).map(function(x){return caches.delete(x)}))}));self.clients.claim()});
-self.addEventListener('fetch',function(e){e.respondWith(fetch(e.request).then(function(r){var cp=r.clone();caches.open(C).then(function(c){c.put(e.request,cp)});return r}).catch(function(){return caches.match(e.request)}))});
+self.addEventListener('fetch',function(e){if(e.request.method!=='GET'||new URL(e.request.url).pathname.indexOf('/api/')===0){e.respondWith(fetch(e.request));return}e.respondWith(fetch(e.request).then(function(r){if(r.ok){var cp=r.clone();caches.open(C).then(function(c){return c.put(e.request,cp)}).catch(function(){})}return r}).catch(function(){return caches.match(e.request)}))});
