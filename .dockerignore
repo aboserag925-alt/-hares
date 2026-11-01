@@ -1,8 +1,1 @@
-.git
-node_modules/
-storage/
-README.md
-docker-compose.yml
-.env
-.env.*
-!.env.example
+.git<<<<<<< app-design
