@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
 const { createMediaLibrary } = require('./media-library');
+const { createAdminApi } = require('./lecture-api');
 
 const PUBLIC_ROOT = path.resolve(__dirname, '..');
 const MAX_BODY_BYTES = 16 * 1024;
@@ -274,6 +275,7 @@ function createServer(options) {
   const env = options.env || process.env;
   const fetchImpl = options.fetch || global.fetch;
   const limits = new Map();
+  const adminApi = createAdminApi({ env: env, fetch: fetchImpl });
   const mediaLibrary = options.mediaLibrary || createMediaLibrary({
     env: env,
     fetch: fetchImpl,
@@ -297,6 +299,7 @@ function createServer(options) {
         return;
       }
     }
+    if (await adminApi(request, response, requestUrl.pathname)) return;
     if (requestUrl.pathname === '/api/health' && request.method === 'GET') {
       sendJson(response, 200, { ok: true });
       return;
