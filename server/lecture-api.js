@@ -95,7 +95,7 @@ function createAdminApi(options) {
     if (pathname === '/api/lectures' && request.method === 'GET') {
       try {
         const responseFromSupabase = await fetchImpl(
-          env.SUPABASE_URL.replace(/\\/$/, '') + '/rest/v1/lectures?select=id,title,description,starts_at,category,stream_url,recording_url,status,created_at,updated_at&status=eq.published&order=starts_at.asc.nullslast',
+          env.SUPABASE_URL.replace(/\/$/, '') + '/rest/v1/lectures?select=id,title,description,starts_at,category,stream_url,recording_url,status,created_at,updated_at&status=eq.published&order=starts_at.asc.nullslast',
           {
             headers: {
               apikey: env.SUPABASE_ANON_KEY,
