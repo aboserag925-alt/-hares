@@ -177,11 +177,11 @@ function staticFilePath(requestUrl) {
     return null;
   }
   if (segments.length === 0) segments = ['index.html'];
-  if (segments[0] !== 'index.html' &&
+  if (segments[0] !== 'index.html' && segments[0] !== 'runtime-config.js' &&
       segments[0] !== 'app' && segments[0] !== 'assets' && segments[0] !== 'screens') {
     return null;
   }
-  if (segments[0] === 'index.html' && segments.length !== 1) return null;
+  if ((segments[0] === 'index.html' || segments[0] === 'runtime-config.js') && segments.length !== 1) return null;
 
   const filePath = path.resolve(PUBLIC_ROOT, ...segments);
   return filePath.startsWith(PUBLIC_ROOT + path.sep) || filePath === path.join(PUBLIC_ROOT, 'index.html')
