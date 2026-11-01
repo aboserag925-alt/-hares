@@ -138,7 +138,7 @@ dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(
 <h1 class="big gold in d1"><span class="hero-arabic">علم شرعي</span><br><span class="hero-kufi">بمنهج أهل السنة</span></h1>
 <div class="sheikh in d2">بإشراف الدكتور خالد الحارس</div>
 <p class="lead in d2">دروس في مصطلح الحديث والفقه والسيرة والعقيدة، وبثوث مباشرة على يوتيوب وتيك توك، وأرشيف مفتوح لكل ما فاتك. «لنصرة الحق ونشر الهدى»</p>
-<div class="cta in d3" id="live"><a class="btn fill" href="https://www.youtube.com/@Khaled_Najm">شاهد على يوتيوب</a><a class="btn line" href="https://www.tiktok.com/@d.khaled.4">تابع على تيك توك</a></div>
+<div class="cta in d3" id="live"><a class="btn fill" href="https://www.youtube.com/@Khaled_Najm">شاهد على يوتيوب</a><a class="btn line" href="https://www.tiktok.com/@d.khaled.4">تابع على تيك توك</a></div><div id="broadcastNotice" class="row rv" hidden></div>
 <nav class="social-links hero-socials in d4" aria-label="تابع المجلس على المنصات">
 <span>تابعنا على:</span>
 <a class="social-icon" href="https://www.youtube.com/@Khaled_Najm" target="_blank" rel="noopener noreferrer" aria-label="قناة يوتيوب" title="يوتيوب"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg></a>
@@ -165,16 +165,16 @@ dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(
 </div></div></section>
 <section class="s" id="schedule"><div class="wrap">
 <h2 class="t gold rv">جدول الدورات العلمية</h2><p class="sub rv">يومياً من 7:00 إلى 10:00 مساءً.</p>
-<div class="row rv"><b>السبت</b><span>شرح علم مصطلح الحديث</span><span></span></div>
+<div id="scheduleRows"><div class="row rv"><b>السبت</b><span>شرح علم مصطلح الحديث</span><span></span></div>
 <div class="row rv"><b>الأحد</b><span>مناهج البيان في أصول التفسير</span><span>قواعد عقائد أهل السنة والجماعة</span></div>
 <div class="row rv"><b>الإثنين</b><span>شرح صحيح الإمام مسلم</span><span>شرح علم مصطلح الحديث</span></div>
 <div class="row rv"><b>الثلاثاء</b><span>شرح العقيدة الواسطية</span><span>أصول الفقه</span></div>
 <div class="row rv"><b>الأربعاء</b><span>شرح صحيح الإمام مسلم</span><span>شرح علم مصطلح الحديث</span></div>
-<div class="row rv"><b>الخميس</b><span>عظماء الإسلام</span><span>منوعات ومقتطفات وحوارات</span></div>
+<div class="row rv"><b>الخميس</b><span>عظماء الإسلام</span><span>منوعات ومقتطفات وحوارات</span></div></div>
 </div></section>
 <section class="s" id="archive"><div class="wrap">
 <h2 class="t gold rv">من الأرشيف</h2><p class="sub rv">أحدث ما نُشر على المنصات.</p>
-<div class="grid">
+<div class="grid" id="lectureArchive">
 <a class="card rv" href="#" style="text-decoration:none;color:inherit"><div class="thumb"><svg width="46" height="46" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div><span class="tag">ردود</span><h3>حقيقة حديث حجامة أم سلمة.. الرد على عمار الشويلي</h3><p>37:05 · يوتيوب</p></a>
 <a class="card rv" href="#" style="text-decoration:none;color:inherit"><div class="thumb"><svg width="46" height="46" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div><span class="tag">العقيدة</span><h3>جميل حليم يزعم أن الحسن البصري ينفي علو الله على عرشه</h3><p>19:21 · يوتيوب</p></a>
 <a class="card rv" href="#" style="text-decoration:none;color:inherit"><div class="thumb"><svg width="46" height="46" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div><span class="tag">العقيدة</span><h3>الفرق بين نسبة الخلق إلى الله ونسبته إلى الإنسان</h3><p>[التاريخ] · تيك توك</p></a>
@@ -192,6 +192,23 @@ dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(
 </div>
 
 
+<script src="app/runtime-config.js"></script>
+<script>
+(function(){
+  var base=typeof window.AHL_API_BASE_URL==='string'?window.AHL_API_BASE_URL.replace(/\\/+$/,''):'';
+  var schedule=document.getElementById('scheduleRows'), archive=document.getElementById('lectureArchive'), broadcast=document.getElementById('broadcastNotice');
+  function link(text,url){var a=document.createElement('a');a.className='btn line';a.textContent=text;a.href=url;a.target='_blank';a.rel='noopener noreferrer';return a;}
+  fetch(base+'/api/lectures',{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('request failed');return r.json();}).then(function(data){
+    var items=Array.isArray(data.items)?data.items:[];if(!items.length)return;
+    var live=items.filter(function(x){return x.stream_url;}).sort(function(a,b){return Date.parse(b.starts_at||0)-Date.parse(a.starts_at||0);})[0];
+    if(live){broadcast.hidden=false;broadcast.textContent='البث أو اللقاء القادم: '+live.title+' ';broadcast.appendChild(link('افتح البث',live.stream_url));}
+    var dated=items.filter(function(x){return x.starts_at;}).sort(function(a,b){return Date.parse(a.starts_at)-Date.parse(b.starts_at);});
+    if(dated.length){schedule.textContent='';dated.forEach(function(x){var row=document.createElement('div');row.className='row rv';var day=document.createElement('b');day.textContent=new Date(x.starts_at).toLocaleString('ar-EG',{weekday:'long',day:'numeric',month:'long',hour:'numeric',minute:'2-digit'});var title=document.createElement('span');title.textContent=x.title;var category=document.createElement('span');category.textContent=x.category||'محاضرة';row.append(day,title,category);schedule.appendChild(row);});}
+    var recordings=items.filter(function(x){return x.recording_url;}).slice(0,6);
+    if(recordings.length){archive.textContent='';recordings.forEach(function(x){var card=document.createElement('article');card.className='card rv';var tag=document.createElement('span');tag.className='tag';tag.textContent=x.category||'محاضرة';var title=document.createElement('h3');title.textContent=x.title;var desc=document.createElement('p');desc.textContent=x.description||'تسجيل من مكتبة أهل الأثر';card.append(tag,title,desc,link('مشاهدة التسجيل',x.recording_url));archive.appendChild(card);});}
+  }).catch(function(){/* Keep the static fallback when the API is unavailable. */});
+})();
+</script>
 <script>
 function toggleSiteMenu(){
   const menu=document.getElementById('mobileSiteMenu');

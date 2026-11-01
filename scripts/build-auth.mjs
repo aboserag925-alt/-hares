@@ -29,7 +29,7 @@ if (supabaseUrl || supabaseAnonKey) {
   if (parsedUrl.protocol !== 'https:' || !supabaseAnonKey) {
     throw new Error('Set both SUPABASE_URL (HTTPS) and SUPABASE_ANON_KEY.');
   }
-  await writeFile(localConfig, 'window.AHL_SUPABASE_CONFIG = ' + JSON.stringify({ url: supabaseUrl, anonKey: supabaseAnonKey }) + ';\\n', 'utf8');
+  await writeFile(localConfig, 'window.AHL_SUPABASE_CONFIG = ' + JSON.stringify({ url: supabaseUrl, anonKey: supabaseAnonKey }) + ';\n', 'utf8');
 } else {
   await copyFile(resolve(root, 'src', 'supabase-config.example.js'), localConfig);
 }
