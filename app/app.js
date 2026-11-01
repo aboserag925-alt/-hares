@@ -169,18 +169,56 @@ function updateLessonCountdown() {
   }
 }
 
-function show(sectionId) {
+var sectionStack = ['sched'];
+
+function renderSectionStack() {
   prayerSections.forEach(function (id, index) {
-    var active = id === sectionId;
-    document.getElementById(id).hidden = !active;
+    var position = sectionStack.indexOf(id);
+    var visible = position !== -1;
+    var section = document.getElementById(id);
+    section.hidden = !visible;
+    section.classList.toggle('app-section-overlay', visible && position > 0);
+    if (visible && position > 0) section.style.zIndex = String(15 + position);
+    else section.style.removeProperty('z-index');
+    var active = id === sectionStack[sectionStack.length - 1];
     var tab = document.getElementById(prayerTabs[index]);
     tab.className = 'tab' + (active ? ' on' : '');
     tab.setAttribute('aria-pressed', active ? 'true' : 'false');
   });
+}
+
+function closeTopSection() {
+  if (sectionStack.length <= 1) return;
+  sectionStack.pop();
+  renderSectionStack();
+}
+
+function show(sectionId) {
+  if (prayerSections.indexOf(sectionId) === -1) return;
+  var top = sectionStack[sectionStack.length - 1];
+  if (sectionId === 'sched') {
+    sectionStack = ['sched'];
+  } else if (sectionId !== top) {
+    var existing = sectionStack.indexOf(sectionId);
+    if (existing >= 0) sectionStack = sectionStack.slice(0, existing + 1);
+    else sectionStack.push(sectionId);
+  }
+  renderSectionStack();
+  if (accountUser && window.ahlAuth && window.ahlAuth.configured) {
+    window.ahlAuth.logActivity(accountUser.id, 'section_view', { section: sectionId }).catch(function () {});
+  }
   if (sectionId === 'qibla') updateQibla();
   if (sectionId === 'adhkar') renderAdhkar();
   if (sectionId === 'media') loadMediaLibrary();
 }
+
+prayerSections.forEach(function (id) {
+  if (id === 'sched') return;
+  var section = document.getElementById(id);
+  section.addEventListener('click', function (event) {
+    if (event.target === section) closeTopSection();
+  });
+});
 
 function renderMediaLibrary() {
   var container = document.getElementById('mediaItems');
@@ -572,6 +610,11 @@ function renderAdhkar() {
       button.setAttribute('aria-label', 'سجل قراءة الذكر: ' + entry.text +
         '، ' + count + ' من ' + entry.count);
       button.disabled = count >= entry.count;
+      if (accountUser && window.ahlAuth && window.ahlAuth.configured) {
+        window.ahlAuth.logActivity(accountUser.id, 'dhikr_progress', {
+          period: currentDhikrPeriod, item: entry.text.slice(0, 80), count: next
+        }).catch(function () {});
+      }
     });
     footer.appendChild(reference);
     footer.appendChild(button);
@@ -702,12 +745,14 @@ function setAccountState(state) {
     accountUser = null;
     activeSyncUserId = null;
     configMissing.hidden = false;
+    document.getElementById('googleSignInBtn').hidden = true;
     form.hidden = true;
     signedIn.hidden = true;
     setStatus(message, 'أضف إعدادات Supabase لتفعيل الحسابات.');
     return;
   }
   configMissing.hidden = true;
+  document.getElementById('googleSignInBtn').hidden = Boolean(state.user);
   accountUser = state.user;
   if (!state.user) {
     activeSyncUserId = null;
@@ -720,6 +765,15 @@ function setAccountState(state) {
   signedIn.hidden = false;
   document.getElementById('accountEmail').textContent = state.user.email || '';
   setStatus(message, 'تسجيل الدخول محفوظ تلقائيًا على هذا الجهاز.');
+  if (state.event === 'SIGNED_IN') {
+    window.ahlAuth.saveMemberProfile(state.user).then(function () {
+      return window.ahlAuth.logActivity(state.user.id, 'login', {
+        provider: state.user.app_metadata && state.user.app_metadata.provider || 'email'
+      });
+    }).catch(function (error) {
+      setStatus(message, 'تم الدخول، لكن تعذر تحديث سجل الحساب: ' + error.message, true);
+    });
+  }
   if (activeSyncUserId !== state.user.id) {
     activeSyncUserId = state.user.id;
     window.setTimeout(function () {
@@ -731,6 +785,18 @@ function setAccountState(state) {
 function setAuthBusy(busy) {
   document.getElementById('signInBtn').disabled = busy;
   document.getElementById('signUpBtn').disabled = busy;
+  document.getElementById('googleSignInBtn').disabled = busy;
+}
+
+function handleGoogleSignIn() {
+  setAuthBusy(true);
+  setStatus(document.getElementById('authMessage'), 'جاري تحويلك إلى Google لتسجيل الدخول…');
+  window.ahlAuth.signInWithGoogle().then(function (result) {
+    if (result.error) throw result.error;
+  }).catch(function (error) {
+    setStatus(document.getElementById('authMessage'), 'تعذر تسجيل الدخول بحساب Google: ' + error.message, true);
+    setAuthBusy(false);
+  });
 }
 
 function handleSignIn(event) {
@@ -784,6 +850,7 @@ function initAuth() {
   window.ahlAuth.init(setAccountState);
   document.getElementById('authForm').addEventListener('submit', handleSignIn);
   document.getElementById('signUpBtn').addEventListener('click', handleSignUp);
+  document.getElementById('googleSignInBtn').addEventListener('click', handleGoogleSignIn);
   document.getElementById('signOutBtn').addEventListener('click', function () {
     setStatus(document.getElementById('authMessage'), 'جاري تسجيل الخروج…');
     window.ahlAuth.signOut().then(function (result) {

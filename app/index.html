@@ -45,6 +45,10 @@ dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(
 .wallet-detail summary{color:var(--gold2);font-weight:700;cursor:pointer}
 .wallet-detail p{margin:12px 0 0;color:var(--muted);line-height:1.8}
 .support-dialog form{margin-top:16px}
+.google-signin{display:flex;width:100%;min-height:48px;align-items:center;justify-content:center;gap:10px;margin:0 0 14px;border:1px solid rgba(213,171,100,.35);border-radius:14px;background:#f8f7f4;color:#202124;font-weight:750}
+.google-signin svg{width:19px;height:19px}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:8px 0 12px;color:var(--muted);font-size:12px}
+.auth-divider::before,.auth-divider::after{height:1px;flex:1;background:var(--line);content:""}
 .next{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 24px;align-items:center;overflow:hidden;padding:clamp(22px,4vw,36px);margin:0 0 18px;text-align:right;border:1px solid rgba(213,171,100,.27);border-radius:26px;background:linear-gradient(115deg,rgba(25,32,29,.97),rgba(18,23,21,.94) 56%,rgba(37,34,25,.92));box-shadow:0 20px 70px rgba(0,0,0,.24);animation:enter .8s .08s cubic-bezier(.2,.7,.2,1) both}
 .next::before{position:absolute;inset:-1px;z-index:-1;background:radial-gradient(ellipse at 0% 50%,rgba(213,171,100,.14),transparent 48%);content:"";pointer-events:none}
 .next::after{position:absolute;top:-50%;bottom:-50%;left:-38%;z-index:0;width:22%;background:linear-gradient(90deg,transparent,rgba(242,217,164,.09),transparent);content:"";pointer-events:none;transform:rotate(18deg);animation:gold-sweep 9s 1.5s ease-in-out infinite}
@@ -177,6 +181,54 @@ textarea::placeholder{color:#777e75}
 @media(max-width:390px){.welcome-hero{grid-template-columns:minmax(0,1fr) 72px;padding:18px 14px}.hero-emblem{width:70px;height:70px}.hero-emblem span{font-size:14px}.hero-emblem b{font-size:12px}.hero-copy h2{font-size:23px}.hero-copy p{font-size:11px}.hero-foot{font-size:10px}.quick-item{padding:8px}.quick-item b{font-size:11px}.quick-item small{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.welcome-hero,.quick-item,.hero-primary,.hero-secondary{animation:none!important;transition:none!important}}
 
+
+/* Compact mobile identity and reliable outside-tap dismissal */
+.blessing{display:block;align-self:start;margin-top:3px;color:var(--green);font-size:12px;font-weight:650;line-height:1.6;opacity:1;visibility:visible}
+.logo{width:58px;height:58px;padding:6px;border-radius:18px}
+.social-link{min-width:34px;height:34px;padding:0 8px;font-size:10px}
+.social-link svg{width:15px;height:15px}
+.support-button{min-height:42px;padding:0 15px;font-size:12px}
+@media(max-width:680px){
+ .wrap{width:min(100% - 24px,560px);padding-top:14px}
+ header{grid-template-columns:48px minmax(0,1fr);column-gap:10px;padding-bottom:15px}
+ .logo{grid-row:1/6;width:44px;height:44px;padding:5px;border-radius:14px}
+ h1{font-size:clamp(20px,5.4vw,25px);line-height:1.5}
+ header p{font-size:11px;margin-top:2px}
+ .doctor{font-size:11px;margin-top:4px}
+ .blessing{font-size:11px;margin-top:1px}
+ .app-social{gap:6px;margin-top:8px}
+ .social-link{min-width:30px;height:30px;padding:0 7px;border-radius:10px;font-size:9px}
+ .social-link svg{width:14px;height:14px}
+ .support-prompt{margin-top:8px}
+ .support-button{min-height:36px;padding:0 12px;border-width:1px;font-size:10px}
+}
+@media(max-width:390px){
+ header{grid-template-columns:40px minmax(0,1fr);column-gap:8px}
+ .logo{width:38px;height:38px}
+ h1{font-size:19px}
+ .app-social .social-link span{display:none}
+ .app-social .social-link{width:30px;padding:0}
+}
+
+
+/* Context-preserving section sheets: tap the dimmed area to return one level. */
+.app-section-overlay{
+  position:fixed;inset:0 0 calc(66px + env(safe-area-inset-bottom));z-index:15;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  overflow-y:auto;overscroll-behavior:contain;
+  padding:clamp(14px,3vw,28px) 14px 24px;
+  background:rgba(5,8,7,.76);backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  animation:section-sheet-in .22s ease-out both;
+}
+.app-section-overlay>*{width:min(100%,760px);flex:0 0 auto}
+.app-section-overlay>.card{margin:0;box-shadow:0 18px 54px rgba(0,0,0,.32)}
+@keyframes section-sheet-in{from{opacity:0;backdrop-filter:blur(0)}to{opacity:1;backdrop-filter:blur(12px)}}
+@media(min-width:760px){
+ .app-section-overlay{inset:0 0 76px;justify-content:center;padding:28px}
+}
+@media(prefers-reduced-motion:reduce){.app-section-overlay{animation:none}}
+
 </style>
 </head>
 <body>
@@ -186,6 +238,7 @@ textarea::placeholder{color:#777e75}
 <h1>استراحة أهل الأثر</h1>
 <p>مجلس تدارس العلم والأدب</p>
 <span class="doctor">بإشراف الدكتور خالد الحارس</span>
+<span class="blessing">غفر الله لهم</span>
 <nav class="social-links app-social" aria-label="حسابات المجلس على المنصات">
 <a class="social-link" href="https://www.youtube.com/@Khaled_Najm" target="_blank" rel="noopener noreferrer" aria-label="قناة يوتيوب">
 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg>
@@ -348,6 +401,11 @@ textarea::placeholder{color:#777e75}
 <p class="section-subtitle">سجّل الدخول ببريدك لحفظ تقدم الأذكار وطريقة الحساب ومزامنتها بين أجهزتك.</p>
 <p id="authMessage" class="status" role="status" aria-live="polite"></p>
 <div id="authConfigMissing" class="notice" hidden>تسجيل الدخول غير مفعّل بعد. أنشئ مشروع Supabase، ونفّذ <code>supabase/schema.sql</code> في SQL Editor، ثم أضف رابط المشروع والمفتاح العام إلى <code>app/supabase-config.js</code> وشغّل <code>npm.cmd run build:app</code>. لا تضع مفتاح service_role هنا.</div>
+<button id="googleSignInBtn" class="google-signin" type="button">
+<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6C44.42 37.95 46.98 31.87 46.98 24.55Z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.52 2.56 10.78l7.97-6.19Z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.13 1.44-4.86 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z"/></svg>
+الدخول باستخدام Google
+</button>
+<div class="auth-divider">أو بالبريد الإلكتروني</div>
 <form id="authForm" class="auth-form" hidden>
 <label class="field" for="authEmail">البريد الإلكتروني
 <input id="authEmail" type="email" autocomplete="email" inputmode="email" required placeholder="name@example.com">
@@ -385,5 +443,19 @@ textarea::placeholder{color:#777e75}
 <script src="vendor/adhan.umd.min.js"></script>
 <script src="auth-client.js"></script>
 <script src="app.js"></script>
+
+<script>
+(function () {
+  var supportDialog = document.getElementById('supportDialog');
+  if (!supportDialog) return;
+  supportDialog.addEventListener('click', function (event) {
+    if (event.target === supportDialog) supportDialog.close();
+  });
+  supportDialog.addEventListener('cancel', function () {
+    supportDialog.close();
+  });
+})();
+</script>
+
 </body>
 </html>
