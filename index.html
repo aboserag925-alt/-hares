@@ -140,7 +140,7 @@ dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(
 <main id="top">
 <div class="hero"><div class="wrap">
 <div>
-<div class="eyebrow in"><span class="dot"></span>تابع إعلانات البث ومواعيد الدروس عبر المنصات الرسمية</div>
+<div class="eyebrow in" id="broadcastNotice"><span class="dot"></span>تابع إعلانات البث ومواعيد الدروس عبر المنصات الرسمية</div>
 <h1 class="big gold in d1"><span class="hero-arabic">علم شرعي</span><br><span class="hero-kufi">بمنهج أهل السنة</span></h1>
 <div class="sheikh in d2">بإشراف الدكتور خالد الحارس</div>
 <p class="lead in d2">دروس في مصطلح الحديث والفقه والسيرة والعقيدة، وبثوث مباشرة على يوتيوب وتيك توك، وأرشيف مفتوح لكل ما فاتك. «لنصرة الحق ونشر الهدى»</p>
@@ -171,16 +171,16 @@ dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(
 </div></div></section>
 <section class="s" id="schedule"><div class="wrap">
 <h2 class="t gold rv">جدول الدورات العلمية</h2><p class="sub rv">الجدول الأسبوعي من السبت إلى الخميس؛ يُرجى متابعة الإعلانات لتأكيد توقيت كل لقاء.</p>
-<div class="row rv"><b>السبت</b><span>شرح علم مصطلح الحديث</span><span></span></div>
+<div id="scheduleRows"><div class="row rv"><b>السبت</b><span>شرح علم مصطلح الحديث</span><span></span></div>
 <div class="row rv"><b>الأحد</b><span>مناهج البيان في أصول التفسير</span><span>قواعد عقائد أهل السنة والجماعة</span></div>
 <div class="row rv"><b>الإثنين</b><span>شرح صحيح الإمام مسلم</span><span>شرح علم مصطلح الحديث</span></div>
 <div class="row rv"><b>الثلاثاء</b><span>شرح العقيدة الواسطية</span><span>أصول الفقه</span></div>
 <div class="row rv"><b>الأربعاء</b><span>شرح صحيح الإمام مسلم</span><span>شرح علم مصطلح الحديث</span></div>
-<div class="row rv"><b>الخميس</b><span>عظماء الإسلام</span><span>منوعات ومقتطفات وحوارات</span></div>
+<div class="row rv"><b>الخميس</b><span>عظماء الإسلام</span><span>منوعات ومقتطفات وحوارات</span></div></div>
 </div></section>
 <section class="s" id="archive"><div class="wrap">
 <h2 class="t gold rv">من الأرشيف</h2><p class="sub rv">أحدث ما نُشر على المنصات.</p>
-<div class="grid">
+<div class="grid" id="lectureArchive">
 <article class="card rv"><div class="thumb"><svg width="46" height="46" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div><span class="tag">ردود</span><h3>حقيقة حديث حجامة أم سلمة.. الرد على عمار الشويلي</h3><p>37:05 · يوتيوب · رابط التسجيل سيُضاف بعد توثيقه</p></article>
 <article class="card rv"><div class="thumb"><svg width="46" height="46" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div><span class="tag">العقيدة</span><h3>جميل حليم يزعم أن الحسن البصري ينفي علو الله على عرشه</h3><p>19:21 · يوتيوب · رابط التسجيل سيُضاف بعد توثيقه</p></article>
 <article class="card rv"><div class="thumb"><svg width="46" height="46" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div><span class="tag">العقيدة</span><h3>الفرق بين نسبة الخلق إلى الله ونسبته إلى الإنسان</h3><p>تيك توك · تاريخ النشر غير متاح حاليًا</p></article>
@@ -212,5 +212,8 @@ dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(
   document.addEventListener('click',function(event){if(!menu.contains(event.target)&&!toggle.contains(event.target))closeMenu();});
 })();
 </script>
+<script src="app/supabase-config.js"></script>
+<script src="app/auth-client.js"></script>
+<script src="app/public-content.js"></script>
 </body>
 </html>
