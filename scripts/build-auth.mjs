@@ -1,4 +1,4 @@
-import { access, copyFile, mkdir } from 'node:fs/promises';
+import { access, copyFile, mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
@@ -21,13 +21,31 @@ await build({
   legalComments: 'eof'
 });
 
-try {
-  await access(localConfig);
-} catch {
-  await copyFile(
-    resolve(root, 'src', 'supabase-config.example.js'),
-    localConfig
+const supabaseUrl = (process.env.SUPABASE_URL || '').trim();
+const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || '').trim();
+
+if (supabaseUrl && supabaseAnonKey) {
+  const parsedUrl = new URL(supabaseUrl);
+  if (parsedUrl.protocol !== 'https:' || parsedUrl.origin !== supabaseUrl.replace(/\\/+$/, '')) {
+    throw new Error('SUPABASE_URL must be an HTTPS project origin.');
+  }
+  await writeFile(
+    localConfig,
+    'window.AHL_SUPABASE_CONFIG = ' + JSON.stringify({
+      url: supabaseUrl.replace(/\\/+$/, ''),
+      anonKey: supabaseAnonKey
+    }, null, 2) + ';\\n',
+    'utf8'
   );
+} else {
+  try {
+    await access(localConfig);
+  } catch {
+    await copyFile(
+      resolve(root, 'src', 'supabase-config.example.js'),
+      localConfig
+    );
+  }
 }
 
 await copyFile(
