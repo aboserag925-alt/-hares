@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
 const { createMediaLibrary } = require('./media-library');
+const { createAdminApi } = require('./lecture-api');
 
 const PUBLIC_ROOT = path.resolve(__dirname, '..');
 const MAX_BODY_BYTES = 16 * 1024;
@@ -87,8 +88,8 @@ function applyCorsHeaders(request, response, env) {
 
   response.setHeader('Access-Control-Allow-Origin', new URL(origin).origin);
   response.setHeader('Vary', 'Origin');
-  response.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, OPTIONS');
-  response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Range');
+  response.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, PATCH, DELETE, OPTIONS');
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Range, Authorization');
   response.setHeader('Access-Control-Expose-Headers',
     'Accept-Ranges, Content-Range, Content-Length, Content-Disposition');
   return true;
@@ -274,6 +275,7 @@ function createServer(options) {
   const env = options.env || process.env;
   const fetchImpl = options.fetch || global.fetch;
   const limits = new Map();
+  const lectureApi = createAdminApi({ env: env, fetch: fetchImpl });
   const mediaLibrary = options.mediaLibrary || createMediaLibrary({
     env: env,
     fetch: fetchImpl,
@@ -292,11 +294,12 @@ function createServer(options) {
         return;
       }
       if (request.method === 'OPTIONS') {
-        response.writeHead(204, { 'Allow': 'GET, HEAD, POST, OPTIONS' });
+        response.writeHead(204, { 'Allow': 'GET, HEAD, POST, PATCH, DELETE, OPTIONS' });
         response.end();
         return;
       }
     }
+    if (await lectureApi(request, response, requestUrl.pathname)) return;
     if (requestUrl.pathname === '/api/health' && request.method === 'GET') {
       sendJson(response, 200, { ok: true });
       return;
