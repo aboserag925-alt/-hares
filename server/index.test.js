@@ -402,3 +402,77 @@ test('lecture API requires server-side Supabase credentials before serving admin
     assert.equal(response.status, 503);
   });
 });
+
+
+test('lecture API permits a verified administrator to create a valid HTTPS lecture', async function () {
+  const adminId = '123e4567-e89b-42d3-a456-426614174000';
+  const env = {
+    SUPABASE_URL: 'https://project.example',
+    SUPABASE_ANON_KEY: 'public-test-key',
+    SUPABASE_SERVICE_ROLE_KEY: 'server-only-test-key'
+  };
+  const calls = [];
+  const fetchMock = async function (url, options) {
+    calls.push({ url: url, options: options });
+    if (url.endsWith('/auth/v1/user')) {
+      return { ok: true, status: 200, json: async function () { return { id: adminId, email: 'admin@example.com' }; } };
+    }
+    if (url.includes('/rest/v1/admin_users?')) {
+      return { ok: true, status: 200, json: async function () { return [{ user_id: adminId }]; } };
+    }
+    return {
+      ok: true,
+      status: 201,
+      json: async function () { return [{ id: adminId, title: 'درس التوحيد', status: 'published' }]; }
+    };
+  };
+  await withServer({ env: env, fetch: fetchMock }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/lectures', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-session-token'
+      },
+      body: JSON.stringify({
+        title: 'درس التوحيد',
+        starts_at: '2026-11-05T18:00:00.000Z',
+        stream_url: 'https://youtube.com/live/example',
+        status: 'published'
+      })
+    });
+    assert.equal(response.status, 201);
+    assert.equal((await response.json()).item.title, 'درس التوحيد');
+    assert.equal(calls.length, 3);
+    assert.equal(calls[0].options.headers.Authorization, 'Bearer test-session-token');
+    assert.equal(calls[1].options.headers.Authorization, 'Bearer server-only-test-key');
+    assert.equal(calls[2].options.method, 'POST');
+  });
+});
+
+test('lecture API rejects insecure stream URLs before database writes', async function () {
+  let writeAttempted = false;
+  const env = {
+    SUPABASE_URL: 'https://project.example',
+    SUPABASE_ANON_KEY: 'public-test-key',
+    SUPABASE_SERVICE_ROLE_KEY: 'server-only-test-key'
+  };
+  const fetchMock = async function (url) {
+    if (url.endsWith('/auth/v1/user')) {
+      return { ok: true, status: 200, json: async function () { return { id: '123e4567-e89b-42d3-a456-426614174000' }; } };
+    }
+    if (url.includes('/rest/v1/admin_users?')) {
+      return { ok: true, status: 200, json: async function () { return [{ user_id: '123e4567-e89b-42d3-a456-426614174000' }]; } };
+    }
+    writeAttempted = true;
+    return { ok: true, status: 201, json: async function () { return []; } };
+  };
+  await withServer({ env: env, fetch: fetchMock }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/lectures', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-session-token' },
+      body: JSON.stringify({ title: 'درس تجريبي', stream_url: 'javascript:alert(1)' })
+    });
+    assert.equal(response.status, 400);
+    assert.equal(writeAttempted, false);
+  });
+});
