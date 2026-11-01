@@ -80,6 +80,20 @@ function isAllowedOrigin(request, env) {
   return parsedOrigin.host.toLowerCase() === request.headers.host.toLowerCase();
 }
 
+function applyCorsHeaders(request, response, env) {
+  const origin = request.headers.origin;
+  if (!origin) return true;
+  if (!isAllowedOrigin(request, env)) return false;
+
+  response.setHeader('Access-Control-Allow-Origin', new URL(origin).origin);
+  response.setHeader('Vary', 'Origin');
+  response.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, OPTIONS');
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Range');
+  response.setHeader('Access-Control-Expose-Headers',
+    'Accept-Ranges, Content-Range, Content-Length, Content-Disposition');
+  return true;
+}
+
 function readJsonBody(request, response) {
   return new Promise(function (resolve, reject) {
     const declaredLength = Number(request.headers['content-length'] || 0);
@@ -272,6 +286,17 @@ function createServer(options) {
     response.setHeader('X-Frame-Options', 'DENY');
 
     const requestUrl = new URL(request.url, 'http://localhost');
+    if (requestUrl.pathname.startsWith('/api/')) {
+      if (!applyCorsHeaders(request, response, env)) {
+        sendJson(response, 403, { error: 'مصدر الطلب غير مسموح.' });
+        return;
+      }
+      if (request.method === 'OPTIONS') {
+        response.writeHead(204, { 'Allow': 'GET, HEAD, POST, OPTIONS' });
+        response.end();
+        return;
+      }
+    }
     if (requestUrl.pathname === '/api/health' && request.method === 'GET') {
       sendJson(response, 200, { ok: true });
       return;
