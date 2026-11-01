@@ -57,7 +57,7 @@ test('serves the app and health status without exposing environment values', asy
 
     const app = await fetch(baseUrl + '/app/');
     assert.equal(app.status, 200);
-    assert.match(await app.text(), /إستراحة أهل الأثر/);
+    assert.match(await app.text(), /استراحة أهل الأثر/);
 
     const envFile = await fetch(baseUrl + '/.env');
     assert.equal(envFile.status, 404);
@@ -282,5 +282,65 @@ test('does not contact providers when server credentials are missing', async fun
 
     assert.equal(response.status, 503);
     assert.equal(provider.calls.length, 0);
+  });
+});
+
+
+test('handles allowlisted CORS preflight requests for API endpoints', async function () {
+  const env = { ...configuredEnv, ALLOWED_ORIGINS: 'https://app.example' };
+  await withServer({ env: env, fetch: mockFetch().fetch }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/questions', {
+      method: 'OPTIONS',
+      headers: {
+        Origin: 'https://app.example',
+        'Access-Control-Request-Method': 'POST',
+        'Access-Control-Request-Headers': 'content-type'
+      }
+    });
+    assert.equal(response.status, 204);
+    assert.equal(response.headers.get('access-control-allow-origin'), 'https://app.example');
+    assert.equal(response.headers.get('access-control-allow-methods'), 'GET, HEAD, POST, OPTIONS');
+    assert.match(response.headers.get('access-control-allow-headers'), /Content-Type/i);
+    assert.equal(response.headers.get('vary'), 'Origin');
+  });
+});
+
+test('rejects disallowed CORS preflight requests without reflecting their origin', async function () {
+  const env = { ...configuredEnv, ALLOWED_ORIGINS: 'https://app.example' };
+  await withServer({ env: env, fetch: mockFetch().fetch }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/library', {
+      method: 'OPTIONS',
+      headers: { Origin: 'https://attacker.example' }
+    });
+    assert.equal(response.status, 403);
+    assert.equal(response.headers.get('access-control-allow-origin'), null);
+  });
+});
+
+test('adds allowlisted CORS headers to library and media responses', async function () {
+  const fileId = '123e4567-e89b-42d3-a456-426614174000';
+  const env = { ...configuredEnv, ALLOWED_ORIGINS: 'https://app.example' };
+  const mediaLibrary = {
+    listApproved: async function () { return []; },
+    getApprovedFile: async function () {
+      return {
+        item: { kind: 'audio', mimeType: 'audio/mpeg', fileName: 'lesson.mp3' },
+        data: Buffer.from('audio')
+      };
+    }
+  };
+  await withServer({ env: env, fetch: mockFetch().fetch, mediaLibrary: mediaLibrary }, async function (baseUrl) {
+    const list = await fetch(baseUrl + '/api/library', {
+      headers: { Origin: 'https://app.example' }
+    });
+    assert.equal(list.status, 200);
+    assert.equal(list.headers.get('access-control-allow-origin'), 'https://app.example');
+
+    const file = await fetch(baseUrl + '/api/library/files/' + fileId, {
+      headers: { Origin: 'https://app.example' }
+    });
+    assert.equal(file.status, 200);
+    assert.equal(file.headers.get('access-control-allow-origin'), 'https://app.example');
+    assert.match(file.headers.get('access-control-expose-headers'), /Content-Range/i);
   });
 });
