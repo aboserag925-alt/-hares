@@ -710,12 +710,14 @@ function setAccountState(state) {
     accountUser = null;
     activeSyncUserId = null;
     configMissing.hidden = false;
+    document.getElementById('googleSignInBtn').hidden = true;
     form.hidden = true;
     signedIn.hidden = true;
     setStatus(message, 'أضف إعدادات Supabase لتفعيل الحسابات.');
     return;
   }
   configMissing.hidden = true;
+  document.getElementById('googleSignInBtn').hidden = Boolean(state.user);
   accountUser = state.user;
   if (!state.user) {
     activeSyncUserId = null;
