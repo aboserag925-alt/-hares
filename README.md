@@ -103,3 +103,20 @@ docker compose up --build
 ```powershell
 npm.cmd test
 ```
+
+
+## لوحة إدارة المحاضرات والبث والمواعيد
+
+تتوفر لوحة الإدارة على `/app/admin.html`. لا يكفي نشر الواجهة وحدها؛ يلزم ربطها بخادم Node.js ومشروع Supabase:
+
+1. نفّذ `supabase/schema.sql` في SQL Editor داخل مشروع Supabase.
+2. أنشئ حساب المشرف من Supabase Authentication، ثم أضف معرّفه إلى جدول `public.admin_users` من SQL Editor:
+   ```sql
+   insert into public.admin_users (user_id)
+   values ('UUID-OF-ADMIN');
+   ```
+3. في GitHub Actions Variables أضف `SUPABASE_URL` و`SUPABASE_ANON_KEY` و`AHL_API_BASE_URL`. المفتاح العام فقط يذهب إلى الواجهة.
+4. على خادم Node.js اضبط `SUPABASE_URL` و`SUPABASE_ANON_KEY` و`SUPABASE_SERVICE_ROLE_KEY` و`ALLOWED_ORIGINS`. لا تضع مفتاح Service Role في GitHub Pages أو ملفات الواجهة أو ترسله في المحادثة.
+5. اجعل `ALLOWED_ORIGINS` يتضمن أصل الموقع المنشور، مثل `https://aboserag925-alt.github.io`، ثم أعد تشغيل الخادم.
+
+تتيح اللوحة إضافة المحاضرات وتعديلها وحذفها ونشرها كمسودة أو منشورة أو أرشيف، مع موعد وروابط بث وتسجيل HTTPS. تظهر العناصر المنشورة تلقائيًا في جدول الموقع والتطبيق عند اتصال الواجهة بالخادم. إذا لم تُضبط متغيرات الخدمة، تبقى بيانات الجدول الثابتة بديلًا ولا تُعرض رسالة نجاح زائفة.

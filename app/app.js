@@ -111,6 +111,30 @@ function cairo() {
   };
 }
 
+
+async function loadPublishedLectures() {
+  try {
+    var response = await fetch(apiUrl('/api/lectures'), { cache: 'no-store' });
+    if (!response.ok) throw new Error('Lecture request failed');
+    var result = await response.json();
+    if (!Array.isArray(result.items) || result.items.length === 0) return;
+    var box = document.getElementById('sched'); box.textContent = '';
+    result.items.forEach(function (item) {
+      var card = document.createElement('article'); card.className = 'card';
+      var title = document.createElement('h3'); title.className = 'section-title'; title.textContent = item.title;
+      var meta = document.createElement('p'); meta.className = 'section-subtitle';
+      meta.textContent = (item.starts_at ? new Date(item.starts_at).toLocaleString('ar-EG') : 'موعد يحدد لاحقًا') + ' · ' + (item.category || 'محاضرة');
+      card.append(title, meta);
+      if (item.description) { var description = document.createElement('p'); description.textContent = item.description; card.appendChild(description); }
+      [['stream_url', 'مشاهدة البث'], ['recording_url', 'مشاهدة التسجيل']].forEach(function (entry) {
+        if (!item[entry[0]]) return;
+        var link = document.createElement('a'); link.className = 'btn'; link.href = item[entry[0]]; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = entry[1]; card.appendChild(link);
+      });
+      box.appendChild(card);
+    });
+  } catch (error) { /* Keep the built-in schedule if the API is offline. */ }
+}
+
 function buildSchedule() {
   var box = document.getElementById('sched');
   var today = names[cairo().day];
@@ -979,6 +1003,7 @@ if ('serviceWorker' in navigator) {
 }
 
 buildSchedule();
+loadPublishedLectures();
 updateLessonCountdown();
 loadSavedSettings();
 renderAdhkar();
