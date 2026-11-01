@@ -1,0 +1,82 @@
+name: Android app build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/android-capacitor-app
+    paths:
+      - 'app/**'
+      - 'capacitor.config.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/android-build.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  debug-apk:
+    name: Build Android debug APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install project dependencies
+        run: npm ci
+
+      - name: Configure native app endpoints
+        env:
+          API_BASE_URL: ${{ vars.AHL_API_BASE_URL }}
+          SUPABASE_URL: ${{ vars.AHL_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.AHL_SUPABASE_ANON_KEY }}
+        run: |
+          test -n "$SUPABASE_URL" || { echo "Missing Actions variable: AHL_SUPABASE_URL"; exit 1; }
+          test -n "$SUPABASE_ANON_KEY" || { echo "Missing Actions variable: AHL_SUPABASE_ANON_KEY"; exit 1; }
+          node --input-type=module <<'NODE'
+          import { writeFileSync } from 'node:fs';
+          const api = (process.env.API_BASE_URL || '').replace(/\\/$/, '');
+          const supabaseUrl = process.env.SUPABASE_URL;
+          const anonKey = process.env.SUPABASE_ANON_KEY;
+          if (api && new URL(api).protocol !== 'https:') throw new Error('API_BASE_URL must use HTTPS');
+          if (new URL(supabaseUrl).protocol !== 'https:') throw new Error('SUPABASE_URL must use HTTPS');
+          writeFileSync('app/runtime-config.js', 'window.AHL_API_BASE_URL = ' + JSON.stringify(api) + ';\\n');
+          writeFileSync('app/supabase-config.js', 'window.AHL_SUPABASE_CONFIG = ' + JSON.stringify({ url: supabaseUrl, anonKey }) + ';\\n');
+          NODE
+
+      - name: Build web application assets
+        run: npm run build:app
+
+      - name: Install Capacitor tooling
+        run: npm install --no-save @capacitor/core@^7 @capacitor/android@^7 @capacitor/cli@^7
+
+      - name: Generate Android project
+        run: npx cap add android
+
+      - name: Sync web app into Android
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ahl-athar-android-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
