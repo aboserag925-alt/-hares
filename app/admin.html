@@ -34,7 +34,7 @@
 <script src="runtime-config.js"></script><script src="supabase-config.js"></script><script src="auth-client.js"></script>
 <script>
 const $=id=>document.getElementById(id);
-const api=(window.AHL_API_BASE_URL||'').replace(/\\/$/,'')+'/api/lectures';let items=[];
+let apiBase=window.AHL_API_BASE_URL||'';while(apiBase.endsWith('/'))apiBase=apiBase.slice(0,-1);const api=apiBase+'/api/lectures';let items=[];
 function status(id,message,error){$(id).textContent=message;$(id).classList.toggle('error',!!error)}
 async function token(){const value=await window.ahlAuth.getAccessToken();if(!value)throw Error('انتهت جلسة الدخول. سجّل الدخول مجددًا.');return value}
 async function request(url,options={}){const access=await token();const response=await fetch(url,{...options,headers:{'Content-Type':'application/json','Authorization':'Bearer '+access,...options.headers}});const data=await response.json().catch(()=>({}));if(!response.ok)throw Error(data.error||'تعذر تنفيذ الطلب');return data}
