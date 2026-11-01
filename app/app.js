@@ -216,7 +216,11 @@ prayerSections.forEach(function (id) {
   if (id === 'sched') return;
   var section = document.getElementById(id);
   section.addEventListener('click', function (event) {
-    if (event.target === section) closeTopSection();
+    var contentSelector = [
+      '.card', '.note', 'button', 'a', 'input', 'select', 'textarea', 'label',
+      'audio', '[role="button"]', '[contenteditable="true"]'
+    ].join(', ');
+    if (!event.target.closest(contentSelector)) closeTopSection();
   });
 });
 
@@ -765,8 +769,9 @@ function setAccountState(state) {
   signedIn.hidden = false;
   document.getElementById('accountEmail').textContent = state.user.email || '';
   setStatus(message, 'تسجيل الدخول محفوظ تلقائيًا على هذا الجهاز.');
-  if (state.event === 'SIGNED_IN') {
+  if (state.event === 'SIGNED_IN' || state.event === 'INITIAL_SESSION') {
     window.ahlAuth.saveMemberProfile(state.user).then(function () {
+      if (state.event !== 'SIGNED_IN') return;
       return window.ahlAuth.logActivity(state.user.id, 'login', {
         provider: state.user.app_metadata && state.user.app_metadata.provider || 'email'
       });
