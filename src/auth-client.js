@@ -55,7 +55,11 @@ window.ahlAuth = {
   signUp: function (email, password) {
     return requireClient().auth.signUp({ email: email, password: password });
   },
-  getAccessToken: async function () {\n    const result = await requireClient().auth.getSession();\n    if (result.error) throw result.error;\n    return result.data.session ? result.data.session.access_token : null;\n  },\n  signOut: function () {
+  getAccessToken: async function () {
+    const result = await requireClient().auth.getSession();
+    if (result.error) throw result.error;
+    return result.data.session ? result.data.session.access_token : null;
+  },\n  signOut: function () {
     return requireClient().auth.signOut();
   },
   loadUserData: async function (userId) {
