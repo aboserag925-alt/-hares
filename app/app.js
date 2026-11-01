@@ -986,3 +986,23 @@ initAuth();
 setInterval(updateLessonCountdown, 1000);
 setInterval(function () { updatePrayerTimes(false); }, 60000);
 setInterval(updateNextPrayerCountdown, 1000);
+
+
+function openAppSupportDialog(){
+  var dialog=document.getElementById('supportDialog');
+  if(!dialog||dialog.open)return;
+  dialog.showModal();
+  history.pushState({supportDialogOpen:true},'',location.pathname+location.search+'#support');
+}
+var appSupportDialog=document.getElementById('supportDialog');
+if(appSupportDialog){
+  appSupportDialog.addEventListener('click',function(event){
+    if(event.target===appSupportDialog)appSupportDialog.close();
+  });
+  appSupportDialog.addEventListener('close',function(){
+    if(history.state&&history.state.supportDialogOpen)history.back();
+  });
+}
+window.addEventListener('popstate',function(){
+  if(appSupportDialog&&appSupportDialog.open)appSupportDialog.close();
+});
