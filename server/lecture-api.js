@@ -85,7 +85,36 @@ function createAdminApi(options) {
       sendJson(response, 405, { error: 'طريقة الطلب غير مدعومة.' });
       return true;
     }
-    if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY || !env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY) {
+      sendJson(response, 503, { error: 'خدمة المحاضرات غير مهيأة بعد.' });
+      return true;
+    }
+
+    // Public lecture reads use the anon key and the database's published-only RLS policy.
+    // The service-role key is reserved for authenticated administrator operations.
+    if (pathname === '/api/lectures' && request.method === 'GET') {
+      try {
+        const responseFromSupabase = await fetchImpl(
+          env.SUPABASE_URL.replace(/\\/$/, '') + '/rest/v1/lectures?select=id,title,description,starts_at,category,stream_url,recording_url,status,created_at,updated_at&status=eq.published&order=starts_at.asc.nullslast',
+          {
+            headers: {
+              apikey: env.SUPABASE_ANON_KEY,
+              Authorization: 'Bearer ' + env.SUPABASE_ANON_KEY,
+              Accept: 'application/json'
+            },
+            signal: AbortSignal.timeout(12000)
+          }
+        );
+        if (!responseFromSupabase.ok) throw new Error('Supabase request failed: ' + responseFromSupabase.status);
+        sendJson(response, 200, { items: await responseFromSupabase.json() });
+      } catch (error) {
+        console.error('Public lecture request failed:', error.message);
+        sendJson(response, 502, { error: 'تعذر تحميل المحاضرات الآن.' });
+      }
+      return true;
+    }
+
+    if (!env.SUPABASE_SERVICE_ROLE_KEY) {
       sendJson(response, 503, { error: 'خدمة إدارة المحاضرات غير مهيأة بعد.' });
       return true;
     }
@@ -110,12 +139,6 @@ function createAdminApi(options) {
         sendJson(response, 200, { items: allRows });
         return true;
       }
-      if (request.method === 'GET') {
-        const rows = await supabase('/rest/v1/lectures?select=id,title,description,starts_at,category,stream_url,recording_url,status,created_at,updated_at&status=eq.published&order=starts_at.asc.nullslast');
-        sendJson(response, 200, { items: rows });
-        return true;
-      }
-
       const user = await authenticate(request);
       if (!user) {
         sendJson(response, 403, { error: 'هذه العملية متاحة للمشرفين المصرح لهم فقط.' });
