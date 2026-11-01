@@ -102,7 +102,12 @@ function createAdminApi(options) {
           sendJson(response, 403, { error: 'هذا الحساب غير مسجل كمشرف.' });
           return true;
         }
-        sendJson(response, 200, { user: { id: admin.id, email: admin.email || null } });
+        if (pathname === '/api/admin/session') {
+          sendJson(response, 200, { user: { id: admin.id, email: admin.email || null } });
+          return true;
+        }
+        const allRows = await supabase('/rest/v1/lectures?select=id,title,description,starts_at,category,stream_url,recording_url,status,created_at,updated_at&order=starts_at.asc.nullslast');
+        sendJson(response, 200, { items: allRows });
         return true;
       }
       if (request.method === 'GET') {
