@@ -26,15 +26,16 @@ const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || '').trim();
 
 if (supabaseUrl && supabaseAnonKey) {
   const parsedUrl = new URL(supabaseUrl);
-  if (parsedUrl.protocol !== 'https:' || parsedUrl.origin !== supabaseUrl.replace(/\\/+$/, '')) {
+  if (parsedUrl.protocol !== 'https:' || parsedUrl.pathname !== '/' ||
+      parsedUrl.search || parsedUrl.hash) {
     throw new Error('SUPABASE_URL must be an HTTPS project origin.');
   }
   await writeFile(
     localConfig,
     'window.AHL_SUPABASE_CONFIG = ' + JSON.stringify({
-      url: supabaseUrl.replace(/\\/+$/, ''),
+      url: parsedUrl.origin,
       anonKey: supabaseAnonKey
-    }, null, 2) + ';\\n',
+    }, null, 2) + ';' + String.fromCharCode(10),
     'utf8'
   );
 } else {
