@@ -346,7 +346,7 @@ test('adds allowlisted CORS headers to library and media responses', async funct
 });
 
 
-test('lecture API returns published lectures through the server service role only', async function () {
+test('lecture API returns published lectures using the public anon key', async function () {
   const calls = [];
   const env = {
     SUPABASE_URL: 'https://project.example',
@@ -369,7 +369,33 @@ test('lecture API returns published lectures through the server service role onl
     assert.equal((await response.json()).items[0].title, 'درس منشور');
     assert.equal(calls.length, 1);
     assert.equal(calls[0].url, 'https://project.example/rest/v1/lectures?select=id,title,description,starts_at,category,stream_url,recording_url,status,created_at,updated_at&status=eq.published&order=starts_at.asc.nullslast');
-    assert.equal(calls[0].options.headers.Authorization, 'Bearer server-only-test-key');
+    assert.equal(calls[0].options.headers.Authorization, 'Bearer public-test-key');
+    assert.equal(calls[0].options.headers.apikey, 'public-test-key');
+  });
+});
+
+test('lecture API can serve published lectures without exposing or requiring the service-role key', async function () {
+  const env = {
+    SUPABASE_URL: 'https://project.example',
+    SUPABASE_ANON_KEY: 'public-test-key'
+  };
+  let requestOptions;
+  const fetchMock = async function (url, options) {
+    requestOptions = options;
+    return {
+      ok: true,
+      status: 200,
+      json: async function () {
+        return [{ id: '123e4567-e89b-42d3-a456-426614174000', title: 'درس عام', status: 'published' }];
+      }
+    };
+  };
+  await withServer({ env: env, fetch: fetchMock }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/lectures');
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).items[0].title, 'درس عام');
+    assert.equal(requestOptions.headers.Authorization, 'Bearer public-test-key');
+    assert.equal(requestOptions.headers.apikey, 'public-test-key');
   });
 });
 
