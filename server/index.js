@@ -331,7 +331,7 @@ function createServer(options) {
         sendJson(response, 403, { error: 'مصدر الطلب غير مسموح.' });
         return;
       }
-      if (!/^application\\/json(?:\\s*;|$)/i.test(request.headers['content-type'] || '')) {
+      if (!/^application\/json(?:\s*;|$)/i.test(request.headers['content-type'] || '')) {
         request.resume();
         sendJson(response, 415, { error: 'صيغة الطلب يجب أن تكون JSON.' });
         return;
