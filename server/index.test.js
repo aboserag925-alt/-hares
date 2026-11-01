@@ -344,3 +344,61 @@ test('adds allowlisted CORS headers to library and media responses', async funct
     assert.match(file.headers.get('access-control-expose-headers'), /Content-Range/i);
   });
 });
+
+
+test('lecture API returns published lectures through the server service role only', async function () {
+  const calls = [];
+  const env = {
+    SUPABASE_URL: 'https://project.example',
+    SUPABASE_ANON_KEY: 'public-test-key',
+    SUPABASE_SERVICE_ROLE_KEY: 'server-only-test-key'
+  };
+  const fetchMock = async function (url, options) {
+    calls.push({ url: url, options: options });
+    return {
+      ok: true,
+      status: 200,
+      json: async function () {
+        return [{ id: '123e4567-e89b-42d3-a456-426614174000', title: 'درس منشور', status: 'published' }];
+      }
+    };
+  };
+  await withServer({ env: env, fetch: fetchMock }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/lectures');
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).items[0].title, 'درس منشور');
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].url, 'https://project.example/rest/v1/lectures?select=id,title,description,starts_at,category,stream_url,recording_url,status,created_at,updated_at&status=eq.published&order=starts_at.asc.nullslast');
+    assert.equal(calls[0].options.headers.Authorization, 'Bearer server-only-test-key');
+  });
+});
+
+test('lecture API rejects writes from visitors without a verified admin account', async function () {
+  let restCalled = false;
+  const env = {
+    SUPABASE_URL: 'https://project.example',
+    SUPABASE_ANON_KEY: 'public-test-key',
+    SUPABASE_SERVICE_ROLE_KEY: 'server-only-test-key'
+  };
+  const fetchMock = async function () {
+    restCalled = true;
+    return { ok: false, status: 401, json: async function () { return {}; } };
+  };
+  await withServer({ env: env, fetch: fetchMock }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/lectures', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'محاضرة تجريبية' })
+    });
+    assert.equal(response.status, 403);
+    assert.equal(restCalled, false);
+    assert.match((await response.json()).error, /المشرفين/);
+  });
+});
+
+test('lecture API requires server-side Supabase credentials before serving admin features', async function () {
+  await withServer({ env: {}, fetch: mockFetch().fetch }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/lectures');
+    assert.equal(response.status, 503);
+  });
+});
