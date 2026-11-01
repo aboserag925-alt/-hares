@@ -18,6 +18,7 @@ async function withServer(options, run) {
   try {
     await run('http://127.0.0.1:' + address.port);
   } finally {
+    if (typeof server.closeAllConnections === 'function') server.closeAllConnections();
     await new Promise(function (resolve, reject) {
       server.close(function (error) { if (error) reject(error); else resolve(); });
     });

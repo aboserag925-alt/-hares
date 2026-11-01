@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0e0d">
+<title>لوحة إدارة إستراحة أهل الأثر</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0e0d;--panel:#151c18;--panel2:#1c261f;--gold:#d5ab64;--gold2:#f2d9a4;--text:#f4f0e7;--muted:#a9ada2;--line:rgba(213,171,100,.2);--danger:#e6a19a}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 90% 0%,rgba(213,171,100,.09),transparent 35%),var(--bg);color:var(--text);font-family:system-ui,-apple-system,'Segoe UI',sans-serif}
+main{width:min(100% - 28px,980px);margin:0 auto;padding:30px 0 60px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px}
+h1{margin:0;color:var(--gold2);font-size:clamp(22px,4vw,32px)}h2{margin:0 0 8px;color:var(--gold2);font-size:20px}p{color:var(--muted);line-height:1.8}
+.card{padding:20px;margin:0 0 16px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,var(--panel2),var(--panel));box-shadow:0 12px 36px #0003}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.field{display:grid;gap:7px;margin:12px 0;color:var(--muted);font-size:14px}
+input,textarea,select{width:100%;min-height:44px;padding:10px 12px;border:1px solid #ffffff20;border-radius:12px;background:#0c110f;color:var(--text);font:inherit}
+textarea{min-height:130px;resize:vertical;line-height:1.7}
+input:focus,textarea:focus,select:focus{outline:2px solid #d5ab6455;border-color:var(--gold)}
+button{min-height:42px;padding:9px 16px;border:1px solid var(--line);border-radius:12px;background:#25271f;color:var(--gold2);font:inherit;font-weight:700;cursor:pointer}
+button.primary{background:linear-gradient(135deg,#e1bd79,#c89a50);color:#181610;border:0}
+button.danger{color:var(--danger);border-color:#e6a19a55}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.status{min-height:24px;color:var(--muted);font-size:14px}.status.error{color:var(--danger)}.status.ok{color:#a8d4ae}
+[hidden]{display:none!important}
+.item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-top:1px solid #ffffff12}
+.item strong{display:block;overflow-wrap:anywhere}.item small{color:var(--muted)}
+.pill{display:inline-block;padding:3px 8px;border:1px solid var(--line);border-radius:999px;color:var(--gold2);font-size:12px}
+.check{display:flex;align-items:center;gap:9px;margin:12px 0;color:var(--muted)}.check input{width:18px;min-height:18px;accent-color:var(--gold)}
+@media(max-width:700px){.grid{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}.item{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<main>
+<header><div><h1>إستراحة أهل الأثر</h1><p>لوحة إدارة المحاضرات والبث والمواعيد</p></div><a href="index.html" style="color:var(--gold2)">العودة للتطبيق</a></header>
+<section class="card" id="loginPanel">
+<h2>دخول المشرف</h2>
+<p>الدخول متاح للحسابات التي منحها مسؤول المشروع صلاحية site_admin في Supabase.</p>
+<form id="loginForm">
+<label class="field">البريد الإلكتروني<input id="email" type="email" autocomplete="username" required></label>
+<label class="field">كلمة المرور<input id="password" type="password" autocomplete="current-password" required></label>
+<div class="actions"><button class="primary" type="submit">تسجيل الدخول</button></div>
+</form>
+<p id="loginStatus" class="status" role="status" aria-live="polite"></p>
+</section>
+<section id="dashboard" hidden>
+<div class="card">
+<div class="actions" style="justify-content:space-between;align-items:center"><h2>مرحبًا بك في لوحة الإدارة</h2><button id="logoutBtn" type="button">تسجيل الخروج</button></div>
+<p>التعديلات تُحفظ في قاعدة البيانات. لا تنشر إلا المواد التي تم التحقق من روابطها ومعلوماتها.</p>
+<p id="dashboardStatus" class="status" role="status" aria-live="polite"></p>
+</div>
+<div class="grid">
+<section class="card">
+<h2>إدارة البث</h2>
+<form id="liveForm">
+<label class="field">عنوان البث<input id="liveTitle" maxlength="240" required></label>
+<label class="field">رابط البث HTTPS<input id="liveUrl" type="url" placeholder="https://" required></label>
+<label class="field">موعد البث<input id="liveTime" type="datetime-local"></label>
+<label class="field">حالة البث<select id="liveStatus"><option value="scheduled">مجدول</option><option value="live">مباشر الآن</option><option value="ended">انتهى</option></select></label>
+<label class="check"><input id="livePublished" type="checkbox"> إظهار بيانات البث للجمهور</label>
+<button class="primary" type="submit">حفظ بيانات البث</button>
+</form>
+</section>
+<section class="card">
+<h2>إدارة جدول المواعيد</h2>
+<form id="scheduleForm">
+<label class="field">بيانات الجدول بصيغة JSON<textarea id="scheduleData" spellcheck="false" required>[
+  {"day":"السبت","lessons":["شرح صحيح الإمام مسلم","شرح علم مصطلح الحديث"]},
+  {"day":"الأحد","lessons":["أصول التفسير","قواعد عقائد أهل السنة"]},
+  {"day":"الإثنين","lessons":["شرح صحيح الإمام مسلم","شرح علم مصطلح الحديث"]},
+  {"day":"الثلاثاء","lessons":["شرح العقيدة الواسطية","أصول الفقه"]},
+  {"day":"الأربعاء","lessons":["شرح صحيح الإمام مسلم","شرح علم مصطلح الحديث"]},
+  {"day":"الخميس","lessons":["عظماء الإسلام","منوعات وحوارات"]}
+]</textarea></label>
+<label class="check"><input id="schedulePublished" type="checkbox"> نشر الجدول للجمهور</label>
+<button class="primary" type="submit">حفظ الجدول</button>
+</form>
+</section>
+</div>
+<section class="card">
+<h2>إضافة / تعديل محاضرة</h2>
+<form id="lectureForm">
+<input id="lectureKey" type="hidden">
+<div class="grid">
+<label class="field">عنوان المحاضرة<input id="lectureTitle" maxlength="240" required></label>
+<label class="field">التصنيف<input id="lectureCategory" maxlength="80" placeholder="حديث، فقه، عقيدة..."></label>
+<label class="field">رابط التسجيل HTTPS<input id="lectureUrl" type="url" placeholder="https://" required></label>
+<label class="field">تاريخ المحاضرة<input id="lectureDate" type="datetime-local"></label>
+</div>
+<label class="field">الوصف<textarea id="lectureDescription" maxlength="2000"></textarea></label>
+<label class="check"><input id="lecturePublished" type="checkbox"> نشر المحاضرة للجمهور</label>
+<div class="actions"><button class="primary" type="submit">حفظ المحاضرة</button><button id="resetLecture" type="button">إفراغ الحقول</button></div>
+</form>
+</section>
+<section class="card">
+<h2>المحاضرات المسجلة</h2>
+<div id="lectureList"><p>جارٍ تحميل المحاضرات…</p></div>
+</section>
+</section>
+</main>
+<script src="supabase-config.js"></script>
+<script src="auth-client.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

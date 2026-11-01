@@ -15,6 +15,25 @@ GitHub Pages لا يشغّل خادم Node.js؛ لذلك تحتاج الأسئل
 
 إن لم تضبط `AHL_API_BASE_URL` فستُنشر الواجهة وحدها، وستبقى ميزات API غير متاحة حتى ربط الخادم. لن يتم نشر ملف `.env` أو مجلد `storage/`.
 
+## لوحة إدارة المحاضرات والبث والمواعيد
+
+توجد لوحة الإدارة في `app/admin.html`. تعتمد على Supabase Auth وقاعدة بيانات Supabase، ولا تستخدم كلمة مرور ثابتة أو مفتاح `service_role` في المتصفح.
+
+1. أنشئ مشروع Supabase. أضف متغيري GitHub Actions التاليين من **Settings → Secrets and variables → Actions → Variables**: `SUPABASE_URL` (رابط مشروع HTTPS) و`SUPABASE_ANON_KEY` (المفتاح العام anon/publishable). يستخدمهما بناء GitHub Pages لإنشاء `app/supabase-config.js`. للتطوير المحلي، أنشئ هذا الملف داخل `app/` باستخدام `src/supabase-config.example.js` وأدخل القيم العامة. لا تستخدم `service_role`.
+2. نفّذ `supabase/schema.sql` ثم `supabase/site-content.sql` في SQL Editor.
+3. أنشئ حساب المشرف من لوحة Supabase Authentication، ثم امنحه الدور الإداري من SQL Editor بعد استبدال UUID بمعرّف المستخدم الفعلي:
+   ```sql
+   update auth.users
+   set raw_app_meta_data = coalesce(raw_app_meta_data, '{}'::jsonb)
+     || jsonb_build_object('role', 'site_admin')
+   where id = 'ضع-معرف-المستخدم-هنا';
+   ```
+   لا تمنح هذا الدور لأي حساب غير موثوق؛ سياسات RLS تسمح لهذا الدور وحده بإضافة المحتوى وتعديله وحذفه.
+4. شغّل `npm run build:app` ثم انشر الموقع. افتح `/app/admin.html` وسجّل الدخول بحساب المشرف.
+5. من اللوحة أدرج المحاضرات وروابطها، وحالة البث وموعده، وجدول الدروس. لا تنشر إلا روابط HTTPS ومعلومات تم التحقق منها.
+
+تظهر العناصر المنشورة في الصفحة الرئيسية تلقائيًا عند توفر إعدادات Supabase الصحيحة. إن لم تُضبط قاعدة البيانات أو تعذر الاتصال بها، تحتفظ الصفحة بالمحتوى الاحتياطي ولا تتعطل. لا تضع مفاتيح سرية أو مفاتيح `service_role` في ملفات الواجهة أو GitHub.
+
 ## تطوير CSS
 
 يستخدم المشروع Tailwind CSS 4. بعد تثبيت Node.js، ثبّت اعتماديات التطوير:
