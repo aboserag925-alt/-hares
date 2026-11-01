@@ -38,6 +38,28 @@ jobs:
       - name: Install project dependencies
         run: npm ci
 
+      - name: Configure native app endpoints
+        env:
+          API_BASE_URL: ${{ vars.AHL_API_BASE_URL }}
+          SUPABASE_URL: ${{ vars.AHL_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.AHL_SUPABASE_ANON_KEY }}
+        run: |
+          test -n "$API_BASE_URL" || { echo "Missing Actions variable: AHL_API_BASE_URL"; exit 1; }
+          test -n "$SUPABASE_URL" || { echo "Missing Actions variable: AHL_SUPABASE_URL"; exit 1; }
+          test -n "$SUPABASE_ANON_KEY" || { echo "Missing Actions variable: AHL_SUPABASE_ANON_KEY"; exit 1; }
+          node --input-type=module <<'NODE'
+          import { writeFileSync } from 'node:fs';
+          const api = process.env.API_BASE_URL.replace(/\\/$/, '');
+          const supabaseUrl = process.env.SUPABASE_URL;
+          const anonKey = process.env.SUPABASE_ANON_KEY;
+          for (const [name, value] of [['API_BASE_URL', api], ['SUPABASE_URL', supabaseUrl]]) {
+            const url = new URL(value);
+            if (url.protocol !== 'https:') throw new Error(name + ' must use HTTPS');
+          }
+          writeFileSync('app/runtime-config.js', 'window.AHL_API_BASE_URL = ' + JSON.stringify(api) + ';\\n');
+          writeFileSync('app/supabase-config.js', 'window.AHL_SUPABASE_CONFIG = ' + JSON.stringify({ url: supabaseUrl, anonKey }) + ';\\n');
+          NODE
+
       - name: Build web application assets
         run: npm run build:app
 
