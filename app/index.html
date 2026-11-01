@@ -384,15 +384,15 @@ textarea::placeholder{color:#777e75}
 </div>
 </section>
 <section id="q" hidden>
-<div class="note">الأسئلة الشرعية يراجعها الدكتور خالد وحده. Gemini ينشئ مسودة أولية للمراجعة، ولا تُعد المسودة فتوى أو ردًا معتمدًا.</div>
+<div class="note">الأسئلة الشرعية يراجعها الدكتور خالد وحده. ينشئ Gemini وGrok مسودتين مستقلتين للمراجعة، ولا تُعد أي منهما فتوى أو ردًا معتمدًا.</div>
 <div class="card">
 <h2>اكتب سؤالك</h2>
-<p class="section-subtitle">يُرسل السؤال إلى Gemini لإنشاء مسودة، ثم يُرسل السؤال والمسودة إلى وجهة Telegram للمراجعة. لا ترسل معلومات شخصية أو حساسة.</p>
+<p class="section-subtitle">يُرسل السؤال إلى Gemini وGrok معًا لإنشاء مسودتين مستقلتين، ثم تُرسل الإجابتان إلى وجهة Telegram للمراجعة. لا ترسل معلومات شخصية أو حساسة.</p>
 <textarea id="qt" maxlength="1600" placeholder="سؤالك أو ملاحظتك"></textarea>
-<label class="question-consent"><input id="questionConsent" type="checkbox"><span>أوافق على إرسال سؤالي إلى Gemini ثم Telegram للمراجعة.</span></label>
+<label class="question-consent"><input id="questionConsent" type="checkbox"><span>أوافق على إرسال سؤالي إلى Gemini وGrok ثم Telegram للمراجعة.</span></label>
 <div class="question-actions"><button class="btn" id="sendQuestionBtn" type="button" disabled>أرسل السؤال للمراجعة</button><button class="btn" type="button" onclick="copyQ()">انسخ السؤال</button></div>
 <p class="status" id="qm" role="status" aria-live="polite">لن يُرسل السؤال قبل موافقتك.</p>
-<div class="notice question-draft" id="questionDraft" hidden><h3>مسودة Gemini للمراجعة فقط</h3><p id="questionDraftText"></p></div>
+<div class="notice question-draft" id="questionDraft" hidden><h3>إجابة Gemini — للمراجعة فقط</h3><p id="questionGeminiDraftText"></p><h3>إجابة Grok — للمراجعة فقط</h3><p id="questionGrokDraftText"></p></div>
 </div>
 </section>
 <section id="account" hidden>

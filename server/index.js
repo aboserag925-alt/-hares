@@ -188,10 +188,11 @@ function staticFilePath(requestUrl) {
     : null;
 }
 
-async function createQuestionDraft(question, env, fetchImpl) {
+const QUESTION_SYSTEM_PROMPT = "أنت مساعد يصوغ مسودة أولية باللغة العربية لعرضها على عالم شرعي للمراجعة. لا تقدّم المسودة كفتوى أو حكم معتمد، ولا تدّع أنك عالم. إذا احتاج السؤال إلى فتوى خاصة أو كان الدليل غير متحقق، فصرّح بذلك وأحل السائل إلى الدكتور خالد للمراجعة. لا تختلق آيات أو أحاديث أو مراجع. اجعل الرد موجزًا ومحترمًا، واختم بالتنبيه أن المسودة غير معتمدة حتى يراجعها الدكتور خالد.";
+
+async function createGeminiDraft(question, env, fetchImpl) {
   const model = env.GEMINI_MODEL || 'gemini-3.8-flash';
   if (!/^[A-Za-z0-9._-]{1,80}$/.test(model)) throw new Error('Invalid Gemini model configuration');
-
   const result = await fetchImpl(
     'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent',
     {
@@ -201,39 +202,68 @@ async function createQuestionDraft(question, env, fetchImpl) {
         Accept: 'application/json; charset=utf-8',
         'x-goog-api-key': env.GEMINI_API_KEY
       },
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(60000),
       body: JSON.stringify({
         contents: [{ parts: [{ text: question }] }],
-        systemInstruction: {
-          parts: [{
-            text: 'أنت مساعد يصوغ مسودة أولية باللغة العربية لعرضها على عالم شرعي للمراجعة. لا تقدّم المسودة كفتوى أو حكم معتمد، ولا تدّع أنك عالم. إذا احتاج السؤال إلى فتوى خاصة أو كان الدليل غير متحقق، فصرّح بذلك وأحل السائل إلى الدكتور خالد للمراجعة. لا تختلق آيات أو أحاديث أو مراجع. اجعل الرد موجزًا ومحترمًا، واختم بالتنبيه أن المسودة غير معتمدة حتى يراجعها الدكتور خالد.'
-          }]
-        },
+        systemInstruction: { parts: [{ text: QUESTION_SYSTEM_PROMPT }] },
         generationConfig: { maxOutputTokens: 700, temperature: 0.2 }
       })
     }
   );
   if (!result.ok) {
     console.error('Gemini request failed with status ' + result.status);
-    throw new Error('تعذر إنشاء مسودة الآن. حاول لاحقًا.');
+    throw new Error('تعذر الحصول على إجابة من أحد محركي الذكاء الاصطناعي.');
   }
-
   const payload = await readUtf8Json(result);
   const draft = payload.candidates && payload.candidates[0] &&
     payload.candidates[0].content && payload.candidates[0].content.parts
-      ? payload.candidates[0].content.parts
-        .map(function (part) { return typeof part.text === 'string' ? part.text : ''; })
-        .join('')
-        .trim()
+      ? payload.candidates[0].content.parts.map(function (part) {
+        return typeof part.text === 'string' ? part.text : '';
+      }).join('').trim()
       : '';
-  if (!draft) throw new Error('لم تُنتج الخدمة مسودة صالحة. حاول لاحقًا.');
-  if (draft.length <= MAX_DRAFT_LENGTH) return draft;
-  return draft.slice(0, MAX_DRAFT_LENGTH).trimEnd() + '\n[اختُصر الرد لطوله.]';
+  if (!draft) throw new Error('لم يُنتج Gemini إجابة صالحة.');
+  return draft.length <= MAX_DRAFT_LENGTH ? draft : draft.slice(0, MAX_DRAFT_LENGTH).trimEnd() + '\n[اختُصر الرد لطوله.]';
 }
 
-async function sendToTelegram(question, draft, env, fetchImpl) {
+async function createGrokDraft(question, env, fetchImpl) {
+  const model = env.GROK_MODEL || 'grok-4.7';
+  if (!/^[A-Za-z0-9._-]{1,80}$/.test(model)) throw new Error('Invalid Grok model configuration');
+  const result = await fetchImpl('https://api.x.ai/v1/responses', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      Accept: 'application/json; charset=utf-8',
+      Authorization: 'Bearer ' + env.GROK_API_KEY
+    },
+    signal: AbortSignal.timeout(90000),
+    body: JSON.stringify({
+      model: model,
+      input: [
+        { role: 'system', content: QUESTION_SYSTEM_PROMPT },
+        { role: 'user', content: question }
+      ],
+      max_output_tokens: 700,
+      temperature: 0.7
+    })
+  });
+  if (!result.ok) {
+    console.error('Grok request failed with status ' + result.status);
+    throw new Error('تعذر الحصول على إجابة من أحد محركي الذكاء الاصطناعي.');
+  }
+  const payload = await readUtf8Json(result);
+  const draft = Array.isArray(payload.output)
+    ? payload.output.filter(function (item) { return item.type === 'message' && Array.isArray(item.content); })
+      .flatMap(function (item) { return item.content; })
+      .filter(function (part) { return part.type === 'output_text' && typeof part.text === 'string'; })
+      .map(function (part) { return part.text; }).join('').trim()
+    : '';
+  if (!draft) throw new Error('لم يُنتج Grok إجابة صالحة.');
+  return draft.length <= MAX_DRAFT_LENGTH ? draft : draft.slice(0, MAX_DRAFT_LENGTH).trimEnd() + '\n[اختُصر الرد لطوله.]';
+}
+async function sendToTelegram(question, geminiDraft, grokDraft, env, fetchImpl) {
   const message = 'سؤال للمراجعة من التطبيق:\n\n' + question +
-    '\n\nمسودة Gemini غير معتمدة:\n' + draft;
+    '\n\nمسودة Gemini غير معتمدة:\n' + geminiDraft +
+    '\n\nمسودة Grok غير معتمدة:\n' + grokDraft;
   let result;
   try {
     result = await fetchImpl(
@@ -376,8 +406,8 @@ function createServer(options) {
         sendJson(response, 403, { error: 'مصدر الطلب غير مسموح.' });
         return;
       }
-      if (!env.GEMINI_API_KEY || !env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) {
-        sendJson(response, 503, { error: 'إعدادات Gemini وTelegram غير مكتملة على الخادم.' });
+      if (!env.GEMINI_API_KEY || !env.GROK_API_KEY || !env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) {
+        sendJson(response, 503, { error: 'إعدادات Gemini وGrok وTelegram غير مكتملة على الخادم.' });
         return;
       }
       if (!consumeRateLimit(limits, clientAddress(request), Date.now())) {
@@ -403,25 +433,32 @@ function createServer(options) {
       }
 
       try {
-        const draft = await createQuestionDraft(question, env, fetchImpl);
+        const drafts = await Promise.all([
+          createGeminiDraft(question, env, fetchImpl),
+          createGrokDraft(question, env, fetchImpl)
+        ]);
+        const geminiDraft = drafts[0];
+        const grokDraft = drafts[1];
         try {
-          await sendToTelegram(question, draft, env, fetchImpl);
+          await sendToTelegram(question, geminiDraft, grokDraft, env, fetchImpl);
         } catch (error) {
           sendJson(response, 502, {
             error: error.message,
-            draft: draft,
+            geminiDraft: geminiDraft,
+            grokDraft: grokDraft,
             telegramSent: false
           });
           return;
         }
-        sendJson(response, 200, { draft: draft, telegramSent: true });
+        sendJson(response, 200, { geminiDraft: geminiDraft, grokDraft: grokDraft, telegramSent: true });
       } catch (error) {
         if (error.name === 'TimeoutError' || error.name === 'AbortError') {
           sendJson(response, 504, { error: 'انتهت مهلة الاتصال بالخدمة. حاول لاحقًا.' });
           return;
         }
-        if (error.message === 'تعذر إنشاء مسودة الآن. حاول لاحقًا.' ||
-            error.message === 'لم تُنتج الخدمة مسودة صالحة. حاول لاحقًا.') {
+        if (error.message === 'تعذر الحصول على إجابة من أحد محركي الذكاء الاصطناعي.' ||
+            error.message === 'لم يُنتج Gemini إجابة صالحة.' ||
+            error.message === 'لم يُنتج Grok إجابة صالحة.') {
           sendJson(response, 502, { error: error.message });
           return;
         }
