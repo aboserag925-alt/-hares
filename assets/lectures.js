@@ -2,7 +2,8 @@
   'use strict';
   const host = document.getElementById('managedLectures');
   if (!host) return;
-  let base = typeof window.AHL_API_BASE_URL === 'string' ? window.AHL_API_BASE_URL : '';\n  while (base.endsWith('/')) base = base.slice(0, -1);
+  let base = typeof window.AHL_API_BASE_URL === 'string' ? window.AHL_API_BASE_URL : '';
+  while (base.endsWith('/')) base = base.slice(0, -1);
   const grid = document.createElement('div');
   grid.className = 'managed-lecture-grid';
   const heading = document.createElement('h3');
