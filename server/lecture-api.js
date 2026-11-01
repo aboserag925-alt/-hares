@@ -79,7 +79,7 @@ function createAdminApi(options) {
     const isLecturePath = pathname === '/api/lectures' ||
       (pathname.startsWith('/api/lectures/') &&
        /^[0-9a-f-]{36}$/i.test(pathname.slice('/api/lectures/'.length)));
-    if (pathname !== '/api/admin/session' && !isLecturePath) return false;
+    if (pathname !== '/api/admin/session' && pathname !== '/api/admin/lectures' && !isLecturePath) return false;
     if (!['GET', 'POST', 'PATCH', 'DELETE'].includes(request.method)) {
       response.setHeader('Allow', 'GET, POST, PATCH, DELETE, OPTIONS');
       sendJson(response, 405, { error: 'طريقة الطلب غير مدعومة.' });
@@ -91,7 +91,7 @@ function createAdminApi(options) {
     }
 
     try {
-      if (pathname === '/api/admin/session') {
+      if (pathname === '/api/admin/session' || pathname === '/api/admin/lectures') {
         if (request.method !== 'GET') {
           response.setHeader('Allow', 'GET');
           sendJson(response, 405, { error: 'طريقة الطلب غير مدعومة.' });
