@@ -13,10 +13,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Check server JavaScript syntax
+        run: |
+          node --check server/index.js
+          node --check server/lecture-api.js
+          node --check server/suggestions/suggestion-api.js
+          node --check server/suggestions/suggestion-validator.js
       - run: npm test
       - run: npm run build:app
+      - name: Check patch whitespace
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: git diff --check "$BASE_SHA...$HEAD_SHA"
