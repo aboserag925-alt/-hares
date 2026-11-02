@@ -24,9 +24,13 @@ function classifyRisk(areas=[], declared='low') {
 function requiresHumanApproval(risk) { return risk==='high'||risk==='critical'; }
 function canTransition(from,to,task={}) {
   if (!TRANSITIONS[from] || !TRANSITIONS[from].includes(to)) return false;
-  if (to==='IMPLEMENTING' && !(task.approved===true && task.approvalId)) return false;
-  if (to==='HUMAN_APPROVED' && !(task.humanApproved===true && task.humanApprovalId)) return false;
-  if (to==='MERGED' && !(task.humanApproved===true && task.humanApprovalId)) return false;
+  const approvalId=task.approvalId||task.approval_id;
+  const humanApprovalId=task.humanApprovalId||task.human_approval_id;
+  const humanApproved=task.humanApproved===true||task.human_approved===true;
+  if (to==='APPROVED' && !(task.approved===true && approvalId)) return false;
+  if (to==='IMPLEMENTING' && !(task.approved===true && approvalId)) return false;
+  if (to==='HUMAN_APPROVED' && !(humanApproved && humanApprovalId)) return false;
+  if (to==='MERGED' && !(humanApproved && humanApprovalId)) return false;
   return true;
 }
 module.exports={HIGH_RISK_AREAS,TRANSITIONS,classifyRisk,requiresHumanApproval,canTransition};
