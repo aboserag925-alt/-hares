@@ -88,8 +88,8 @@ function applyCorsHeaders(request, response, env) {
 
   response.setHeader('Access-Control-Allow-Origin', new URL(origin).origin);
   response.setHeader('Vary', 'Origin');
-  response.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, OPTIONS');
-  response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Range');
+  response.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, PATCH, DELETE, OPTIONS');
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Range');
   response.setHeader('Access-Control-Expose-Headers',
     'Accept-Ranges, Content-Range, Content-Length, Content-Disposition');
   return true;
@@ -294,7 +294,7 @@ function createServer(options) {
         return;
       }
       if (request.method === 'OPTIONS') {
-        response.writeHead(204, { 'Allow': 'GET, HEAD, POST, OPTIONS' });
+        response.writeHead(204, { 'Allow': 'GET, HEAD, POST, PATCH, DELETE, OPTIONS' });
         response.end();
         return;
       }
