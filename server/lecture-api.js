@@ -81,6 +81,12 @@ function createAdminApi(options) {
       (pathname.startsWith('/api/lectures/') &&
        /^[0-9a-f-]{36}$/i.test(pathname.slice('/api/lectures/'.length)));
     if (pathname !== '/api/admin/session' && pathname !== '/api/admin/lectures' && !isLecturePath) return false;
+    const isLectureItemPath = /^\/api\/lectures\/[0-9a-f-]{36}$/i.test(pathname);
+    if (isLectureItemPath && request.method === 'POST') {
+      response.setHeader('Allow', 'GET, PATCH, DELETE');
+      sendJson(response, 405, { error: 'إنشاء المحاضرة متاح فقط عبر /api/lectures.' });
+      return true;
+    }
     if (!['GET', 'POST', 'PATCH', 'DELETE'].includes(request.method)) {
       response.setHeader('Allow', 'GET, POST, PATCH, DELETE, OPTIONS');
       sendJson(response, 405, { error: 'طريقة الطلب غير مدعومة.' });
@@ -147,7 +153,6 @@ function createAdminApi(options) {
       }
       const id = pathname.match(/^\/api\/lectures\/([0-9a-f-]{36})$/i);
       if (request.method === 'POST') {
-        if (id) { sendJson(response, 404, { error: 'إنشاء المحاضرة متاح فقط عبر /api/lectures.' }); return true; }
         if (!String(request.headers['content-type'] || '').toLowerCase().startsWith('application/json')) {
           sendJson(response, 415, { error: 'يجب إرسال البيانات بصيغة JSON.' });
           return true;
