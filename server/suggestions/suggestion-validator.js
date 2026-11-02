@@ -15,11 +15,10 @@ function validateSuggestion(input) {
 }
 function validateAdminPatch(input) {
   if (!input||typeof input!=='object'||Array.isArray(input)) return {error:'التعديل غير صالح.'};
-  const allowed=new Set(['status','priority','risk']);
+  const allowed=new Set(['status','priority']);
   if (!Object.keys(input).length||Object.keys(input).some(key=>!allowed.has(key))) return {error:'حقول التعديل غير مسموحة.'};
   if (input.status!==undefined&&!STATUSES.has(input.status)) return {error:'الحالة غير صالحة.'};
   if (input.priority!==undefined&&!['low','normal','high','urgent'].includes(input.priority)) return {error:'الأولوية غير صالحة.'};
-  if (input.risk!==undefined&&!['low','medium','high','critical'].includes(input.risk)) return {error:'درجة الخطورة غير صالحة.'};
   return {value:input};
 }
 module.exports={CATEGORIES,STATUSES,validateSuggestion,validateAdminPatch};
