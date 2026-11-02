@@ -149,8 +149,9 @@ function clientAddress(request, env) {
   if (env && env.TRUST_PROXY === 'true') {
     const forwarded = request.headers['x-forwarded-for'];
     if (typeof forwarded === 'string' && forwarded.length <= 512) {
-      const first = forwarded.split(',')[0].trim();
-      if (first && /^[0-9a-f:.]+$/i.test(first)) return first;
+      const hops = forwarded.split(',').map(function (value) { return value.trim(); }).filter(Boolean);
+      const trustedPeer = hops[hops.length - 1];
+      if (trustedPeer && /^[0-9a-f:.]+$/i.test(trustedPeer)) return trustedPeer;
     }
   }
   return request.socket.remoteAddress || 'unknown';
@@ -301,17 +302,19 @@ function createServer(options) {
   const fetchImpl = options.fetch || global.fetch;
   const limits = new Map();
   const analyticsLimits = new Map();
+  const suggestionLimits = new Map();
+  const approvalLimits = new Map();
   let lastAnalyticsCleanupDate = null;
   const adminApi = createAdminApi({ env: env, fetch: fetchImpl });
   const suggestionService = createSuggestionService({ env: env, fetch: fetchImpl });
   const taskService = createTaskService({ env: env, fetch: fetchImpl });
   const approvalApi = createApprovalApi({
     env: env, fetch: fetchImpl, taskService: taskService,
-    rateLimit: function (request) { return consumeRateLimit(limits, clientAddress(request, env), Date.now(), 10); }
+    rateLimit: function (request) { return consumeRateLimit(approvalLimits, clientAddress(request, env), Date.now(), 10); }
   });
   const suggestionsApi = createSuggestionsApi({
     env: env, fetch: fetchImpl, service: suggestionService,
-    rateLimit: function (request) { return consumeRateLimit(limits, clientAddress(request, env), Date.now(), 5); }
+    rateLimit: function (request) { return consumeRateLimit(suggestionLimits, clientAddress(request, env), Date.now(), 5); }
   });
   const mediaLibrary = options.mediaLibrary || createMediaLibrary({
     env: env,
@@ -341,7 +344,7 @@ function createServer(options) {
         sendJson(response, 503, { error: 'إحصاء الزوار غير مهيأ بعد.' });
         return;
       }
-      if (!consumeRateLimit(analyticsLimits, clientAddress(request), Date.now(), 30)) {
+      if (!consumeRateLimit(analyticsLimits, clientAddress(request, env), Date.now(), 30)) {
         sendJson(response, 429, { error: 'تم تجاوز عدد المحاولات. حاول لاحقًا.' });
         return;
       }
@@ -491,7 +494,7 @@ function createServer(options) {
         sendJson(response, 503, { error: 'إعدادات Gemini وTelegram غير مكتملة على الخادم.' });
         return;
       }
-      if (!consumeRateLimit(limits, clientAddress(request), Date.now())) {
+      if (!consumeRateLimit(limits, clientAddress(request, env), Date.now())) {
         sendJson(response, 429, { error: 'وصلت إلى حد الإرسال المؤقت. حاول لاحقًا.' });
         return;
       }
