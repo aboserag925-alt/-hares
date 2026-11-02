@@ -64,6 +64,42 @@ test('serves the app and health status without exposing environment values', asy
   });
 });
 
+test('records a daily unique visitor without storing the browser identifier', async function () {
+  const env = {
+    ...configuredEnv,
+    SUPABASE_URL: 'https://project.example',
+    SUPABASE_SERVICE_ROLE_KEY: 'test-service-role-key'
+  };
+  const calls = [];
+  const analyticsFetch = async function (url, options) {
+    calls.push({ url: url, options: options });
+    if (options.method === 'POST') return { ok: true, status: 201 };
+    return {
+      ok: true,
+      status: 200,
+      headers: { get: function (name) { return name.toLowerCase() === 'content-range' ? '0-0/8' : null; } }
+    };
+  };
+  const visitorId = '123e4567-e89b-42d3-a456-426614174000';
+  await withServer({ env: env, fetch: analyticsFetch }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/analytics/visit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({ visitorId: visitorId })
+    });
+    assert.equal(response.status, 200);
+    const result = await response.json();
+    assert.equal(result.visitors, 8);
+    assert.match(result.date, /^\\d{4}-\\d{2}-\\d{2}$/);
+    assert.equal(calls.length, 2);
+    const stored = JSON.parse(calls[0].options.body);
+    assert.equal(stored.visitor_hash.length, 64);
+    assert.equal(stored.visitor_hash.includes(visitorId), false);
+    assert.match(calls[0].url, /daily_visitors/);
+    assert.match(calls[0].options.headers.Prefer, /ignore-duplicates/);
+  });
+});
+
 test('publishes only approved library items and serves their files safely', async function () {
   const fileId = '123e4567-e89b-42d3-a456-426614174000';
   let approved = false;
