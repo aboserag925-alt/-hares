@@ -36,3 +36,7 @@ test('rejects invalid publication states and unknown fields', () => {
 test('supports partial updates without requiring a title', () => {
   assert.equal(validateLecture({ status: 'archived' }, true), null);
 });
+
+test('rejects empty partial updates', () => {
+  assert.match(validateLecture({}, true), /حقل واحد/);
+});
