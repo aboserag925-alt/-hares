@@ -13,8 +13,22 @@ class HaresAISupervisor {
     const reports=[];
     for (const name of names) {
       const agent=this.agents[name];
-      if (!agent || typeof agent.run!=='function') continue;
-      const report=await agent.run({task:{...task},input});
+      if (!agent || typeof agent.run!=='function') {
+        if (name==='security') {
+          const report={agent:'security',status:'BLOCKED',data:{blocked:true,reason:'Security agent unavailable'},warnings:['Required security review could not run']};
+          reports.push(report);
+          task={...task,tainted:true,status:'FAILED'};
+          break;
+        }
+        continue;
+      }
+      let report;
+      try {
+        report=await agent.run({task:{...task},input});
+      } catch (error) {
+        if (name!=='security') throw error;
+        report={agent:'security',status:'BLOCKED',data:{blocked:true,reason:'Security review failed'},warnings:['Required security review failed']};
+      }
       reports.push(report);
       if (report && report.status==='BLOCKED') { task={...task,tainted:true,status:'FAILED'}; break; }
     }
