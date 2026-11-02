@@ -19,7 +19,7 @@ function fakeRequest(method,headers={},payload){
 }
 test('public suggestions API rejects unknown fields before storage',async()=>{
  let submitted=false;
- const api=createSuggestionsApi({env:{},service:{submit:async()=>{submitted=true;}},rateLimit:()=>true});
+ const api=createSuggestionsApi({env:{},service:{submit:async(input)=>{const checked=validateSuggestion(input);if(checked.error)throw Object.assign(new Error(checked.error),{statusCode:400});submitted=true;}},rateLimit:()=>true});
  const res=fakeResponse();
  await api(fakeRequest('POST',{'content-type':'application/json'},{category:'bug',title:'عنوان صالح',description:'تفاصيل كافية للاقتراح',status:'APPROVED'}),res,'/api/suggestions');
  assert.equal(res.status,400);assert.equal(submitted,false);
