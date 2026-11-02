@@ -1,0 +1,1 @@
+'use strict'; const {assertApproval}=require('../approval-gate'); const {createAgent}=require('./index'); module.exports=createAgent('developer',({task})=>{assertApproval(task,'implement');return {authorized:true,branchRequired:true,mergeAllowed:false};});
