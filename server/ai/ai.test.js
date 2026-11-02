@@ -1,0 +1,16 @@
+'use strict';
+const test=require('node:test');const assert=require('node:assert/strict');
+const {classifyRisk,canTransition}=require('./policy');
+const {assess}=require('./risk-engine');
+const {assertApproval}=require('./approval-gate');
+const {route}=require('./router');
+const {HaresAISupervisor}=require('./supervisor');
+test('high-risk areas always require human approval',()=>{const a=assess({affectedAreas:['supabase_rls']});assert.equal(a.risk,'high');assert.equal(a.requiresApproval,true);});
+test('production secrets and deployment are critical',()=>{assert.equal(classifyRisk(['secrets']),'critical');assert.equal(classifyRisk(['deployment']),'critical');});
+test('approval gate blocks unapproved developer work',()=>{assert.throws(()=>assertApproval({approved:false},'implement'),/Human approval/);});
+test('approval gate requires a recorded approval id',()=>{assert.throws(()=>assertApproval({approved:true,risk:'high'},'implement'),/Recorded human approval/);assert.equal(assertApproval({approved:true,approvalId:'human-approval-1',risk:'high'},'implement'),true);});
+test('state machine blocks WAITING_APPROVAL to IMPLEMENTING',()=>{assert.equal(canTransition('WAITING_APPROVAL','IMPLEMENTING',{approved:true,approvalId:'x'}),false);});
+test('state machine blocks READY_FOR_REVIEW to MERGED without human approval',()=>{assert.equal(canTransition('READY_FOR_REVIEW','MERGED',{}),false);assert.equal(canTransition('HUMAN_APPROVED','MERGED',{humanApproved:true,humanApprovalId:'x'}),true);});
+test('agent router rejects unknown task categories',()=>{assert.deepEqual(route('implementation'),['security','developer','test','verifier']);assert.throws(()=>route('shell'),/Unsupported/);});
+test('security agent blocks prohibited auth/RLS bypass signals',async()=>{const security=require('./agents/security-agent');const r=await security.run({input:{affectedAreas:['auth_bypass']}});assert.equal(r.status,'BLOCKED');});
+test('supervisor stops when security agent blocks a task',async()=>{const security=require('./agents/security-agent');const supervisor=new HaresAISupervisor({security});const r=await supervisor.analyze({id:'task-1',type:'security',affectedAreas:['rls_disabled']});assert.equal(r.task.status,'FAILED');assert.equal(r.task.tainted,true);});

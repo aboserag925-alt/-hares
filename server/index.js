@@ -6,6 +6,8 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { createMediaLibrary } = require('./media-library');
 const { createAdminApi } = require('./lecture-api');
+const { createSuggestionService } = require('./suggestions/suggestion-service');
+const { createSuggestionsApi } = require('./suggestions/suggestion-api');
 
 const PUBLIC_ROOT = path.resolve(__dirname, '..');
 const MAX_BODY_BYTES = 16 * 1024;
@@ -291,6 +293,11 @@ function createServer(options) {
   const analyticsLimits = new Map();
   let lastAnalyticsCleanupDate = null;
   const adminApi = createAdminApi({ env: env, fetch: fetchImpl });
+  const suggestionService = createSuggestionService({ env: env, fetch: fetchImpl });
+  const suggestionsApi = createSuggestionsApi({
+    env: env, fetch: fetchImpl, service: suggestionService,
+    rateLimit: function (request) { return consumeRateLimit(limits, clientAddress(request), Date.now(), 5); }
+  });
   const mediaLibrary = options.mediaLibrary || createMediaLibrary({
     env: env,
     fetch: fetchImpl,
@@ -383,6 +390,7 @@ function createServer(options) {
       }
       return;
     }
+    if (await suggestionsApi(request, response, requestUrl.pathname)) return;
     if (await adminApi(request, response, requestUrl.pathname)) return;
     if (requestUrl.pathname === '/api/health' && request.method === 'GET') {
       sendJson(response, 200, { ok: true });
@@ -559,7 +567,7 @@ if (require.main === module) {
     console.log('Ahl Athar server listening on port ' + port);
     mediaLibrary.start().catch(function () {
       console.error('Telegram media intake could not be started.');
-      server.close(function () {});
+      if (process.env.TELEGRAM_MEDIA_REQUIRED === 'true') server.close(function () {});
     });
   });
 }

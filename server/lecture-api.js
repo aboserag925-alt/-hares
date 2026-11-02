@@ -26,6 +26,7 @@ function validateLecture(body, partial) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return 'بيانات المحاضرة غير صالحة.';
   const fields = ['title', 'description', 'starts_at', 'category', 'stream_url', 'recording_url', 'status'];
   if (Object.keys(body).some((key) => !fields.includes(key))) return 'توجد حقول غير معروفة.';
+  if (partial && Object.keys(body).length === 0) return 'يجب تحديد حقل واحد على الأقل للتعديل.';
   if (!partial || Object.hasOwn(body, 'title')) {
     if (typeof body.title !== 'string' || !body.title.trim() || body.title.trim().length > MAX_TITLE) return 'عنوان المحاضرة مطلوب وبحد أقصى 180 حرفًا.';
   }
@@ -146,6 +147,7 @@ function createAdminApi(options) {
       }
       const id = pathname.match(/^\/api\/lectures\/([0-9a-f-]{36})$/i);
       if (request.method === 'POST') {
+        if (id) { sendJson(response, 404, { error: 'إنشاء المحاضرة متاح فقط عبر /api/lectures.' }); return true; }
         if (!String(request.headers['content-type'] || '').toLowerCase().startsWith('application/json')) {
           sendJson(response, 415, { error: 'يجب إرسال البيانات بصيغة JSON.' });
           return true;
