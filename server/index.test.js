@@ -3,7 +3,7 @@
 const assert = require('node:assert/strict');
 const http = require('node:http');
 const test = require('node:test');
-const { createServer, clientAddress, consumeRateLimit } = require('./index');
+const { createServer, clientAddress, consumeRateLimit, RATE_LIMIT } = require('./index');
 
 const configuredEnv = {
   GEMINI_API_KEY: 'test-gemini-key',
@@ -390,6 +390,14 @@ test('ignores X-Forwarded-For unless TRUST_PROXY is explicitly enabled', functio
   assert.equal(clientAddress(request,{TRUST_PROXY:'true'}),'10.0.0.2');
   const spoofed={headers:{'x-forwarded-for':'not-an-ip'},socket:{remoteAddress:'192.0.2.9'}};
   assert.equal(clientAddress(spoofed,{TRUST_PROXY:'true'}),'192.0.2.9');
+});
+
+test('consumeRateLimit defaults to RATE_LIMIT when maximum is omitted', function () {
+  const limits = new Map();
+  for (let index = 0; index < RATE_LIMIT; index += 1) {
+    assert.equal(consumeRateLimit(limits, 'default-limit-client', 1000), true);
+  }
+  assert.equal(consumeRateLimit(limits, 'default-limit-client', 1000), false);
 });
 
 test('rate limiter bounds its in-memory key count and expires entries', function () {
