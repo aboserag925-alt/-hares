@@ -8,6 +8,8 @@ const { createMediaLibrary } = require('./media-library');
 const { createAdminApi } = require('./lecture-api');
 const { createSuggestionService } = require('./suggestions/suggestion-service');
 const { createSuggestionsApi } = require('./suggestions/suggestion-api');
+const { createTaskService } = require('./ai/task-service');
+const { createApprovalApi } = require('./ai/approval-api');
 
 const PUBLIC_ROOT = path.resolve(__dirname, '..');
 const MAX_BODY_BYTES = 16 * 1024;
@@ -302,6 +304,11 @@ function createServer(options) {
   let lastAnalyticsCleanupDate = null;
   const adminApi = createAdminApi({ env: env, fetch: fetchImpl });
   const suggestionService = createSuggestionService({ env: env, fetch: fetchImpl });
+  const taskService = createTaskService({ env: env, fetch: fetchImpl });
+  const approvalApi = createApprovalApi({
+    env: env, fetch: fetchImpl, taskService: taskService,
+    rateLimit: function (request) { return consumeRateLimit(limits, clientAddress(request, env), Date.now(), 10); }
+  });
   const suggestionsApi = createSuggestionsApi({
     env: env, fetch: fetchImpl, service: suggestionService,
     rateLimit: function (request) { return consumeRateLimit(limits, clientAddress(request, env), Date.now(), 5); }
@@ -398,6 +405,7 @@ function createServer(options) {
       }
       return;
     }
+    if (await approvalApi(request, response, requestUrl.pathname)) return;
     if (await suggestionsApi(request, response, requestUrl.pathname)) return;
     if (await adminApi(request, response, requestUrl.pathname)) return;
     if (requestUrl.pathname === '/api/health' && request.method === 'GET') {
