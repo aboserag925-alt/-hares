@@ -333,7 +333,7 @@ function createServer(options) {
       const visitorHash = crypto.createHash('sha256')
         .update(visitDate + ':' + body.visitorId)
         .digest('hex');
-      const supabaseBase = env.SUPABASE_URL.replace(/\\/$/, '');
+      const supabaseBase = env.SUPABASE_URL.replace(/\/$/, '');
       try {
         const insert = await fetchImpl(supabaseBase +
           '/rest/v1/daily_visitors?on_conflict=visit_date,visitor_hash', {
@@ -360,7 +360,7 @@ function createServer(options) {
         });
         if (!countResponse.ok) throw new Error('Analytics count failed');
         const contentRange = countResponse.headers && countResponse.headers.get('content-range');
-        const countMatch = typeof contentRange === 'string' && contentRange.match(/\\/(\\d+)$/);
+        const countMatch = typeof contentRange === 'string' && contentRange.match(/\/(\d+)$/);
         sendJson(response, 200, { date: visitDate, visitors: countMatch ? Number(countMatch[1]) : null });
       } catch {
         sendJson(response, 502, { error: 'تعذر تحميل إحصاء الزوار الآن.' });
