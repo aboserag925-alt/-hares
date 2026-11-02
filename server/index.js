@@ -289,6 +289,7 @@ function createServer(options) {
   const fetchImpl = options.fetch || global.fetch;
   const limits = new Map();
   const analyticsLimits = new Map();
+  let lastAnalyticsCleanupDate = null;
   const adminApi = createAdminApi({ env: env, fetch: fetchImpl });
   const mediaLibrary = options.mediaLibrary || createMediaLibrary({
     env: env,
@@ -335,6 +336,21 @@ function createServer(options) {
         .digest('hex');
       const supabaseBase = env.SUPABASE_URL.replace(/\/$/, '');
       try {
+        if (lastAnalyticsCleanupDate !== visitDate) {
+          const cutoffDate = cairoDateKey(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000));
+          const cleanup = await fetchImpl(supabaseBase +
+            '/rest/v1/daily_visitors?visit_date=lt.' + cutoffDate, {
+            method: 'DELETE',
+            headers: {
+              apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+              Authorization: 'Bearer ' + env.SUPABASE_SERVICE_ROLE_KEY,
+              Prefer: 'return=minimal'
+            },
+            signal: AbortSignal.timeout(10000)
+          });
+          if (!cleanup.ok) throw new Error('Analytics retention cleanup failed');
+          lastAnalyticsCleanupDate = visitDate;
+        }
         const insert = await fetchImpl(supabaseBase +
           '/rest/v1/daily_visitors?on_conflict=visit_date,visitor_hash', {
           method: 'POST',
