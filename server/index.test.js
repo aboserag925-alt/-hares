@@ -91,12 +91,13 @@ test('records a daily unique visitor without storing the browser identifier', as
     const result = await response.json();
     assert.equal(result.visitors, 8);
     assert.match(result.date, /^\d{4}-\d{2}-\d{2}$/);
-    assert.equal(calls.length, 2);
-    const stored = JSON.parse(calls[0].options.body);
+    assert.equal(calls.length, 3);
+    assert.equal(calls[0].options.method, 'DELETE');
+    const stored = JSON.parse(calls[1].options.body);
     assert.equal(stored.visitor_hash.length, 64);
     assert.equal(stored.visitor_hash.includes(visitorId), false);
-    assert.match(calls[0].url, /daily_visitors/);
-    assert.match(calls[0].options.headers.Prefer, /ignore-duplicates/);
+    assert.match(calls[1].url, /daily_visitors/);
+    assert.match(calls[1].options.headers.Prefer, /ignore-duplicates/);
   });
 });
 
