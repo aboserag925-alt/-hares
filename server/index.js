@@ -143,15 +143,23 @@ async function readUtf8Json(response) {
   return JSON.parse(text);
 }
 
-function clientAddress(request) {
+function clientAddress(request, env) {
+  if (env && env.TRUST_PROXY === 'true') {
+    const forwarded = request.headers['x-forwarded-for'];
+    if (typeof forwarded === 'string' && forwarded.length <= 512) {
+      const first = forwarded.split(',')[0].trim();
+      if (first && /^[0-9a-f:.]+$/i.test(first)) return first;
+    }
+  }
   return request.socket.remoteAddress || 'unknown';
 }
 
 function consumeRateLimit(limits, address, now, maximum) {
-  if (limits.size > 10000) {
+  if (limits.size >= 10000) {
     limits.forEach(function (entry, key) {
       if (entry.resetAt <= now) limits.delete(key);
     });
+    while (limits.size >= 10000) limits.delete(limits.keys().next().value);
   }
 
   let entry = limits.get(address);
@@ -296,7 +304,7 @@ function createServer(options) {
   const suggestionService = createSuggestionService({ env: env, fetch: fetchImpl });
   const suggestionsApi = createSuggestionsApi({
     env: env, fetch: fetchImpl, service: suggestionService,
-    rateLimit: function (request) { return consumeRateLimit(limits, clientAddress(request), Date.now(), 5); }
+    rateLimit: function (request) { return consumeRateLimit(limits, clientAddress(request, env), Date.now(), 5); }
   });
   const mediaLibrary = options.mediaLibrary || createMediaLibrary({
     env: env,
@@ -572,4 +580,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { createServer: createServer, loadEnvFile: loadEnvFile };
+module.exports = { createServer: createServer, loadEnvFile: loadEnvFile, clientAddress: clientAddress, consumeRateLimit: consumeRateLimit };
