@@ -1,6 +1,6 @@
 'use strict';
 const CATEGORIES=new Set(['feature','bug','design','content','performance','usability','other']);
-const STATUSES=new Set(['NEW','ANALYZING','ANALYZED','PLANNED','WAITING_APPROVAL','APPROVED','REJECTED','IMPLEMENTING','TESTING','VERIFYING','READY_FOR_REVIEW','COMPLETED']);
+const STATUSES=new Set(['REJECTED']);
 function validateSuggestion(input) {
   if (!input || typeof input!=='object' || Array.isArray(input)) return {error:'بيانات الاقتراح غير صالحة.'};
   const allowed=new Set(['category','title','description']);
