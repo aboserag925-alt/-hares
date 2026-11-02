@@ -3,6 +3,7 @@
 const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const { createMediaLibrary } = require('./media-library');
 const { createAdminApi } = require('./lecture-api');
 
@@ -144,7 +145,7 @@ function clientAddress(request) {
   return request.socket.remoteAddress || 'unknown';
 }
 
-function consumeRateLimit(limits, address, now) {
+function consumeRateLimit(limits, address, now, maximum) {
   if (limits.size > 10000) {
     limits.forEach(function (entry, key) {
       if (entry.resetAt <= now) limits.delete(key);
@@ -156,9 +157,21 @@ function consumeRateLimit(limits, address, now) {
     entry = { count: 0, resetAt: now + RATE_WINDOW_MS };
     limits.set(address, entry);
   }
-  if (entry.count >= RATE_LIMIT) return false;
+  if (entry.count >= (maximum || RATE_LIMIT)) return false;
   entry.count += 1;
   return true;
+}
+
+function cairoDateKey(date) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Africa/Cairo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(date || new Date());
+  const values = {};
+  parts.forEach(function (part) { values[part.type] = part.value; });
+  return values.year + '-' + values.month + '-' + values.day;
 }
 
 function staticFilePath(requestUrl) {
@@ -275,6 +288,7 @@ function createServer(options) {
   const env = options.env || process.env;
   const fetchImpl = options.fetch || global.fetch;
   const limits = new Map();
+  const analyticsLimits = new Map();
   const adminApi = createAdminApi({ env: env, fetch: fetchImpl });
   const mediaLibrary = options.mediaLibrary || createMediaLibrary({
     env: env,
@@ -298,6 +312,60 @@ function createServer(options) {
         response.end();
         return;
       }
+    }
+    if (requestUrl.pathname === '/api/analytics/visit' && request.method === 'POST') {
+      if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+        sendJson(response, 503, { error: 'إحصاء الزوار غير مهيأ بعد.' });
+        return;
+      }
+      if (!consumeRateLimit(analyticsLimits, clientAddress(request), Date.now(), 30)) {
+        sendJson(response, 429, { error: 'تم تجاوز عدد المحاولات. حاول لاحقًا.' });
+        return;
+      }
+      const body = await readJsonBody(request, response);
+      if (!body) return;
+      if (typeof body.visitorId !== 'string' ||
+          !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.visitorId)) {
+        sendJson(response, 400, { error: 'معرّف الزائر غير صالح.' });
+        return;
+      }
+      const visitDate = cairoDateKey(new Date());
+      const visitorHash = crypto.createHash('sha256')
+        .update(visitDate + ':' + body.visitorId)
+        .digest('hex');
+      const supabaseBase = env.SUPABASE_URL.replace(/\\/$/, '');
+      try {
+        const insert = await fetchImpl(supabaseBase +
+          '/rest/v1/daily_visitors?on_conflict=visit_date,visitor_hash', {
+          method: 'POST',
+          headers: {
+            apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+            Authorization: 'Bearer ' + env.SUPABASE_SERVICE_ROLE_KEY,
+            'Content-Type': 'application/json',
+            Prefer: 'resolution=ignore-duplicates,return=minimal'
+          },
+          body: JSON.stringify({ visit_date: visitDate, visitor_hash: visitorHash }),
+          signal: AbortSignal.timeout(10000)
+        });
+        if (!insert.ok) throw new Error('Analytics insert failed');
+        const countResponse = await fetchImpl(supabaseBase +
+          '/rest/v1/daily_visitors?select=visitor_hash&visit_date=eq.' + visitDate, {
+          headers: {
+            apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+            Authorization: 'Bearer ' + env.SUPABASE_SERVICE_ROLE_KEY,
+            Prefer: 'count=exact',
+            Range: '0-0'
+          },
+          signal: AbortSignal.timeout(10000)
+        });
+        if (!countResponse.ok) throw new Error('Analytics count failed');
+        const contentRange = countResponse.headers && countResponse.headers.get('content-range');
+        const countMatch = typeof contentRange === 'string' && contentRange.match(/\\/(\\d+)$/);
+        sendJson(response, 200, { date: visitDate, visitors: countMatch ? Number(countMatch[1]) : null });
+      } catch {
+        sendJson(response, 502, { error: 'تعذر تحميل إحصاء الزوار الآن.' });
+      }
+      return;
     }
     if (await adminApi(request, response, requestUrl.pathname)) return;
     if (requestUrl.pathname === '/api/health' && request.method === 'GET') {
