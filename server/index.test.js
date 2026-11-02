@@ -387,7 +387,9 @@ test('ignores X-Forwarded-For unless TRUST_PROXY is explicitly enabled', functio
   const request={headers:{'x-forwarded-for':'203.0.113.8, 10.0.0.2'},socket:{remoteAddress:'192.0.2.4'}};
   assert.equal(clientAddress(request,{}),'192.0.2.4');
   assert.equal(clientAddress(request,{TRUST_PROXY:'false'}),'192.0.2.4');
-  assert.equal(clientAddress(request,{TRUST_PROXY:'true'}),'203.0.113.8');
+  assert.equal(clientAddress(request,{TRUST_PROXY:'true'}),'10.0.0.2');
+  const spoofed={headers:{'x-forwarded-for':'not-an-ip'},socket:{remoteAddress:'192.0.2.9'}};
+  assert.equal(clientAddress(spoofed,{TRUST_PROXY:'true'}),'192.0.2.9');
 });
 
 test('rate limiter bounds its in-memory key count and expires entries', function () {
