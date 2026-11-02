@@ -61,3 +61,17 @@ do $$ declare t text; begin
     execute format('grant all on public.%I to service_role',t);
   end loop;
 end $$;
+
+create table if not exists public.ai_audit_events (
+  id bigint generated always as identity primary key,
+  event_type text not null check (event_type in ('suggestion.created','suggestion.updated','suggestion.rejected','ai.task.created','ai.analysis.completed','ai.approval.requested','ai.approval.granted','ai.approval.rejected','ai.implementation.started','ai.tests.executed','ai.verification.completed','ai.pull_request.prepared')),
+  suggestion_id uuid references public.suggestions(id) on delete set null,
+  actor_user_id uuid references auth.users(id) on delete set null,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+create index if not exists ai_audit_events_created_idx on public.ai_audit_events(created_at desc);
+create index if not exists ai_audit_events_suggestion_idx on public.ai_audit_events(suggestion_id,created_at desc);
+alter table public.ai_audit_events enable row level security;
+revoke all on public.ai_audit_events from anon, authenticated, public;
+grant all on public.ai_audit_events to service_role;
