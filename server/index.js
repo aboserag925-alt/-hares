@@ -157,7 +157,7 @@ function clientAddress(request, env) {
   return request.socket.remoteAddress || 'unknown';
 }
 
-function consumeRateLimit(limits, address, now, maximum) {
+function consumeRateLimit(limits, address, now, maximum = RATE_LIMIT) {
   if (limits.size >= 10000) {
     limits.forEach(function (entry, key) {
       if (entry.resetAt <= now) limits.delete(key);
@@ -170,7 +170,7 @@ function consumeRateLimit(limits, address, now, maximum) {
     entry = { count: 0, resetAt: now + RATE_WINDOW_MS };
     limits.set(address, entry);
   }
-  if (entry.count >= (maximum || RATE_LIMIT)) return false;
+  if (entry.count >= maximum) return false;
   entry.count += 1;
   return true;
 }
@@ -591,4 +591,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { createServer: createServer, loadEnvFile: loadEnvFile, clientAddress: clientAddress, consumeRateLimit: consumeRateLimit };
+module.exports = { createServer: createServer, loadEnvFile: loadEnvFile, clientAddress: clientAddress, consumeRateLimit: consumeRateLimit, RATE_LIMIT: RATE_LIMIT };
