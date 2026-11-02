@@ -299,8 +299,9 @@ test('handles allowlisted CORS preflight requests for API endpoints', async func
     });
     assert.equal(response.status, 204);
     assert.equal(response.headers.get('access-control-allow-origin'), 'https://app.example');
-    assert.equal(response.headers.get('access-control-allow-methods'), 'GET, HEAD, POST, OPTIONS');
+    assert.equal(response.headers.get('access-control-allow-methods'), 'GET, HEAD, POST, PATCH, DELETE, OPTIONS');
     assert.match(response.headers.get('access-control-allow-headers'), /Content-Type/i);
+    assert.match(response.headers.get('access-control-allow-headers'), /Authorization/i);
     assert.equal(response.headers.get('vary'), 'Origin');
   });
 });
