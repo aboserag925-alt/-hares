@@ -1,0 +1,1 @@
+'use strict'; const {reportOnly}=require('./index'); module.exports=reportOnly('performance');
