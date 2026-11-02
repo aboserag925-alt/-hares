@@ -75,3 +75,83 @@ create index if not exists ai_audit_events_suggestion_idx on public.ai_audit_eve
 alter table public.ai_audit_events enable row level security;
 revoke all on public.ai_audit_events from anon, authenticated, public;
 grant all on public.ai_audit_events to service_role;
+
+-- Approval records are written only by the trusted server after validating the caller's JWT.
+alter table public.ai_tasks
+  add column if not exists approval_id uuid,
+  add column if not exists human_approved boolean not null default false,
+  add column if not exists human_approval_id uuid;
+
+alter table public.ai_tasks
+  drop constraint if exists ai_tasks_approval_id_fkey;
+alter table public.ai_tasks
+  add constraint ai_tasks_approval_id_fkey foreign key (approval_id)
+  references public.ai_approvals(id) on delete restrict;
+alter table public.ai_tasks
+  drop constraint if exists ai_tasks_human_approval_id_fkey;
+alter table public.ai_tasks
+  add constraint ai_tasks_human_approval_id_fkey foreign key (human_approval_id)
+  references public.ai_approvals(id) on delete restrict;
+
+create or replace function public.record_ai_approval(
+  p_task_id uuid,
+  p_actor_user_id uuid,
+  p_action text,
+  p_decision text,
+  p_reason text default null
+) returns uuid
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
+declare
+  v_task public.ai_tasks%rowtype;
+  v_approval_id uuid;
+begin
+  if p_action not in ('IMPLEMENT','MERGE') or p_decision not in ('APPROVED','REJECTED') then
+    raise exception 'Invalid approval action';
+  end if;
+  if not exists (select 1 from public.admin_users where user_id = p_actor_user_id) then
+    raise exception 'Administrator authorization required';
+  end if;
+  select * into v_task from public.ai_tasks where id = p_task_id for update;
+  if not found then raise exception 'AI task not found'; end if;
+  if v_task.tainted then raise exception 'Tainted tasks cannot be approved'; end if;
+  if p_action = 'IMPLEMENT' and v_task.status <> 'WAITING_APPROVAL' then
+    raise exception 'Task is not waiting for implementation approval';
+  end if;
+  if p_action = 'MERGE' and v_task.status <> 'READY_FOR_REVIEW' then
+    raise exception 'Task is not ready for human review';
+  end if;
+  insert into public.ai_approvals(task_id,approved_by,action,decision,reason)
+  values (p_task_id,p_actor_user_id,p_action,p_decision,left(coalesce(p_reason,''),1000))
+  returning id into v_approval_id;
+  if p_action = 'IMPLEMENT' then
+    update public.ai_tasks
+      set status = case when p_decision = 'APPROVED' then 'APPROVED' else 'REJECTED' end,
+          approved = (p_decision = 'APPROVED'),
+          approval_id = v_approval_id,
+          updated_at = now()
+      where id = p_task_id;
+  elsif p_action = 'MERGE' and p_decision = 'APPROVED' then
+    update public.ai_tasks
+      set status = 'HUMAN_APPROVED',
+          human_approved = true,
+          human_approval_id = v_approval_id,
+          updated_at = now()
+      where id = p_task_id;
+  end if;
+  insert into public.ai_audit_events(event_type,actor_user_id,metadata)
+  values (
+    case when p_action = 'IMPLEMENT' and p_decision = 'APPROVED' then 'ai.approval.granted'
+         when p_decision = 'REJECTED' then 'ai.approval.rejected'
+         else 'ai.approval.granted' end,
+    p_actor_user_id,
+    jsonb_build_object('task_id',p_task_id,'result',p_decision,'status',p_action)
+  );
+  return v_approval_id;
+end;
+$$;
+
+revoke all on function public.record_ai_approval(uuid,uuid,text,text,text) from public, anon, authenticated;
+grant execute on function public.record_ai_approval(uuid,uuid,text,text,text) to service_role;
