@@ -293,8 +293,8 @@ test('handles allowlisted CORS preflight requests for API endpoints', async func
       method: 'OPTIONS',
       headers: {
         Origin: 'https://app.example',
-        'Access-Control-Request-Method': 'POST',
-        'Access-Control-Request-Headers': 'content-type'
+        'Access-Control-Request-Method': 'PATCH',
+        'Access-Control-Request-Headers': 'authorization, content-type'
       }
     });
     assert.equal(response.status, 204);
