@@ -25,6 +25,7 @@ function requiresHumanApproval(risk) { return risk==='high'||risk==='critical'; 
 function canTransition(from,to,task={}) {
   if (!TRANSITIONS[from] || !TRANSITIONS[from].includes(to)) return false;
   if (to==='IMPLEMENTING' && !(task.approved===true && task.approvalId)) return false;
+  if (to==='HUMAN_APPROVED' && !(task.humanApproved===true && task.humanApprovalId)) return false;
   if (to==='MERGED' && !(task.humanApproved===true && task.humanApprovalId)) return false;
   return true;
 }
