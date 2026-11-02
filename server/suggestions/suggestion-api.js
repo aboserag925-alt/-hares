@@ -35,7 +35,7 @@ function createSuggestionsApi({env,fetch:fetchImpl=global.fetch,service,rateLimi
       if(req.method==='GET'){const item=await service.get(match[1]);send(res,item?200:404,item?{item}:{error:'الاقتراح غير موجود.'});return true;}
       if(!/^application\/json(?:\s*;|$)/i.test(req.headers['content-type']||'')){send(res,415,{error:'أرسل التعديل بصيغة JSON.'});return true;}
       const checked=validateAdminPatch(await body(req));if(checked.error){send(res,400,{error:checked.error});return true;}
-      const item=await service.update(match[1],checked.value);send(res,item?200:404,item?{item}:{error:'الاقتراح غير موجود.'});return true;
+      const item=await service.update(match[1],checked.value,user.id);send(res,item?200:404,item?{item}:{error:'الاقتراح غير موجود.'});return true;
     }catch(e){send(res,e.statusCode||502,{error:e.statusCode?e.message:'تعذر تنفيذ الطلب الآن.'});return true;}
   };
 }
