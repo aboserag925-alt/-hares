@@ -14,3 +14,13 @@ test('state machine blocks READY_FOR_REVIEW to MERGED without human approval',()
 test('agent router rejects unknown task categories',()=>{assert.deepEqual(route('implementation'),['security','developer','test','verifier']);assert.throws(()=>route('shell'),/Unsupported/);});
 test('security agent blocks prohibited auth/RLS bypass signals',async()=>{const security=require('./agents/security-agent');const r=await security.run({input:{affectedAreas:['auth_bypass']}});assert.equal(r.status,'BLOCKED');});
 test('supervisor stops when security agent blocks a task',async()=>{const security=require('./agents/security-agent');const supervisor=new HaresAISupervisor({security});const r=await supervisor.analyze({id:'task-1',type:'security',affectedAreas:['rls_disabled']});assert.equal(r.task.status,'FAILED');assert.equal(r.task.tainted,true);});
+
+test('database approval fields are accepted only when backed by approval IDs',()=>{
+ assert.equal(canTransition('WAITING_APPROVAL','APPROVED',{approved:true}),false);
+ assert.equal(canTransition('WAITING_APPROVAL','APPROVED',{approved:true,approval_id:'db-approval'}),true);
+ assert.equal(canTransition('READY_FOR_REVIEW','HUMAN_APPROVED',{human_approved:true,human_approval_id:'db-merge-approval'}),true);
+});
+test('approval gate accepts persisted snake-case approval records',()=>{
+ assert.equal(assertApproval({approved:true,approval_id:'db-approval',risk:'critical'},'implement'),true);
+ assert.equal(assertApproval({human_approved:true,human_approval_id:'db-merge-approval'},'merge'),true);
+});
