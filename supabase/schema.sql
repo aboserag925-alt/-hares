@@ -68,3 +68,16 @@ create policy "Public can read published lectures"
 -- Add administrators manually from the Supabase SQL Editor, after creating their Auth account:
 -- insert into public.admin_users (user_id)
 -- select id from auth.users where email = 'admin@example.com';
+
+
+-- Daily unique visitor counts. Only the server service role may read or write these rows.
+create table if not exists public.daily_visitors (
+  visit_date date not null,
+  visitor_hash text not null check (visitor_hash ~ '^[0-9a-f]{64}$'),
+  created_at timestamptz not null default now(),
+  primary key (visit_date, visitor_hash)
+);
+
+alter table public.daily_visitors enable row level security;
+revoke all on public.daily_visitors from anon, authenticated, public;
+grant all on public.daily_visitors to service_role;
