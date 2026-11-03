@@ -241,6 +241,18 @@ body,.app-shell,button,input,textarea,select{
 .site footer .design-signature{margin:0;padding:0;color:#8a8f88}
 @media(max-width:600px){.support-bottom{margin:24px 16px 12px;padding:16px;align-items:flex-start;flex-direction:column}.support-bottom .support-button{width:100%}.design-signature{text-align:center;margin-bottom:14px}}
 
+
+/* Experimental release notice */
+.development-notice{max-width:1132px;width:calc(100% - 48px);margin:14px auto 0;padding:12px 18px;display:flex;align-items:center;gap:13px;border:1px solid rgba(181,139,66,.38);border-radius:16px;background:linear-gradient(105deg,#fbf8f0,#fff 62%,#f7f4eb);color:#173f35;box-shadow:0 8px 24px rgba(23,63,53,.055)}
+.development-notice-icon{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border-radius:12px;background:#f1e8d4;color:#94713b}
+.development-notice-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.development-notice-copy{display:grid;gap:2px;min-width:0;line-height:1.55}
+.development-notice-copy strong{font-size:14px;font-weight:800;color:#173f35}
+.development-notice-copy span{font-size:12px;color:#66736b}
+.development-notice-dot{width:8px;height:8px;flex:0 0 8px;margin-inline-start:auto;border-radius:50%;background:#b58b42;box-shadow:0 0 0 0 rgba(181,139,66,.35);animation:development-pulse 2.4s ease-out infinite}
+@keyframes development-pulse{70%{box-shadow:0 0 0 8px rgba(181,139,66,0)}100%{box-shadow:0 0 0 0 rgba(181,139,66,0)}}
+@media(max-width:600px){.development-notice{width:calc(100% - 28px);margin-top:10px;padding:10px 12px;gap:9px;border-radius:13px}.development-notice-icon{width:32px;height:32px;flex-basis:32px}.development-notice-copy strong{font-size:12px}.development-notice-copy span{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.development-notice-dot{animation:none}}
 </style>
 
 </head>
@@ -256,6 +268,11 @@ body,.app-shell,button,input,textarea,select{
 <a class="btn fill nav-cta" href="#live" style="height:42px;padding:0 20px;color:#0b0e0d">تابع البث</a>
 <nav class="mobile-site-menu" id="mobileSiteMenu" aria-label="قائمة الهاتف" hidden><a href="#sections" onclick="closeSiteMenu()">الأقسام</a><a href="#schedule" onclick="closeSiteMenu()">الجدول</a><a href="#archive" onclick="closeSiteMenu()">الأرشيف</a><a href="#majlis" onclick="closeSiteMenu()">المجلس</a></nav>
 </div></header>
+<div class="development-notice" role="status" aria-label="حالة المنصة">
+  <span class="development-notice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6M9 9h.01M15 9h.01"/></svg></span>
+  <span class="development-notice-copy"><strong>نسخة تجريبية — المنصة تحت التطوير</strong><span>نعمل على تحسين استراحة أهل الأثر وإضافة مزايا جديدة، وقد تتغير بعض الأقسام أثناء التطوير.</span></span>
+  <span class="development-notice-dot" aria-hidden="true"></span>
+</div>
 <main id="top">
 <div class="hero"><div class="wrap">
 <div>
