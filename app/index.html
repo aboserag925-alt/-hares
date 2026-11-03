@@ -210,6 +210,28 @@ dialog.support-dialog{background:#fff!important;color:#303833!important;border-c
 dialog.support-dialog>p{color:#68736d!important}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
+
+/* Premium motion identity — mobile application */
+:root{--motion-green:#173f35;--motion-gold:#c5a253;--motion-ivory:#f5f1e8}
+body{background-image:radial-gradient(ellipse at 90% 0,rgba(197,162,83,.08),transparent 34%),radial-gradient(ellipse at 4% 28%,rgba(23,63,53,.045),transparent 35%)}
+header{position:relative}
+header::after{content:"";position:absolute;inset-inline-start:0;bottom:-10px;width:76px;height:2px;border-radius:3px;background:linear-gradient(90deg,var(--motion-gold),transparent)}
+.welcome-hero{background:linear-gradient(115deg,#f8f7f2,#fff 58%,#f5f1e8)!important;border-color:#e5dcc7!important;box-shadow:0 12px 38px rgba(23,63,53,.07)!important}
+.hero-copy p,.hero-foot{color:#5e6863!important}
+.hero-emblem{background:radial-gradient(circle,#f5f1e8,#fff 68%)!important;color:#173f35!important}
+.hero-primary{background:#173f35!important;color:#fff!important;border-color:#173f35!important}
+.hero-secondary{background:#fff!important;border-color:#173f35!important;color:#173f35!important}
+.quick-item{background:#f8f7f2!important;border-color:#e5e8e2!important;color:#303833!important}
+.support-button,.support-button:hover{background:#173f35!important;color:#fff!important;border-color:#c5a253!important}
+.card,.media-card{border-radius:20px!important;box-shadow:0 10px 28px rgba(23,63,53,.055)!important;transition:transform .3s,box-shadow .3s,border-color .3s}
+.card:active,.quick-item:active{transform:scale(.985)}
+.tab,.btn,.media-filter,.adhkar-choice{transition:background .25s,color .25s,transform .25s,box-shadow .25s}
+.tab.on,.media-filter.on,.adhkar-choice.on{box-shadow:inset 0 -2px 0 var(--motion-gold)}
+.next{position:relative;overflow:hidden}
+.next::after{content:"";position:absolute;inset:-40% auto -40% -30%;width:28%;transform:rotate(18deg);background:linear-gradient(90deg,transparent,rgba(197,162,83,.12),transparent);animation:appSheen 8s ease-in-out infinite}
+@keyframes appSheen{0%,35%{left:-35%}75%,100%{left:125%}}
+@media(prefers-reduced-motion:reduce){.next::after{animation:none!important}.card,.media-card,.tab,.btn,.media-filter,.adhkar-choice{transition:none!important}}
+
 </style>
 </head>
 <body>
