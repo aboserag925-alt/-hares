@@ -260,6 +260,18 @@ body,.app-shell,button,input,textarea,select{
 .quick-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:transform .35s cubic-bezier(.2,.7,.2,1),stroke-width .25s}
 .quick-item:hover .quick-icon svg,.quick-item:focus-visible .quick-icon svg{transform:rotate(-8deg) scale(1.12);stroke-width:2}
 @media(prefers-reduced-motion:reduce){.quick-icon svg{transition:none!important}}
+
+/* Experimental release notice */
+.development-notice{display:flex;align-items:center;gap:12px;margin:0 0 18px;padding:12px 15px;border:1px solid rgba(213,171,100,.35);border-radius:16px;background:linear-gradient(110deg,rgba(213,171,100,.11),rgba(255,255,255,.035));color:var(--text);box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.development-notice-icon{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border-radius:12px;background:rgba(213,171,100,.13);color:var(--gold2)}
+.development-notice-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.development-notice-copy{display:grid;gap:2px;min-width:0;line-height:1.55}
+.development-notice-copy strong{font-size:13px;font-weight:800;color:var(--gold2)}
+.development-notice-copy span{font-size:11px;color:var(--muted)}
+.development-notice-dot{width:8px;height:8px;flex:0 0 8px;margin-inline-start:auto;border-radius:50%;background:var(--gold);box-shadow:0 0 0 0 rgba(213,171,100,.35);animation:development-pulse 2.4s ease-out infinite}
+@keyframes development-pulse{70%{box-shadow:0 0 0 8px rgba(213,171,100,0)}100%{box-shadow:0 0 0 0 rgba(213,171,100,0)}}
+@media(max-width:520px){.development-notice{gap:9px;padding:10px 11px}.development-notice-icon{width:32px;height:32px;flex-basis:32px}.development-notice-copy strong{font-size:12px}.development-notice-copy span{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.development-notice-dot{animation:none}}
 </style>
 </head>
 <body>
@@ -285,6 +297,11 @@ body,.app-shell,button,input,textarea,select{
 </nav>
 
 </header>
+<div class="development-notice" role="status" aria-label="حالة المنصة">
+  <span class="development-notice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6M9 9h.01M15 9h.01"/></svg></span>
+  <span class="development-notice-copy"><strong>نسخة تجريبية — المنصة تحت التطوير</strong><span>نعمل على تحسين استراحة أهل الأثر وإضافة مزايا جديدة، وقد تتغير بعض الأقسام أثناء التطوير.</span></span>
+  <span class="development-notice-dot" aria-hidden="true"></span>
+</div>
 <section class="welcome-hero" aria-labelledby="welcomeTitle">
   <div class="hero-copy">
     <span class="hero-kicker"><i></i> مجلس علمي • أدب • أثر</span>
