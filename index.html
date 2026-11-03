@@ -156,6 +156,67 @@ html,body{background:#fff!important;color:#333!important}
 .mobile-site-menu a:hover,.mobile-site-menu a:focus-visible{background:#f5f1e8!important;color:#173f35!important}
 @media(prefers-reduced-motion:reduce){.site *{animation:none!important;transition:none!important}}
 
+
+/* Premium motion identity — Ahl Athar */
+:root{--athar-green:#173f35;--athar-gold:#c5a253;--athar-ivory:#f5f1e8;--athar-ink:#303833}
+html{scroll-behavior:smooth;scroll-padding-top:88px}
+.site{background:#fff!important}
+.site::before{content:"";position:absolute;inset:72px 0 auto;height:720px;pointer-events:none;z-index:0;opacity:.72;background:radial-gradient(ellipse at 82% 20%,rgba(197,162,83,.13),transparent 38%),radial-gradient(ellipse at 12% 45%,rgba(23,63,53,.09),transparent 42%),repeating-linear-gradient(135deg,transparent 0 34px,rgba(23,63,53,.018) 35px 36px);mask-image:linear-gradient(#000,transparent 94%)}
+.site main,.site footer,.site .nav{position:relative;z-index:1}
+.site .hero{position:relative;isolation:isolate;padding:clamp(54px,8vw,104px) 0 clamp(70px,9vw,120px)}
+.site .hero::before{content:"";position:absolute;z-index:-1;inset:3% 4% 0;border:1px solid rgba(197,162,83,.22);border-radius:48% 48% 28px 28px/18% 18% 28px 28px;pointer-events:none;opacity:.55}
+.site .hero .wrap{gap:clamp(28px,5vw,72px)}
+.site h1.big{font-size:clamp(42px,6.7vw,78px);line-height:1.24;letter-spacing:-.035em;color:var(--athar-green)!important}
+.site .hero-arabic{display:inline-block;text-shadow:0 8px 26px rgba(23,63,53,.08)}
+.site .hero-kufi{font-size:.72em;display:inline-block;margin-top:8px}
+.site .eyebrow{box-shadow:0 8px 24px rgba(23,63,53,.06);animation:atharFadeUp .8s both}
+.site .sheikh{box-shadow:0 8px 24px rgba(23,63,53,.06);animation:atharFadeUp .9s .12s both}
+.site .lead{max-width:590px}
+.site .emblem{isolation:isolate;filter:drop-shadow(0 22px 32px rgba(23,63,53,.11))}
+.site .emblem::before,.site .emblem::after{content:"";position:absolute;inset:7%;border:1px solid rgba(197,162,83,.42);border-radius:50%;transform:rotate(24deg) scaleX(.78);animation:atharOrbit 26s linear infinite}
+.site .emblem::after{inset:15%;border-color:rgba(23,63,53,.2);transform:rotate(-24deg) scaleX(.82);animation:atharOrbitReverse 32s linear infinite}
+.site .ring{border-style:solid;border-color:rgba(197,162,83,.62);box-shadow:0 0 0 10px rgba(197,162,83,.035),inset 0 0 24px rgba(197,162,83,.06)}
+.site .ring.b{border-color:rgba(23,63,53,.2);border-top-color:var(--athar-green);border-right-color:var(--athar-gold)}
+.site .core{border:5px solid #fff;outline:1px solid var(--athar-gold);box-shadow:0 20px 60px rgba(23,63,53,.16),0 0 0 12px rgba(197,162,83,.08);animation:atharFloat 7s ease-in-out infinite}
+.site .core img{transition:transform .8s cubic-bezier(.2,.7,.2,1)}
+.site .emblem:hover .core img{transform:scale(1.055)}
+.site .hero::after{content:"";position:absolute;z-index:-1;width:clamp(170px,24vw,300px);aspect-ratio:1;border:1px solid rgba(197,162,83,.24);border-radius:50%;top:12%;inset-inline-end:8%;box-shadow:0 0 0 18px rgba(197,162,83,.025),0 0 0 38px rgba(23,63,53,.018);pointer-events:none;animation:atharPulse 8s ease-in-out infinite}
+.site .strip{position:relative}
+.site .strip::before,.site .strip::after{content:"✦";position:absolute;top:50%;transform:translateY(-50%);color:var(--athar-gold);font-size:14px;z-index:2}
+.site .strip::before{inset-inline-start:18px}.site .strip::after{inset-inline-end:18px}
+.site .track{animation-duration:36s}
+.site .track span{font-size:clamp(17px,2vw,23px);letter-spacing:.02em}
+.site .s{padding-top:clamp(66px,8vw,100px)}
+.site h2.t{font-size:clamp(29px,4vw,42px);position:relative;width:fit-content;padding-bottom:13px;color:var(--athar-green)!important}
+.site h2.t::after{content:"";position:absolute;bottom:0;inset-inline-start:0;width:64%;height:3px;border-radius:5px;background:linear-gradient(90deg,var(--athar-gold),rgba(197,162,83,0))}
+.site .card{border-radius:24px;box-shadow:0 12px 34px rgba(23,63,53,.055)!important;transition:transform .45s cubic-bezier(.2,.7,.2,1),box-shadow .45s,border-color .35s}
+.site .card::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(180deg,transparent,var(--athar-gold),transparent);opacity:0;transition:opacity .35s}
+.site .card:hover{transform:translateY(-7px);box-shadow:0 22px 46px rgba(23,63,53,.11)!important}
+.site .card:hover::before{opacity:1}
+.site .card .n{font-size:46px;color:rgba(197,162,83,.8)!important}
+.site .thumb{border:1px solid rgba(197,162,83,.22);background:radial-gradient(circle at 50% 45%,#fff,#f5f1e8)!important}
+.site .row{border-radius:18px;box-shadow:0 6px 20px rgba(23,63,53,.035);transition:transform .35s,box-shadow .35s,border-color .35s}
+.site .row:hover{transform:translateX(-4px);box-shadow:0 12px 28px rgba(23,63,53,.08)}
+.site .majlis{position:relative;overflow:hidden;box-shadow:0 20px 55px rgba(23,63,53,.07)}
+.site .majlis::after{content:"";position:absolute;width:260px;aspect-ratio:1;border:1px solid rgba(197,162,83,.28);border-radius:50%;inset-inline-end:-110px;top:-120px;box-shadow:0 0 0 18px rgba(197,162,83,.035),0 0 0 38px rgba(23,63,53,.025);pointer-events:none}
+.site .mlogo{border:5px solid #fff;outline:1px solid var(--athar-gold)}
+.site footer{padding-block:54px}
+.site footer .wrap{row-gap:18px}
+.site .brand-motto{display:inline-flex;align-items:center;gap:9px;color:#68736d;font-size:12px;font-weight:700}
+.site .brand-motto::before{content:"";width:24px;height:1px;background:var(--athar-gold)}
+.site .brand-legacy{display:inline-flex;align-items:center;padding:7px 12px;border:1px solid rgba(197,162,83,.38);border-radius:999px;background:#fff;color:var(--athar-green);font-size:12px;font-weight:700}
+.site .hero-motto{display:flex;flex-wrap:wrap;gap:9px;margin:20px 0 0}
+.site .hero-motto span{display:inline-flex;align-items:center;padding:7px 13px;border:1px solid #e7e0d2;border-radius:999px;background:rgba(248,247,242,.9);color:var(--athar-green);font-size:12px;font-weight:700}
+.site .hero-motto span:last-child{color:#8b6b32}
+@keyframes atharFadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes atharFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes atharOrbit{to{transform:rotate(384deg) scaleX(.78)}}
+@keyframes atharOrbitReverse{to{transform:rotate(-384deg) scaleX(.82)}}
+@keyframes atharPulse{0%,100%{transform:scale(.96);opacity:.5}50%{transform:scale(1.04);opacity:.95}}
+@media(max-width:860px){.site .hero{padding-top:52px}.site .hero .wrap{grid-template-columns:1fr;gap:30px}.site .emblem{max-width:280px;grid-row:1}.site .hero::after{inset-inline-end:8%;top:5%;width:170px}.site .hero::before{inset:0 2% 0}.site h1.big{font-size:clamp(40px,9vw,62px)}}
+@media(max-width:480px){.site .wrap{padding-inline:17px}.site .hero{padding-bottom:58px}.site .emblem{max-width:230px}.site .hero-motto{gap:7px}.site .hero-motto span{font-size:11px;padding:6px 10px}.site .track span{padding-inline:20px}}
+@media(prefers-reduced-motion:reduce){.site .emblem::before,.site .emblem::after,.site .core,.site .hero::after,.site .track,.site .eyebrow,.site .sheikh{animation:none!important}.site .card,.site .row,.site .core img{transition:none!important}}
+
 </style>
 
 </head>
@@ -177,7 +238,7 @@ html,body{background:#fff!important;color:#333!important}
 <div class="eyebrow in"><span class="dot"></span>البث القادم: الإثنين 10 م بتوقيت مكة</div>
 <h1 class="big gold in d1"><span class="hero-arabic">علم شرعي</span><br><span class="hero-kufi">بمنهج أهل السنة</span></h1>
 <div class="sheikh in d2">بإشراف الدكتور خالد الحارس</div>
-<p class="lead in d2">دروس في مصطلح الحديث والفقه والسيرة والعقيدة، وبثوث مباشرة على يوتيوب وتيك توك، وأرشيف مفتوح لكل ما فاتك. «لنصرة الحق ونشر الهدى»</p>
+<p class="lead in d2">دروس في مصطلح الحديث والفقه والسيرة والعقيدة، وبثوث مباشرة على يوتيوب وتيك توك، وأرشيف مفتوح لكل ما فاتك. «لنصرة الحق ونشر الهدى»</p><div class="hero-motto in d3" aria-label="شعار المجلس"><span>أنت الجماعة ولو كنت وحدك</span><span>غفر الله لهم</span></div>
 <div class="cta in d3" id="live"><a class="btn fill" href="https://www.youtube.com/@Khaled_Najm">شاهد على يوتيوب</a><a class="btn line" href="https://www.tiktok.com/@d.khaled.4">تابع على تيك توك</a></div><div id="broadcastNotice" class="row rv" hidden></div>
 <nav class="social-links hero-socials in d4" aria-label="تابع المجلس على المنصات">
 <span>تابعنا على:</span>
@@ -228,7 +289,7 @@ html,body{background:#fff!important;color:#333!important}
 <details class="wallet-detail"><summary>اتصالات كاش</summary><p>لم تتم إضافة بيانات هذه المحفظة بعد.</p></details>
 <form method="dialog"><button class="btn line" type="submit">إغلاق</button></form>
 </dialog>
-<footer><div class="wrap"><b class="gold" style="font-size:24px">استراحة أهل الأثر</b><span style="flex:1"></span><nav class="social-links" aria-label="حسابات المجلس على المنصات"><a class="social-icon" href="https://www.youtube.com/@Khaled_Najm" target="_blank" rel="noopener noreferrer" aria-label="قناة يوتيوب"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg></a><a class="social-icon" href="https://www.tiktok.com/@d.khaled.4" target="_blank" rel="noopener noreferrer" aria-label="حساب تيك توك"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 6.2a5.5 5.5 0 0 1-3.4-4.8V1h-4.1v15.4a3.3 3.3 0 1 1-2.8-3.2v-4.2a7.5 7.5 0 1 0 6.9 7.4V8.5a9.5 9.5 0 0 0 5.5 1.8V6.2a5.5 5.5 0 0 1-2.1 0Z"/></svg></a><a class="social-icon" href="https://t.me/khaled_najm1" target="_blank" rel="noopener noreferrer" aria-label="قناة تيليجرام"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 3.2a1.5 1.5 0 0 0-1.6-.2L2.1 10.1c-1.3.5-1.3 1.2-.2 1.6l4.7 1.5 1.8 5.6c.2.6.1.8.7.8.5 0 .7-.2 1-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.2-15c.2-.7-.1-1.1-.2-1.4ZM8.1 12.9l10.3-6.5c.5-.3.9-.1.5.2l-8.5 7.7-.3 3.1-2-4.5Z"/></svg></a><a href="https://t.me/recrdings">التسجيلات</a></nav></div></footer>
+<footer><div class="wrap"><div><b class="gold" style="font-size:24px">استراحة أهل الأثر</b><div class="brand-motto">مجلس علمي على منهج أهل السنة</div></div><span style="flex:1"></span><span class="brand-legacy">غفر الله لهم</span><nav class="social-links" aria-label="حسابات المجلس على المنصات"><a class="social-icon" href="https://www.youtube.com/@Khaled_Najm" target="_blank" rel="noopener noreferrer" aria-label="قناة يوتيوب"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg></a><a class="social-icon" href="https://www.tiktok.com/@d.khaled.4" target="_blank" rel="noopener noreferrer" aria-label="حساب تيك توك"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 6.2a5.5 5.5 0 0 1-3.4-4.8V1h-4.1v15.4a3.3 3.3 0 1 1-2.8-3.2v-4.2a7.5 7.5 0 1 0 6.9 7.4V8.5a9.5 9.5 0 0 0 5.5 1.8V6.2a5.5 5.5 0 0 1-2.1 0Z"/></svg></a><a class="social-icon" href="https://t.me/khaled_najm1" target="_blank" rel="noopener noreferrer" aria-label="قناة تيليجرام"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 3.2a1.5 1.5 0 0 0-1.6-.2L2.1 10.1c-1.3.5-1.3 1.2-.2 1.6l4.7 1.5 1.8 5.6c.2.6.1.8.7.8.5 0 .7-.2 1-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.2-15c.2-.7-.1-1.1-.2-1.4ZM8.1 12.9l10.3-6.5c.5-.3.9-.1.5.2l-8.5 7.7-.3 3.1-2-4.5Z"/></svg></a><a href="https://t.me/recrdings">التسجيلات</a></nav></div></footer>
 </div>
 
 
