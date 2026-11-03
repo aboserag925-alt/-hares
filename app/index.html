@@ -177,6 +177,23 @@ textarea::placeholder{color:#777e75}
 @media(max-width:390px){.welcome-hero{grid-template-columns:minmax(0,1fr) 72px;padding:18px 14px}.hero-emblem{width:70px;height:70px}.hero-emblem span{font-size:14px}.hero-emblem b{font-size:12px}.hero-copy h2{font-size:23px}.hero-copy p{font-size:11px}.hero-foot{font-size:10px}.quick-item{padding:8px}.quick-item b{font-size:11px}.quick-item small{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.welcome-hero,.quick-item,.hero-primary,.hero-secondary{animation:none!important;transition:none!important}}
 
+/* Prevent narrow-screen overflow and keep hero text readable. */
+@media(max-width:390px){
+  .welcome-hero,
+  .quick-item{
+    min-width:0;
+    max-width:100%;
+  }
+  .hero-copy{
+    min-width:0;
+    overflow-wrap:anywhere;
+  }
+  .hero-copy h2{
+    font-size:clamp(18px,5.8vw,23px);
+    overflow-wrap:break-word;
+  }
+}
+
 
 /* Light Islamic palette: high-contrast reading surfaces */
 :root{color-scheme:light;--bg:#fafaf7;--surface:#fff;--surface-raised:#f3f5f0;--wood:#eef1eb;--gold:#98733a;--gold2:#244d3d;--text:#26332d;--muted:#657168;--line:rgba(36,77,61,.16);--green:#47745b}
