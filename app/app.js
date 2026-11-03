@@ -767,6 +767,7 @@ function setAccountState(state) {
 function setAuthBusy(busy) {
   document.getElementById('signInBtn').disabled = busy;
   document.getElementById('signUpBtn').disabled = busy;
+  document.getElementById('resetPasswordBtn').disabled = busy;
 }
 
 function handleSignIn(event) {
@@ -911,7 +912,8 @@ function initAuth() {
     document.getElementById('passwordRecoveryPanel').hidden = true;
     document.getElementById('newPassword').value = '';
     document.getElementById('confirmNewPassword').value = '';
-    window.ahlAuth.signOut().then(function () {
+    window.ahlAuth.signOut().then(function (result) {
+      if (result.error) throw result.error;
       setStatus(document.getElementById('authMessage'), 'تم إلغاء استعادة كلمة المرور. سجّل الدخول مجددًا.');
     }).catch(function (error) {
       setStatus(document.getElementById('authMessage'), 'تعذر إلغاء الاستعادة: ' + error.message, true);
