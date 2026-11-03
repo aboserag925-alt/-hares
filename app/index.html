@@ -460,11 +460,29 @@ body,.app-shell,button,input,textarea,select{
 <div class="design-signature" dir="rtl">تصميم <strong>محمد سراج</strong></div>
 <dialog class="support-dialog" id="supportDialog" aria-labelledby="supportDialogTitle">
 <h2 class="section-title" id="supportDialogTitle">ادعم تطوير المنصة</h2>
-<p>اختر المحفظة واضغط على اسمها لعرض بيانات التحويل عند إضافتها.</p>
-<details class="wallet-detail"><summary>فودافون كاش</summary><p>لم تتم إضافة بيانات هذه المحفظة بعد.</p></details>
-<details class="wallet-detail"><summary>اتصالات كاش</summary><p>لم تتم إضافة بيانات هذه المحفظة بعد.</p></details>
+<p>يمكنك دعم استراحة أهل الأثر عبر فودافون كاش. جزاك الله خيرًا على مساهمتك.</p>
+<div class="wallet-detail"><strong>فودافون كاش</strong><div class="wallet-number" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px"><b dir="ltr" style="font-size:22px;letter-spacing:1px">01020744923</b><button class="btn" type="button" data-support-number="01020744923" onclick="copySupportNumber(this)">نسخ الرقم</button></div><p>حوّل المبلغ إلى الرقم أعلاه من محفظة فودافون كاش، ثم احتفظ بإيصال التحويل.</p><span class="copy-feedback" role="status" aria-live="polite"></span></div>
 <form method="dialog"><button class="btn" type="submit">إغلاق</button></form>
 </dialog>
+<script>
+window.copySupportNumber = async function(button) {
+  var number = button && button.getAttribute('data-support-number');
+  if (!number) return;
+  var feedback = button.parentElement && button.parentElement.parentElement.querySelector('.copy-feedback');
+  try {
+    if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(number);
+    else {
+      var field = document.createElement('textarea'); field.value = number; field.setAttribute('readonly', '');
+      field.style.position = 'fixed'; field.style.opacity = '0'; document.body.appendChild(field); field.select();
+      var copied = document.execCommand('copy'); field.remove(); if (!copied) throw new Error('copy-unavailable');
+    }
+    if (feedback) feedback.textContent = 'تم نسخ رقم فودافون كاش.';
+    button.textContent = 'تم النسخ';
+  } catch (error) {
+    if (feedback) feedback.textContent = 'تعذر النسخ تلقائيًا؛ يمكنك تحديد الرقم ونسخه يدويًا.';
+  }
+};
+</script>
 <script src="supabase-config.js"></script>
 <script src="runtime-config.js"></script>
 <script src="vendor/adhan.umd.min.js"></script>
