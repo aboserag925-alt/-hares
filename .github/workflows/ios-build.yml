@@ -1,0 +1,91 @@
+name: iOS app build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/ios-capacitor-app
+    paths:
+      - 'app/**'
+      - 'src/**'
+      - 'scripts/**'
+      - 'capacitor.config.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/ios-build.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  ios-simulator:
+    name: Build iOS simulator app
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install project dependencies
+        run: npm ci
+
+      - name: Run existing test suite
+        run: npm test
+
+      - name: Configure public app endpoints
+        env:
+          API_BASE_URL: ${{ vars.AHL_API_BASE_URL }}
+          SUPABASE_URL: ${{ vars.AHL_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.AHL_SUPABASE_ANON_KEY }}
+        run: |
+          test -n "$SUPABASE_URL" || { echo "Missing Actions variable: AHL_SUPABASE_URL"; exit 1; }
+          test -n "$SUPABASE_ANON_KEY" || { echo "Missing Actions variable: AHL_SUPABASE_ANON_KEY"; exit 1; }
+          node --input-type=module <<'NODE'
+          import { writeFileSync } from 'node:fs';
+          const api = (process.env.API_BASE_URL || '').replace(/\/$/, '');
+          const supabaseUrl = process.env.SUPABASE_URL;
+          if (api && new URL(api).protocol !== 'https:') throw new Error('API_BASE_URL must use HTTPS');
+          if (new URL(supabaseUrl).protocol !== 'https:') throw new Error('SUPABASE_URL must use HTTPS');
+          writeFileSync('app/runtime-config.js', 'window.AHL_API_BASE_URL = ' + JSON.stringify(api) + ';\n');
+          NODE
+
+      - name: Build web application assets
+        env:
+          SUPABASE_URL: ${{ vars.AHL_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.AHL_SUPABASE_ANON_KEY }}
+        run: npm run build:app
+
+      - name: Install Capacitor iOS tooling
+        run: npm install --no-save @capacitor/core@^7 @capacitor/ios@^7 @capacitor/cli@^7
+
+      - name: Generate iOS project
+        run: npx cap add ios
+
+      - name: Sync web app into iOS
+        run: npx cap sync ios
+
+      - name: Build iOS Simulator app
+        run: xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath build/ios CODE_SIGNING_ALLOWED=NO
+
+      - name: Package simulator build
+        run: |
+          cd build/ios/Build/Products/Debug-iphonesimulator
+          ditto -c -k --sequesterRsrc --keepParent App.app "$GITHUB_WORKSPACE/ahl-athar-ios-simulator.zip"
+
+      - name: Upload simulator app
+        uses: actions/upload-artifact@v4
+        with:
+          name: ahl-athar-ios-simulator
+          path: ahl-athar-ios-simulator.zip
+          if-no-files-found: error
+          retention-days: 14
