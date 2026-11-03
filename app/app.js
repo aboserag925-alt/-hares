@@ -31,6 +31,7 @@ var deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 var accountUser = null;
 var accountSyncTimer = null;
 var activeSyncUserId = null;
+var passwordRecoveryMode = false;
 var mediaItems = [];
 var activeMediaCategory = 'all';
 var prayerStatus = document.getElementById('locationStatus');
@@ -721,7 +722,10 @@ function setAccountState(state) {
   var configMissing = document.getElementById('authConfigMissing');
   var form = document.getElementById('authForm');
   var signedIn = document.getElementById('accountSignedIn');
+  var recovery = document.getElementById('passwordRecoveryPanel');
   var message = document.getElementById('authMessage');
+  if (state.event === 'PASSWORD_RECOVERY') passwordRecoveryMode = true;
+  if (state.event === 'SIGNED_OUT') passwordRecoveryMode = false;
   if (!state.configured) {
     accountUser = null;
     activeSyncUserId = null;
@@ -733,6 +737,14 @@ function setAccountState(state) {
   }
   configMissing.hidden = true;
   accountUser = state.user;
+  if (passwordRecoveryMode) {
+    form.hidden = true;
+    signedIn.hidden = true;
+    recovery.hidden = false;
+    setStatus(message, 'تم التحقق من رابط الاستعادة. أدخل كلمة مرور جديدة.');
+    return;
+  }
+  recovery.hidden = true;
   if (!state.user) {
     activeSyncUserId = null;
     form.hidden = false;
@@ -815,6 +827,67 @@ function handleSignUp() {
   });
 }
 
+
+function handlePasswordReset() {
+  var emailInput = document.getElementById('authEmail');
+  var email = emailInput.value.trim();
+  if (!emailInput.checkValidity() || !email) {
+    emailInput.reportValidity();
+    setStatus(document.getElementById('authMessage'), 'اكتب بريدك الإلكتروني أولًا.', true);
+    return;
+  }
+  var captchaToken = null;
+  try {
+    if (window.ahlCaptcha) captchaToken = window.ahlCaptcha.getToken();
+  } catch (error) {
+    setStatus(document.getElementById('authMessage'), error.message, true);
+    return;
+  }
+  setAuthBusy(true);
+  setStatus(document.getElementById('authMessage'), 'جاري إرسال رابط الاستعادة…');
+  var redirectUrl = window.location.origin + window.location.pathname;
+  window.ahlAuth.requestPasswordReset(email, redirectUrl, captchaToken).then(function (result) {
+    if (result.error) throw result.error;
+    setStatus(document.getElementById('authMessage'),
+      'لو كان البريد مسجلًا، سيصلك رابط استعادة كلمة المرور. افحص الوارد والرسائل غير المرغوب فيها.');
+  }).catch(function (error) {
+    setStatus(document.getElementById('authMessage'),
+      'تعذر طلب استعادة كلمة المرور: ' + error.message, true);
+  }).finally(function () {
+    if (window.ahlCaptcha && window.ahlCaptcha.enabled) window.ahlCaptcha.reset();
+    setAuthBusy(false);
+  });
+}
+
+function handlePasswordUpdate() {
+  var password = document.getElementById('newPassword').value;
+  var confirmPassword = document.getElementById('confirmNewPassword').value;
+  if (password.length < 8) {
+    setStatus(document.getElementById('authMessage'), 'كلمة المرور يجب ألا تقل عن 8 أحرف.', true);
+    return;
+  }
+  if (password !== confirmPassword) {
+    setStatus(document.getElementById('authMessage'), 'كلمتا المرور غير متطابقتين.', true);
+    return;
+  }
+  document.getElementById('saveNewPasswordBtn').disabled = true;
+  setStatus(document.getElementById('authMessage'), 'جاري تحديث كلمة المرور…');
+  window.ahlAuth.updatePassword(password).then(function (result) {
+    if (result.error) throw result.error;
+    passwordRecoveryMode = false;
+    document.getElementById('passwordRecoveryPanel').hidden = true;
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmNewPassword').value = '';
+    setAccountState({ configured: true, user: accountUser, event: 'USER_UPDATED' });
+    setStatus(document.getElementById('authMessage'), 'تم تحديث كلمة المرور بنجاح.');
+  }).catch(function (error) {
+    setStatus(document.getElementById('authMessage'),
+      'تعذر تحديث كلمة المرور: ' + error.message, true);
+  }).finally(function () {
+    document.getElementById('saveNewPasswordBtn').disabled = false;
+  });
+}
+
 function initAuth() {
   if (!window.ahlAuth) {
     setStatus(document.getElementById('authMessage'),
@@ -831,6 +904,19 @@ function initAuth() {
   }
   document.getElementById('authForm').addEventListener('submit', handleSignIn);
   document.getElementById('signUpBtn').addEventListener('click', handleSignUp);
+  document.getElementById('resetPasswordBtn').addEventListener('click', handlePasswordReset);
+  document.getElementById('saveNewPasswordBtn').addEventListener('click', handlePasswordUpdate);
+  document.getElementById('cancelPasswordRecoveryBtn').addEventListener('click', function () {
+    passwordRecoveryMode = false;
+    document.getElementById('passwordRecoveryPanel').hidden = true;
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmNewPassword').value = '';
+    window.ahlAuth.signOut().then(function () {
+      setStatus(document.getElementById('authMessage'), 'تم إلغاء استعادة كلمة المرور. سجّل الدخول مجددًا.');
+    }).catch(function (error) {
+      setStatus(document.getElementById('authMessage'), 'تعذر إلغاء الاستعادة: ' + error.message, true);
+    });
+  });
   document.getElementById('signOutBtn').addEventListener('click', function () {
     setStatus(document.getElementById('authMessage'), 'جاري تسجيل الخروج…');
     window.ahlAuth.signOut().then(function (result) {
