@@ -1,0 +1,3 @@
+[build]
+  command = "npm run build:app && rm -rf public && mkdir -p public && cp index.html 404.html public/ && cp -R app assets screens public/"
+  publish = "public"
