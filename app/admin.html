@@ -18,6 +18,22 @@ header,h1,h2,h3,label,strong{color:#173f35}
 input,textarea,select{background:#fff!important;color:#303833!important;border-color:#dfe5df!important}
 button.primary,.primary-button{background:#173f35!important;color:#fff!important}
 
+
+/* Premium motion identity — administration */
+.stat,.item{background:#fff!important;border-color:#e5e8e2!important}
+button,.link{background:#f5f1e8!important;color:#173f35!important;border-color:#e5dcc7!important}
+button.danger{color:#b3412f!important}
+.panel{box-shadow:0 10px 28px rgba(23,63,53,.06)!important}
+:root{--focus-ring:rgba(197,162,83,.35)}
+body{background-image:radial-gradient(ellipse at 90% 0,rgba(197,162,83,.09),transparent 35%),radial-gradient(ellipse at 5% 35%,rgba(23,63,53,.045),transparent 38%)}
+.panel{border-radius:22px;transition:box-shadow .3s,border-color .3s}
+.stat{border-radius:16px;transition:transform .25s,box-shadow .25s}
+.stat:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(23,63,53,.07)}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible,.link:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
+button,.link{transition:transform .2s,background .2s,border-color .2s,box-shadow .2s}
+button:hover,.link:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(23,63,53,.08)}
+@media(prefers-reduced-motion:reduce){.panel,.stat,button,.link{transition:none!important}}
+
 </style>
 </head>
 <body><main class="wrap">
