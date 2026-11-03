@@ -2,7 +2,7 @@ name: Deploy GitHub Pages
 
 on:
   push:
-    branches: [fix/istirahat-ahl-athar]
+    branches: [main, fix/istirahat-ahl-athar]
   workflow_dispatch:
 
 permissions:
