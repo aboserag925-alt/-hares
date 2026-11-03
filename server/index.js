@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
 const { createMediaLibrary } = require('./media-library');
-const { createAdminApi } = require('./lecture-api');
+const { createAdminApi } = require('./lecture-api');\nconst { createTelegramAssistant } = require('./telegram-assistant');
 
 const PUBLIC_ROOT = path.resolve(__dirname, '..');
 const MAX_BODY_BYTES = 16 * 1024;
@@ -469,7 +469,7 @@ if (require.main === module) {
     throw new Error('PORT must be a valid TCP port.');
   }
   const host = process.env.HOST || '127.0.0.1';
-  const mediaLibrary = createMediaLibrary({ env: process.env });
+  const telegramAssistant = createTelegramAssistant({ env: process.env });\n  const mediaLibrary = createMediaLibrary({ env: process.env, handleAssistantUpdate: telegramAssistant.processUpdate });
   const server = createServer({ mediaLibrary: mediaLibrary });
   server.listen(port, host, function () {
     console.log('Ahl Athar server listening on port ' + port);
