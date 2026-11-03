@@ -763,15 +763,23 @@ function handleSignIn(event) {
   if (!form.reportValidity()) return;
   var email = document.getElementById('authEmail').value.trim();
   var password = document.getElementById('authPassword').value;
+  var captchaToken = null;
+  try {
+    if (window.ahlCaptcha) captchaToken = window.ahlCaptcha.getToken();
+  } catch (error) {
+    setStatus(document.getElementById('authMessage'), error.message, true);
+    return;
+  }
   setAuthBusy(true);
   setStatus(document.getElementById('authMessage'), 'جاري تسجيل الدخول…');
-  window.ahlAuth.signIn(email, password).then(function (result) {
+  window.ahlAuth.signIn(email, password, captchaToken).then(function (result) {
     if (result.error) throw result.error;
     setStatus(document.getElementById('authMessage'), 'تم تسجيل الدخول.');
   }).catch(function (error) {
     setStatus(document.getElementById('authMessage'),
       'تعذر تسجيل الدخول: ' + error.message, true);
   }).finally(function () {
+    if (window.ahlCaptcha && window.ahlCaptcha.enabled) window.ahlCaptcha.reset();
     setAuthBusy(false);
   });
 }
@@ -781,9 +789,16 @@ function handleSignUp() {
   if (!form.reportValidity()) return;
   var email = document.getElementById('authEmail').value.trim();
   var password = document.getElementById('authPassword').value;
+  var captchaToken = null;
+  try {
+    if (window.ahlCaptcha) captchaToken = window.ahlCaptcha.getToken();
+  } catch (error) {
+    setStatus(document.getElementById('authMessage'), error.message, true);
+    return;
+  }
   setAuthBusy(true);
   setStatus(document.getElementById('authMessage'), 'جاري إنشاء الحساب…');
-  window.ahlAuth.signUp(email, password).then(function (result) {
+  window.ahlAuth.signUp(email, password, captchaToken).then(function (result) {
     if (result.error) throw result.error;
     if (result.data.session) {
       setStatus(document.getElementById('authMessage'), 'تم إنشاء الحساب وتسجيل الدخول.');
@@ -795,6 +810,7 @@ function handleSignUp() {
     setStatus(document.getElementById('authMessage'),
       'تعذر إنشاء الحساب: ' + error.message, true);
   }).finally(function () {
+    if (window.ahlCaptcha && window.ahlCaptcha.enabled) window.ahlCaptcha.reset();
     setAuthBusy(false);
   });
 }
@@ -806,6 +822,13 @@ function initAuth() {
     return;
   }
   window.ahlAuth.init(setAccountState);
+  if (window.ahlCaptcha && window.ahlCaptcha.enabled) {
+    var captchaBox = document.getElementById('authCaptcha');
+    captchaBox.hidden = false;
+    window.ahlCaptcha.render('authCaptcha').catch(function (error) {
+      setStatus(document.getElementById('authMessage'), 'تعذر تحميل التحقق الأمني: ' + error.message, true);
+    });
+  }
   document.getElementById('authForm').addEventListener('submit', handleSignIn);
   document.getElementById('signUpBtn').addEventListener('click', handleSignUp);
   document.getElementById('signOutBtn').addEventListener('click', function () {
