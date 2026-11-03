@@ -8,7 +8,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 <title>استراحة أهل الأثر</title>
-<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@400;600;700&family=Reem+Kufi:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="tailwind.css" rel="stylesheet">
 <style>
 :root{color-scheme:dark;--bg:#0b0e0d;--surface:#121715;--surface-raised:#19201d;--wood:#171e1b;--gold:#d5ab64;--gold2:#f2d9a4;--text:#f4f0e7;--muted:#a9ada2;--line:rgba(213,171,100,.18);--green:#99b9a2}
@@ -232,6 +232,30 @@ header::after{content:"";position:absolute;inset-inline-start:0;bottom:-10px;wid
 @keyframes appSheen{0%,35%{left:-35%}75%,100%{left:125%}}
 @media(prefers-reduced-motion:reduce){.next::after{animation:none!important}.card,.media-card,.tab,.btn,.media-filter,.adhkar-choice{transition:none!important}}
 
+
+/* Clear, refined Naskh typography */
+.site,.site button,.site input,.site textarea,.site select,.site a,
+body,.app-shell,button,input,textarea,select{
+ font-family:'Noto Naskh Arabic','Cairo',serif!important;
+}
+.site h1,.site h2,.site h3,.site .gold,.site .brand-motto,.site .brand-legacy,
+.app-shell h1,.app-shell h2,.app-shell h3{
+ font-family:'Noto Naskh Arabic','Cairo',serif!important;
+ font-weight:700;
+ letter-spacing:0!important;
+}
+.site p,.site li,.site nav,.site .lead{line-height:1.9}
+
+
+.support-bottom{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:36px auto 18px;padding:22px 24px;max-width:1180px;border:1px solid rgba(197,162,83,.3);border-radius:22px;background:linear-gradient(110deg,#f8f7f2,#fff);box-shadow:0 12px 32px rgba(23,63,53,.055)}
+.support-bottom-copy{display:flex;flex-direction:column;gap:4px;color:#173f35}
+.support-bottom-copy strong{font-size:17px}.support-bottom-copy span{font-size:13px;color:#68736d}
+.support-bottom .support-prompt{margin:0}
+.design-signature{max-width:1180px;margin:10px auto 22px;padding:10px 18px;text-align:left;color:#8a8f88;font-size:12px;letter-spacing:.02em}
+.design-signature strong{color:#173f35;font-weight:700}
+.site footer .design-signature{margin:0;padding:0;color:#8a8f88}
+@media(max-width:600px){.support-bottom{margin:24px 16px 12px;padding:16px;align-items:flex-start;flex-direction:column}.support-bottom .support-button{width:100%}.design-signature{text-align:center;margin-bottom:14px}}
+
 </style>
 </head>
 <body>
@@ -255,7 +279,7 @@ header::after{content:"";position:absolute;inset-inline-start:0;bottom:-10px;wid
 <span>تيليجرام</span>
 </a>
 </nav>
-<div class="support-prompt"><button class="support-button" type="button" onclick="document.getElementById('supportDialog').showModal()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15.9V20h-2v-2.1a5.5 5.5 0 0 1-4-2.7l1.7-1a3.7 3.7 0 0 0 3.3 1.8c1.5 0 2.5-.7 2.5-1.8 0-1-.8-1.5-2.9-2-2.6-.6-4-1.6-4-3.7 0-1.9 1.3-3.2 3.4-3.6V5h2v1.9a5.1 5.1 0 0 1 3.5 2.3l-1.6 1.1a3.4 3.4 0 0 0-3-1.6c-1.4 0-2.2.6-2.2 1.6s.7 1.4 2.8 1.9c2.8.7 4.1 1.7 4.1 3.8 0 2-1.4 3.5-3.6 3.9Z"/></svg>ادعم تطوير المنصة</button></div>
+
 </header>
 <section class="welcome-hero" aria-labelledby="welcomeTitle">
   <div class="hero-copy">
@@ -428,6 +452,12 @@ header::after{content:"";position:absolute;inset-inline-start:0;bottom:-10px;wid
 <div class="card"><h2>عن المجلس</h2><p class="leading-relaxed">مجلس لتدارس العلم والأدب، فيه دروس يومية في الحديث والعقيدة والتفسير والفقه.</p><p class="leading-relaxed">الدروس: السبت إلى الخميس، الساعة 7:00 والساعة 10:00 مساءً. الجمعة بلا دروس.</p><nav class="social-links" aria-label="حسابات المجلس"><a class="social-link" href="https://www.youtube.com/@Khaled_Najm" target="_blank" rel="noopener noreferrer" aria-label="يوتيوب"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg></a><a class="social-link" href="https://www.tiktok.com/@d.khaled.4" target="_blank" rel="noopener noreferrer" aria-label="تيك توك"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 6.2a5.5 5.5 0 0 1-3.4-4.8V1h-4.1v15.4a3.3 3.3 0 1 1-2.8-3.2v-4.2a7.5 7.5 0 1 0 6.9 7.4V8.5a9.5 9.5 0 0 0 5.5 1.8V6.2a5.5 5.5 0 0 1-2.1 0Z"/></svg></a><a class="social-link" href="https://t.me/khaled_najm1" target="_blank" rel="noopener noreferrer" aria-label="تيليجرام"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 3.2a1.5 1.5 0 0 0-1.6-.2L2.1 10.1c-1.3.5-1.3 1.2-.2 1.6l4.7 1.5 1.8 5.6c.2.6.1.8.7.8.5 0 .7-.2 1-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.2-15c.2-.7-.1-1.1-.2-1.4ZM8.1 12.9l10.3-6.5c.5-.3.9-.1.5.2l-8.5 7.7-.3 3.1-2-4.5Z"/></svg></a></nav><button class="btn" onclick="share()">شارك التطبيق</button><button class="btn" id="inst" hidden onclick="install()">ثبّت على الهاتف</button></div>
 </section>
 </div>
+
+<div class="support-bottom">
+ <div class="support-bottom-copy"><strong>ساهم في استمرار نشر العلم</strong><span>دعمك يساعد على تطوير المنصة وخدمة زوارها</span></div>
+ <div class="support-prompt"><button class="support-button" type="button" onclick="document.getElementById('supportDialog').showModal()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15.9V20h-2v-2.1a5.5 5.5 0 0 1-4-2.7l1.7-1a3.7 3.7 0 0 0 3.3 1.8c1.5 0 2.5-.7 2.5-1.8 0-1-.8-1.5-2.9-2-2.6-.6-4-1.6-4-3.7 0-1.9 1.3-3.2 3.4-3.6V5h2v1.9a5.1 5.1 0 0 1 3.5 2.3l-1.6 1.1a3.4 3.4 0 0 0-3-1.6c-1.4 0-2.2.6-2.2 1.6s.7 1.4 2.8 1.9c2.8.7 4.1 1.7 4.1 3.8 0 2-1.4 3.5-3.6 3.9Z"/></svg>ادعم تطوير المنصة</button></div>
+</div>
+<div class="design-signature" dir="rtl">تصميم <strong>محمد سراج</strong></div>
 <dialog class="support-dialog" id="supportDialog" aria-labelledby="supportDialogTitle">
 <h2 class="section-title" id="supportDialogTitle">ادعم تطوير المنصة</h2>
 <p>اختر المحفظة واضغط على اسمها لعرض بيانات التحويل عند إضافتها.</p>
