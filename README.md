@@ -76,6 +76,18 @@ TELEGRAM_MEDIA_GROUP_ID=-100...
 
 تُحفظ جلسة الدخول باستعمال Supabase Auth، وتُزامَن طريقة حساب الصلاة ومذهب العصر وتقدم الأذكار اليومي. إحداثيات الموقع لا تغادر الجهاز. يبقى استخدام الصلاة والقبلة والأذكار متاحًا دون حساب.
 
+### حماية تسجيل الدخول من الروبوتات (Cloudflare Turnstile)
+
+يدعم تسجيل الدخول وإنشاء الحساب في التطبيق ولوحة المشرف تحقق Cloudflare Turnstile. لتفعيله بالكامل:
+
+1. أنشئ Widget في Cloudflare Turnstile، وأضف نطاق الموقع المنشور إلى قائمة النطاقات المسموح بها. انسخ **Site Key** و**Secret Key**.
+2. في Supabase افتح **Authentication → Settings → Bot and Abuse Protection**، فعّل **CAPTCHA protection**، واختر **Cloudflare Turnstile**، ثم ألصق **Secret Key** واحفظ.
+3. في GitHub افتح **Settings → Secrets and variables → Actions → Variables** وأضف متغيرًا باسم `TURNSTILE_SITE_KEY` وضع فيه **Site Key** العام فقط. أعد تشغيل سير عمل النشر. وللبناء المحلي في PowerShell، عيّن `$env:TURNSTILE_SITE_KEY = 'SITE_KEY'` قبل تشغيل `npm.cmd run build:app`.
+4. لا تضع **Secret Key** في GitHub أو ملفات الواجهة أو التطبيق؛ يُحفظ داخل إعدادات CAPTCHA في Supabase. يرسل التطبيق رمز التحقق إلى Supabase مع طلب الدخول أو إنشاء الحساب، ويتولى Supabase التحقق منه.
+
+عند إعداد Site Key دون تفعيل CAPTCHA السري في Supabase، لن تكتمل الحماية؛ يجب تنفيذ إعداد Cloudflare وSupabase معًا. ويُعاد ضبط الاختبار بعد كل محاولة لأن رمز Turnstile مؤقت ويُستخدم مرة واحدة.
+
+
 أثناء التطوير، شغّل مراقبة ملفات HTML وإعادة بناء CSS عند كل تغيير:
 
 ```powershell
