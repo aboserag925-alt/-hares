@@ -99,7 +99,7 @@ function createMediaLibrary(options) {
   const filesDirectory = path.join(storageDirectory, 'media');
   const indexPath = path.join(storageDirectory, 'media-index.json');
   const botToken = env.TELEGRAM_BOT_TOKEN;
-  const mediaGroupId = env.TELEGRAM_MEDIA_GROUP_ID || env.TELEGRAM_CHAT_ID;
+  const mediaGroupId = env.TELEGRAM_MEDIA_GROUP_ID || env.TELEGRAM_CHAT_ID;\n  const handleAssistantUpdate = options.handleAssistantUpdate;
   let items = [];
   let offset = null;
   let initialized = false;
@@ -365,7 +365,7 @@ function createMediaLibrary(options) {
       await receiveFile(message);
       return;
     }
-    if (update.callback_query) await processCallback(update.callback_query);
+    if (update.callback_query && String(update.callback_query.data || '').startsWith('media:')) {\n      await processCallback(update.callback_query);\n      return;\n    }\n    if (handleAssistantUpdate) await handleAssistantUpdate(update);
   }
 
   async function pollLoop() {
