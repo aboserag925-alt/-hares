@@ -177,6 +177,13 @@ function createMediaLibrary(options) {
   async function receiveFile(message) {
     const attachment = getAttachment(message);
     if (!attachment) return;
+    if (!await isGroupAdministrator(message.from && message.from.id)) {
+      await telegram('sendMessage', {
+        chat_id: mediaGroupId,
+        text: 'رفع المحتوى للنشر المباشر متاح لمشرفي المجموعة فقط.'
+      });
+      return;
+    }
     if (items.filter(function (item) { return item.status === 'approved' || item.status === 'pending'; }).length >= MAX_LIBRARY_ITEMS) {
       await telegram('sendMessage', {
         chat_id: mediaGroupId,
@@ -228,7 +235,9 @@ function createMediaLibrary(options) {
       kind: attachment.kind,
       category: categoryFromCaption(caption, attachment.defaultCategory),
       title: cleanTitle(caption, attachment.fileName),
-      status: 'pending',
+      status: 'approved',
+      approvedAt: new Date().toISOString(),
+      approvedByTelegramId: String(message.from.id),
       uploadedAt: new Date((message.date || Date.now() / 1000) * 1000).toISOString()
     };
     items.push(item);
@@ -239,14 +248,11 @@ function createMediaLibrary(options) {
       await fs.rm(storedPath, { force: true });
       throw error;
     }
-    try {
-      await sendReviewMessage(item);
-    } catch (error) {
-      items = items.filter(function (candidate) { return candidate.id !== id; });
-      await save();
-      await fs.rm(storedPath, { force: true });
-      throw error;
-    }
+    await telegram('sendMessage', {
+      chat_id: mediaGroupId,
+      text: 'تم نشر المحتوى تلقائيًا في مكتبة استراحة أهل الأثر.\\nالعنوان: ' + item.title +
+        '\\nالتصنيف: ' + CATEGORY_NAMES[item.category]
+    });
   }
 
   async function isGroupAdministrator(userId) {
