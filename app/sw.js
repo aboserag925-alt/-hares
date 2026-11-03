@@ -2,12 +2,14 @@
    Authenticated/API and third-party responses are deliberately never cached. */
 'use strict';
 
-var CACHE_NAME = 'ahl-athar-v14';
+var CACHE_NAME = 'ahl-athar-v15';
 var APP_FILES = [
   './',
   './index.html',
   './manifest.json',
   './icon.svg',
+  './icon-192.svg',
+  './icon-512.svg',
   './tailwind.css',
   './app.js',
   './auth-client.js',
@@ -17,7 +19,7 @@ var APP_FILES = [
   './vendor/ADHAN-LICENSE.txt',
   './vendor/SUPABASE-LICENSE.txt'
 ];
-var STATIC_FILE = /\\.(?:css|js|mjs|json|svg|png|jpe?g|webp|ico|woff2?|ttf|eot)$/i;
+var STATIC_FILE = /\.(?:css|js|mjs|json|svg|png|jpe?g|webp|ico|woff2?|ttf|eot)$/i;
 
 self.addEventListener('install', function (event) {
   event.waitUntil((async function () {
