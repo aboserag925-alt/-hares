@@ -23,13 +23,14 @@ await build({
 
 const supabaseUrl = (process.env.SUPABASE_URL || '').trim();
 const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || '').trim();
+const captchaSiteKey = (process.env.TURNSTILE_SITE_KEY || '').trim();
 if (supabaseUrl || supabaseAnonKey) {
   let parsedUrl;
   try { parsedUrl = new URL(supabaseUrl); } catch { throw new Error('SUPABASE_URL must be a valid HTTPS URL.'); }
   if (parsedUrl.protocol !== 'https:' || !supabaseAnonKey) {
     throw new Error('Set both SUPABASE_URL (HTTPS) and SUPABASE_ANON_KEY.');
   }
-  await writeFile(localConfig, 'window.AHL_SUPABASE_CONFIG = ' + JSON.stringify({ url: supabaseUrl, anonKey: supabaseAnonKey }) + ';\n', 'utf8');
+  await writeFile(localConfig, 'window.AHL_SUPABASE_CONFIG = ' + JSON.stringify({ url: supabaseUrl, anonKey: supabaseAnonKey, captchaSiteKey }) + ';\n', 'utf8');
 } else {
   await copyFile(resolve(root, 'src', 'supabase-config.example.js'), localConfig);
 }
