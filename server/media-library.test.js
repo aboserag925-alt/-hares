@@ -217,3 +217,73 @@ test('does not contact Telegram when media intake is disabled', async function (
     assert.equal(context.calls.length, 0);
   });
 });
+
+test('publishes an upload immediately when posted by a verified group administrator', async function () {
+  await withLibrary(async function (context) {
+    await context.library.processUpdate({
+      update_id: 1,
+      message: {
+        chat: { id: -100123 },
+        from: { id: 7 },
+        date: 1793500000,
+        caption: 'محاضرة المشرف #صوتيات',
+        audio: {
+          file_id: 'admin-audio-id',
+          file_unique_id: 'admin-audio-unique',
+          file_name: 'lecture.mp3',
+          mime_type: 'audio/mpeg',
+          file_size: 11
+        }
+      }
+    });
+    const published = await context.library.listApproved();
+    assert.equal(published.length, 1);
+    assert.equal(published[0].title, 'محاضرة المشرف');
+    const index = JSON.parse(await fs.readFile(path.join(context.storageDirectory, 'media-index.json'), 'utf8'));
+    assert.equal(index.items[0].status, 'approved');
+    assert.equal(index.items[0].approvedByTelegramId, '7');
+    const notification = context.calls.find(function (call) {
+      return call.url.includes('/sendMessage') &&
+        JSON.parse(call.options.body).text.includes('تم نشر المحتوى تلقائيًا');
+    });
+    assert.ok(notification);
+  });
+});
+
+test('does not publish content posted by a regular group member', async function () {
+  await withLibrary(async function (context) {
+    context.fetch = async function (url, options) {
+      context.calls.push({ url: url, options: options });
+      if (url.includes('/getChatMember')) {
+        return { ok: true, arrayBuffer: async function () {
+          return Buffer.from(JSON.stringify({ ok: true, result: { status: 'member' } }));
+        }};
+      }
+      if (url.includes('/sendMessage')) return telegramResponse({ message_id: 101 });
+      throw new Error('Unexpected mocked Telegram request');
+    };
+    const library = createMediaLibrary({
+      env: context.env, fetch: context.fetch, storageDirectory: context.storageDirectory
+    });
+    await library.processUpdate({
+      update_id: 1,
+      message: {
+        chat: { id: -100123 },
+        from: { id: 9 },
+        document: {
+          file_id: 'member-file-id',
+          file_unique_id: 'member-file-unique',
+          file_name: 'member.mp3',
+          mime_type: 'audio/mpeg',
+          file_size: 11
+        }
+      }
+    });
+    assert.deepEqual(await library.listApproved(), []);
+    const index = JSON.parse(await fs.readFile(path.join(context.storageDirectory, 'media-index.json'), 'utf8'));
+    assert.equal(index.items.length, 0);
+    assert.ok(context.calls.some(function (call) {
+      return call.url.includes('/getChatMember');
+    }));
+  });
+});
