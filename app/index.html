@@ -177,6 +177,75 @@ textarea::placeholder{color:#777e75}
 @media(max-width:390px){.welcome-hero{grid-template-columns:minmax(0,1fr) 72px;padding:18px 14px}.hero-emblem{width:70px;height:70px}.hero-emblem span{font-size:14px}.hero-emblem b{font-size:12px}.hero-copy h2{font-size:23px}.hero-copy p{font-size:11px}.hero-foot{font-size:10px}.quick-item{padding:8px}.quick-item b{font-size:11px}.quick-item small{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.welcome-hero,.quick-item,.hero-primary,.hero-secondary{animation:none!important;transition:none!important}}
 
+/* Prevent narrow-screen overflow and keep hero text readable. */
+@media(max-width:390px){
+  .welcome-hero,
+  .quick-item{
+    min-width:0;
+    max-width:100%;
+  }
+  .hero-copy{
+    min-width:0;
+    overflow-wrap:anywhere;
+  }
+  .hero-copy h2{
+    font-size:clamp(18px,5.8vw,23px);
+    overflow-wrap:break-word;
+  }
+}
+
+
+/* Light Islamic palette: high-contrast reading surfaces */
+:root{color-scheme:light;--bg:#fafaf7;--surface:#fff;--surface-raised:#f3f5f0;--wood:#eef1eb;--gold:#98733a;--gold2:#244d3d;--text:#26332d;--muted:#657168;--line:rgba(36,77,61,.16);--green:#47745b}
+body{background:var(--bg)!important;color:var(--text)!important}
+body::before{background:radial-gradient(ellipse at 12% 2%,rgba(71,116,91,.07),transparent 34%),radial-gradient(ellipse at 88% 18%,rgba(197,162,100,.10),transparent 30%)!important}
+.logo{background:linear-gradient(145deg,#f2ead9,#edf2eb)!important;border-color:#e0e5dc!important}
+h1,.doctor{color:#244d3d!important}
+.doctor::before{background:linear-gradient(90deg,transparent,#98733a)!important}
+.next{background:linear-gradient(115deg,#fff,#f4f6f1 56%,#f4efe4)!important;border-color:#dfe5db!important;box-shadow:0 14px 40px rgba(30,52,40,.07)!important}
+.next small{color:#47745b!important}.next b,.count{color:#244d3d!important;text-shadow:none!important}
+.tabs{background:rgba(255,255,255,.92)!important;border-color:#e1e6de!important;box-shadow:0 8px 28px rgba(30,52,40,.08)!important}
+.tab{color:#657168!important}.tab:hover{color:#244d3d!important;background:#f3f6f1!important}
+.tab.on{background:linear-gradient(135deg,#e7eee7,#f5f1e7)!important;border-color:#d8dfd4!important;color:#244d3d!important;box-shadow:none!important}
+.tab:before{color:#98733a!important}
+.card{background:linear-gradient(145deg,#fff,#fbfcf9)!important;border-color:#e3e8e0!important;box-shadow:0 8px 26px rgba(30,52,40,.055)!important}
+.card:hover{border-color:#c5a264!important;box-shadow:0 14px 34px rgba(30,52,40,.09)!important}
+.card h2,.section-heading h2{color:#244d3d!important}
+.section-heading span{color:#47745b!important}
+.slot{border-top-color:#e8ebe5!important}.slot>span:last-child{color:#39483f!important}
+.time{background:#f5f0e5!important;border-color:#e5d8bb!important;color:#765b2d!important}
+.today{background:linear-gradient(145deg,#f8f3e8,#fff)!important;border-color:#c5a264!important;box-shadow:0 0 0 1px rgba(197,162,100,.08),0 10px 28px rgba(30,52,40,.07)!important}
+.notice,.status{color:#657168!important}
+textarea,input:not([type=checkbox]){background:#fff!important;color:#26332d!important;border-color:#dce3da!important}
+textarea::placeholder,input::placeholder{color:#8a948c!important}
+.btn,.support-button,.social-link,.adhkar-choice,.media-filter{background:#f2f5f0!important;color:#244d3d!important;border-color:#dce4da!important}
+.btn:disabled{opacity:.55}
+dialog.support-dialog{background:#fff!important;color:#26332d!important;border-color:#c5a264!important;box-shadow:0 24px 80px rgba(25,45,35,.2)!important}
+.support-dialog>p,.wallet-detail p{color:#657168!important}
+.wallet-detail{background:#f7f8f4!important;border-color:#e2e6df!important}
+.wallet-detail summary{color:#244d3d!important}
+@media(max-width:680px){.tabs{background:rgba(255,255,255,.96)!important;border-top-color:#e0e5dd!important;box-shadow:0 -8px 28px rgba(30,52,40,.1)!important}}
+
+/* Refined motion, consistent icon scale, and footer placement */
+.support-footer{display:flex;justify-content:center;width:100%;margin:24px auto 8px}
+.site-credit{display:block;width:100%;margin:8px auto 0;text-align:center;color:#89948b;font-size:10px;font-weight:500;letter-spacing:.04em;opacity:.82}
+.social-link{min-width:40px;height:40px;padding:0 11px;border-radius:13px}
+.social-link svg{width:19px;height:19px}
+.quick-icon{width:38px;height:38px;flex:0 0 38px;font-size:19px;display:inline-flex;align-items:center;justify-content:center}
+.tab:before{font-size:16px!important}
+.tab{min-height:56px;font-size:11px}
+.support-button{min-height:46px;padding:0 22px;border-width:1px;border-radius:24px;font-size:14px}
+.support-button svg{width:19px;height:19px}
+.card,.quick-item,.tab,.btn,.social-link,.hero-emblem{transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease,background .28s ease}
+.quick-item:hover,.card:hover{transform:translateY(-3px)}
+.btn:hover,.social-link:hover{transform:translateY(-2px)}
+.welcome-hero{position:relative;isolation:isolate;overflow:hidden}
+.welcome-hero::after{content:"";position:absolute;z-index:-1;inset:auto -8% -55% auto;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(197,162,100,.16),transparent 68%);filter:blur(12px);animation:ambientDrift 13s ease-in-out infinite alternate}
+.hero-emblem{animation:emblemFloat 7s ease-in-out infinite}
+@keyframes ambientDrift{from{transform:translate3d(0,0,0) scale(.9)}to{transform:translate3d(-24px,-18px,0) scale(1.14)}}
+@keyframes emblemFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@media(prefers-reduced-motion:reduce){.welcome-hero::after,.hero-emblem{animation:none!important}.card,.quick-item,.tab,.btn,.social-link{transition:none!important}}
+
 </style>
 </head>
 <body>
@@ -200,7 +269,7 @@ textarea::placeholder{color:#777e75}
 <span>تيليجرام</span>
 </a>
 </nav>
-<div class="support-prompt"><button class="support-button" type="button" onclick="document.getElementById('supportDialog').showModal()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15.9V20h-2v-2.1a5.5 5.5 0 0 1-4-2.7l1.7-1a3.7 3.7 0 0 0 3.3 1.8c1.5 0 2.5-.7 2.5-1.8 0-1-.8-1.5-2.9-2-2.6-.6-4-1.6-4-3.7 0-1.9 1.3-3.2 3.4-3.6V5h2v1.9a5.1 5.1 0 0 1 3.5 2.3l-1.6 1.1a3.4 3.4 0 0 0-3-1.6c-1.4 0-2.2.6-2.2 1.6s.7 1.4 2.8 1.9c2.8.7 4.1 1.7 4.1 3.8 0 2-1.4 3.5-3.6 3.9Z"/></svg>ادعم تطوير المنصة</button></div>
+
 </header>
 <section class="welcome-hero" aria-labelledby="welcomeTitle">
   <div class="hero-copy">
@@ -372,6 +441,7 @@ textarea::placeholder{color:#777e75}
 <section id="about" hidden>
 <div class="card"><h2>عن المجلس</h2><p class="leading-relaxed">مجلس لتدارس العلم والأدب، فيه دروس يومية في الحديث والعقيدة والتفسير والفقه.</p><p class="leading-relaxed">الدروس: السبت إلى الخميس، الساعة 7:00 والساعة 10:00 مساءً. الجمعة بلا دروس.</p><nav class="social-links" aria-label="حسابات المجلس"><a class="social-link" href="https://www.youtube.com/@Khaled_Najm" target="_blank" rel="noopener noreferrer" aria-label="يوتيوب"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg></a><a class="social-link" href="https://www.tiktok.com/@d.khaled.4" target="_blank" rel="noopener noreferrer" aria-label="تيك توك"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 6.2a5.5 5.5 0 0 1-3.4-4.8V1h-4.1v15.4a3.3 3.3 0 1 1-2.8-3.2v-4.2a7.5 7.5 0 1 0 6.9 7.4V8.5a9.5 9.5 0 0 0 5.5 1.8V6.2a5.5 5.5 0 0 1-2.1 0Z"/></svg></a><a class="social-link" href="https://t.me/khaled_najm1" target="_blank" rel="noopener noreferrer" aria-label="تيليجرام"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 3.2a1.5 1.5 0 0 0-1.6-.2L2.1 10.1c-1.3.5-1.3 1.2-.2 1.6l4.7 1.5 1.8 5.6c.2.6.1.8.7.8.5 0 .7-.2 1-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.2-15c.2-.7-.1-1.1-.2-1.4ZM8.1 12.9l10.3-6.5c.5-.3.9-.1.5.2l-8.5 7.7-.3 3.1-2-4.5Z"/></svg></a></nav><button class="btn" onclick="share()">شارك التطبيق</button><button class="btn" id="inst" hidden onclick="install()">ثبّت على الهاتف</button></div>
 </section>
+<div class="support-footer"><button class="support-button" type="button" onclick="document.getElementById('supportDialog').showModal()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15.9V20h-2v-2.1a5.5 5.5 0 0 1-4-2.7l1.7-1a3.7 3.7 0 0 0 3.3 1.8c1.5 0 2.5-.7 2.5-1.8 0-1-.8-1.5-2.9-2-2.6-.6-4-1.6-4-3.7 0-1.9 1.3-3.2 3.4-3.6V5h2v1.9a5.1 5.1 0 0 1 3.5 2.3l-1.6 1.1a3.4 3.4 0 0 0-3-1.6c-1.4 0-2.2.6-2.2 1.6s.7 1.4 2.8 1.9c2.8.7 4.1 1.7 4.1 3.8 0 2-1.4 3.5-3.6 3.9Z"/></svg>ادعم تطوير المنصة</button></div><small class="site-credit">تصميم بواسطة محمد سراج</small>
 </div>
 <dialog class="support-dialog" id="supportDialog" aria-labelledby="supportDialogTitle">
 <h2 class="section-title" id="supportDialogTitle">ادعم تطوير المنصة</h2>

@@ -116,6 +116,59 @@ dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(
 @media(max-width:380px){.logo{font-size:14px}.logo img{width:34px!important;height:34px!important}.nav-cta{padding:0 10px!important;font-size:11px}}
 @media(prefers-reduced-motion:reduce){.mobile-menu-toggle span{transition:none}}
 
+
+/* Light Islamic palette: ivory, deep green and restrained antique gold */
+:root{color-scheme:light}
+.site{background:#fafaf7!important;color:#26332d!important}
+body{background:#fafaf7!important}
+.nav{background:rgba(250,250,247,.92)!important;border-bottom-color:#e5e8e1!important}
+.nav a{color:#58665e!important}.nav a:hover{color:#183d32!important}
+.logo,.gold{color:#183d32}
+.gold{background:linear-gradient(90deg,#80602d,#bd9857,#6f552b,#bd9857,#80602d)!important;background-clip:text!important;-webkit-background-clip:text!important}
+.eyebrow,.sheikh{background:#f1f4ef!important;border-color:#dce4da!important;color:#28513f!important}
+.dot,.sheikh::before{background:#b58b4b!important}
+.lead,.sub,.card p,.row span,footer{color:#58665e!important}
+.btn.fill{background:linear-gradient(135deg,#244d3d,#183d32)!important;color:#fff!important;box-shadow:0 8px 24px rgba(24,61,50,.16)!important}
+.btn.line{border-color:#b58b4b!important;color:#244d3d!important;background:#fff!important}
+.social-icon{background:#fff!important;border-color:#dce4da!important;color:#244d3d!important}
+.support-button{background:#fff!important;color:#765725!important;border-color:#b58b4b!important;box-shadow:0 6px 20px rgba(24,61,50,.08)!important}
+.strip{background:#f0f2ec!important;border-color:#e2e6df!important}
+.track span{color:#718078!important}.track span.g{color:#9a7438!important}
+.card,.row{background:#fff!important;border-color:#e4e8e1!important;box-shadow:0 8px 26px rgba(30,52,40,.055)!important}
+.card:hover,.row:hover{border-color:#c5a264!important;box-shadow:0 14px 34px rgba(30,52,40,.1)!important}
+.card .n{color:#c8cfc7!important}.card:hover .n{color:#9a7438!important}
+.thumb{background:linear-gradient(145deg,#e8eee7,#f5f3e9)!important;color:#244d3d!important}
+.tag{background:#e9dfc8!important;color:#60491f!important}
+footer{border-top-color:#e2e6df!important}
+footer a{color:#244d3d!important}
+dialog.support-dialog{background:#fff!important;color:#26332d!important;border-color:#c5a264!important;box-shadow:0 24px 80px rgba(25,45,35,.2)!important}
+.support-dialog>p,.wallet-detail p{color:#58665e!important}
+.wallet-detail{background:#f7f8f4!important;border-color:#e2e6df!important}
+.wallet-detail summary{color:#244d3d!important}
+.mobile-menu-toggle{background:#fff!important;color:#244d3d!important;border-color:#dce4da!important}
+.mobile-site-menu{background:rgba(255,255,255,.98)!important;border-color:#dce4da!important;box-shadow:0 18px 45px rgba(30,52,40,.14)!important}
+.mobile-site-menu a{color:#26332d!important}.mobile-site-menu a:hover,.mobile-site-menu a:focus-visible{background:#f0f4ee!important;color:#183d32!important}
+@media(prefers-reduced-motion:reduce){.gold{animation:none!important}}
+
+/* Refined motion, consistent icon scale, and footer placement */
+.support-footer{display:flex;justify-content:center;width:100%;margin:22px auto 8px}
+.site-credit{display:block;width:100%;margin:8px auto 0;text-align:center;color:#89948b;font-size:10px;font-weight:500;letter-spacing:.04em;opacity:.82}
+.social-icon,.hero-socials .social-icon{width:42px;height:42px;border-radius:13px}
+.social-icon svg,.hero-socials .social-icon svg{width:20px;height:20px}
+.social-links{gap:10px;flex-wrap:wrap}
+.support-button{min-height:46px;padding:0 22px;border-width:1px;border-radius:24px;font-size:14px}
+.support-button svg{width:19px;height:19px}
+.hero .emblem{filter:drop-shadow(0 14px 26px rgba(36,77,61,.08))}
+.hero .ring{animation:spin 52s linear infinite}
+.hero .ring.b{animation:spinr 24s linear infinite}
+.hero .core{animation:float 9s ease-in-out infinite}
+.card,.row,.majlis,.emblem,.btn,.social-icon{transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease}
+.card:hover{transform:translateY(-4px)}
+.btn:hover,.social-icon:hover{transform:translateY(-2px)}
+.hero::before{content:"";position:absolute;inset:8% auto auto 8%;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(197,162,100,.13),transparent 68%);filter:blur(12px);pointer-events:none;animation:ambientDrift 12s ease-in-out infinite alternate}
+@keyframes ambientDrift{from{transform:translate3d(0,0,0) scale(.9)}to{transform:translate3d(28px,18px,0) scale(1.15)}}
+@media(prefers-reduced-motion:reduce){.hero::before,.hero .ring,.hero .core,.gold,.track,.in,.rv{animation:none!important}.card,.row,.majlis,.emblem,.btn,.social-icon{transition:none!important}}
+
 </style>
 
 </head>
@@ -145,7 +198,7 @@ dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(
 <a class="social-icon" href="https://www.tiktok.com/@d.khaled.4" target="_blank" rel="noopener noreferrer" aria-label="حساب تيك توك" title="تيك توك"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 6.2a5.5 5.5 0 0 1-3.4-4.8V1h-4.1v15.4a3.3 3.3 0 1 1-2.8-3.2v-4.2a7.5 7.5 0 1 0 6.9 7.4V8.5a9.5 9.5 0 0 0 5.5 1.8V6.2a5.5 5.5 0 0 1-2.1 0Z"/></svg></a>
 <a class="social-icon" href="https://t.me/khaled_najm1" target="_blank" rel="noopener noreferrer" aria-label="قناة تيليجرام" title="تيليجرام"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 3.2a1.5 1.5 0 0 0-1.6-.2L2.1 10.1c-1.3.5-1.3 1.2-.2 1.6l4.7 1.5 1.8 5.6c.2.6.1.8.7.8.5 0 .7-.2 1-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.2-15c.2-.7-.1-1.1-.2-1.4ZM8.1 12.9l10.3-6.5c.5-.3.9-.1.5.2l-8.5 7.7-.3 3.1-2-4.5Z"/></svg></a>
 </nav>
-<div class="support-prompt in d4"><button class="support-button" type="button" onclick="document.getElementById('supportDialog').showModal()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15.9V20h-2v-2.1a5.5 5.5 0 0 1-4-2.7l1.7-1a3.7 3.7 0 0 0 3.3 1.8c1.5 0 2.5-.7 2.5-1.8 0-1-.8-1.5-2.9-2-2.6-.6-4-1.6-4-3.7 0-1.9 1.3-3.2 3.4-3.6V5h2v1.9a5.1 5.1 0 0 1 3.5 2.3l-1.6 1.1a3.4 3.4 0 0 0-3-1.6c-1.4 0-2.2.6-2.2 1.6s.7 1.4 2.8 1.9c2.8.7 4.1 1.7 4.1 3.8 0 2-1.4 3.5-3.6 3.9Z"/></svg>ادعم تطوير المنصة</button></div>
+
 </div>
 <div class="emblem in d2"><div class="ring"></div><div class="ring b"></div><div class="core"><img src="assets/logo.jpg" alt="شعار استراحة أهل الأثر" style="width:100%;height:100%;border-radius:50%;object-fit:cover"></div></div>
 </div></div>
@@ -188,7 +241,7 @@ dialog.support-dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(
 <details class="wallet-detail"><summary>اتصالات كاش</summary><p>لم تتم إضافة بيانات هذه المحفظة بعد.</p></details>
 <form method="dialog"><button class="btn line" type="submit">إغلاق</button></form>
 </dialog>
-<footer><div class="wrap"><b class="gold" style="font-size:24px">استراحة أهل الأثر</b><span style="flex:1"></span><nav class="social-links" aria-label="حسابات المجلس على المنصات"><a class="social-icon" href="https://www.youtube.com/@Khaled_Najm" target="_blank" rel="noopener noreferrer" aria-label="قناة يوتيوب"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg></a><a class="social-icon" href="https://www.tiktok.com/@d.khaled.4" target="_blank" rel="noopener noreferrer" aria-label="حساب تيك توك"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 6.2a5.5 5.5 0 0 1-3.4-4.8V1h-4.1v15.4a3.3 3.3 0 1 1-2.8-3.2v-4.2a7.5 7.5 0 1 0 6.9 7.4V8.5a9.5 9.5 0 0 0 5.5 1.8V6.2a5.5 5.5 0 0 1-2.1 0Z"/></svg></a><a class="social-icon" href="https://t.me/khaled_najm1" target="_blank" rel="noopener noreferrer" aria-label="قناة تيليجرام"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 3.2a1.5 1.5 0 0 0-1.6-.2L2.1 10.1c-1.3.5-1.3 1.2-.2 1.6l4.7 1.5 1.8 5.6c.2.6.1.8.7.8.5 0 .7-.2 1-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.2-15c.2-.7-.1-1.1-.2-1.4ZM8.1 12.9l10.3-6.5c.5-.3.9-.1.5.2l-8.5 7.7-.3 3.1-2-4.5Z"/></svg></a><a href="https://t.me/recrdings">التسجيلات</a></nav></div></footer>
+<footer><div class="wrap"><b class="gold" style="font-size:24px">استراحة أهل الأثر</b><span style="flex:1"></span><nav class="social-links" aria-label="حسابات المجلس على المنصات"><a class="social-icon" href="https://www.youtube.com/@Khaled_Najm" target="_blank" rel="noopener noreferrer" aria-label="قناة يوتيوب"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg></a><a class="social-icon" href="https://www.tiktok.com/@d.khaled.4" target="_blank" rel="noopener noreferrer" aria-label="حساب تيك توك"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 6.2a5.5 5.5 0 0 1-3.4-4.8V1h-4.1v15.4a3.3 3.3 0 1 1-2.8-3.2v-4.2a7.5 7.5 0 1 0 6.9 7.4V8.5a9.5 9.5 0 0 0 5.5 1.8V6.2a5.5 5.5 0 0 1-2.1 0Z"/></svg></a><a class="social-icon" href="https://t.me/khaled_najm1" target="_blank" rel="noopener noreferrer" aria-label="قناة تيليجرام"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 3.2a1.5 1.5 0 0 0-1.6-.2L2.1 10.1c-1.3.5-1.3 1.2-.2 1.6l4.7 1.5 1.8 5.6c.2.6.1.8.7.8.5 0 .7-.2 1-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.2-15c.2-.7-.1-1.1-.2-1.4ZM8.1 12.9l10.3-6.5c.5-.3.9-.1.5.2l-8.5 7.7-.3 3.1-2-4.5Z"/></svg></a><a href="https://t.me/recrdings">التسجيلات</a></nav><div class="support-footer"><button class="support-button" type="button" onclick="document.getElementById('supportDialog').showModal()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15.9V20h-2v-2.1a5.5 5.5 0 0 1-4-2.7l1.7-1a3.7 3.7 0 0 0 3.3 1.8c1.5 0 2.5-.7 2.5-1.8 0-1-.8-1.5-2.9-2-2.6-.6-4-1.6-4-3.7 0-1.9 1.3-3.2 3.4-3.6V5h2v1.9a5.1 5.1 0 0 1 3.5 2.3l-1.6 1.1a3.4 3.4 0 0 0-3-1.6c-1.4 0-2.2.6-2.2 1.6s.7 1.4 2.8 1.9c2.8.7 4.1 1.7 4.1 3.8 0 2-1.4 3.5-3.6 3.9Z"/></svg>ادعم تطوير المنصة</button></div><small class="site-credit">تصميم بواسطة محمد سراج</small></div></footer>
 </div>
 
 
