@@ -26,6 +26,7 @@ function validateLecture(body, partial) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return 'بيانات المحاضرة غير صالحة.';
   const fields = ['title', 'description', 'starts_at', 'category', 'stream_url', 'recording_url', 'status'];
   if (Object.keys(body).some((key) => !fields.includes(key))) return 'توجد حقول غير معروفة.';
+  if (partial && Object.keys(body).length === 0) return 'يجب تحديد حقل واحد على الأقل للتعديل.';
   if (!partial || Object.hasOwn(body, 'title')) {
     if (typeof body.title !== 'string' || !body.title.trim() || body.title.trim().length > MAX_TITLE) return 'عنوان المحاضرة مطلوب وبحد أقصى 180 حرفًا.';
   }
@@ -80,6 +81,12 @@ function createAdminApi(options) {
       (pathname.startsWith('/api/lectures/') &&
        /^[0-9a-f-]{36}$/i.test(pathname.slice('/api/lectures/'.length)));
     if (pathname !== '/api/admin/session' && pathname !== '/api/admin/lectures' && !isLecturePath) return false;
+    const isLectureItemPath = /^\/api\/lectures\/[0-9a-f-]{36}$/i.test(pathname);
+    if (isLectureItemPath && request.method === 'POST') {
+      response.setHeader('Allow', 'GET, PATCH, DELETE');
+      sendJson(response, 405, { error: 'إنشاء المحاضرة متاح فقط عبر /api/lectures.' });
+      return true;
+    }
     if (!['GET', 'POST', 'PATCH', 'DELETE'].includes(request.method)) {
       response.setHeader('Allow', 'GET, POST, PATCH, DELETE, OPTIONS');
       sendJson(response, 405, { error: 'طريقة الطلب غير مدعومة.' });

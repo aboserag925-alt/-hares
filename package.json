@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "start": "node server/index.js",
-    "test": "node --test server/index.test.js server/media-library.test.js server/lecture-api.test.js",
+    "test": "node --test server/index.test.js server/media-library.test.js server/lecture-api.test.js server/suggestions/suggestion.test.js server/ai/ai.test.js server/ai/approval-api.test.js",
     "build:adhan": "node scripts/copy-adhan.mjs",
     "build:auth": "node scripts/build-auth.mjs",
     "build:app": "npm run build:adhan && npm run build:auth && npm run build:css",
@@ -11,8 +11,11 @@
     "dev:css": "tailwindcss -i ./src/tailwind.css -o ./app/tailwind.css --watch"
   },
   "devDependencies": {
+    "@jest/globals": "^29.7.0",
     "@tailwindcss/cli": "^4.1.0",
     "esbuild": "^0.28.2",
+    "jest": "^29.7.0",
+    "jest-circus": "^29.7.0",
     "tailwindcss": "^4.1.0"
   },
   "dependencies": {

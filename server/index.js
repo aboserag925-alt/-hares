@@ -6,6 +6,10 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { createMediaLibrary } = require('./media-library');
 const { createAdminApi } = require('./lecture-api');
+const { createSuggestionService } = require('./suggestions/suggestion-service');
+const { createSuggestionsApi } = require('./suggestions/suggestion-api');
+const { createTaskService } = require('./ai/task-service');
+const { createApprovalApi } = require('./ai/approval-api');
 
 const PUBLIC_ROOT = path.resolve(__dirname, '..');
 const MAX_BODY_BYTES = 16 * 1024;
@@ -141,15 +145,24 @@ async function readUtf8Json(response) {
   return JSON.parse(text);
 }
 
-function clientAddress(request) {
+function clientAddress(request, env) {
+  if (env && env.TRUST_PROXY === 'true') {
+    const forwarded = request.headers['x-forwarded-for'];
+    if (typeof forwarded === 'string' && forwarded.length <= 512) {
+      const hops = forwarded.split(',').map(function (value) { return value.trim(); }).filter(Boolean);
+      const trustedPeer = hops[hops.length - 1];
+      if (trustedPeer && /^[0-9a-f:.]+$/i.test(trustedPeer)) return trustedPeer;
+    }
+  }
   return request.socket.remoteAddress || 'unknown';
 }
 
-function consumeRateLimit(limits, address, now, maximum) {
-  if (limits.size > 10000) {
+function consumeRateLimit(limits, address, now, maximum = RATE_LIMIT) {
+  if (limits.size >= 10000) {
     limits.forEach(function (entry, key) {
       if (entry.resetAt <= now) limits.delete(key);
     });
+    while (limits.size >= 10000) limits.delete(limits.keys().next().value);
   }
 
   let entry = limits.get(address);
@@ -157,7 +170,7 @@ function consumeRateLimit(limits, address, now, maximum) {
     entry = { count: 0, resetAt: now + RATE_WINDOW_MS };
     limits.set(address, entry);
   }
-  if (entry.count >= (maximum || RATE_LIMIT)) return false;
+  if (entry.count >= maximum) return false;
   entry.count += 1;
   return true;
 }
@@ -289,8 +302,20 @@ function createServer(options) {
   const fetchImpl = options.fetch || global.fetch;
   const limits = new Map();
   const analyticsLimits = new Map();
+  const suggestionLimits = new Map();
+  const approvalLimits = new Map();
   let lastAnalyticsCleanupDate = null;
   const adminApi = createAdminApi({ env: env, fetch: fetchImpl });
+  const suggestionService = createSuggestionService({ env: env, fetch: fetchImpl });
+  const taskService = createTaskService({ env: env, fetch: fetchImpl });
+  const approvalApi = createApprovalApi({
+    env: env, fetch: fetchImpl, taskService: taskService,
+    rateLimit: function (request) { return consumeRateLimit(approvalLimits, clientAddress(request, env), Date.now(), 10); }
+  });
+  const suggestionsApi = createSuggestionsApi({
+    env: env, fetch: fetchImpl, service: suggestionService,
+    rateLimit: function (request) { return consumeRateLimit(suggestionLimits, clientAddress(request, env), Date.now(), 5); }
+  });
   const mediaLibrary = options.mediaLibrary || createMediaLibrary({
     env: env,
     fetch: fetchImpl,
@@ -319,7 +344,7 @@ function createServer(options) {
         sendJson(response, 503, { error: 'إحصاء الزوار غير مهيأ بعد.' });
         return;
       }
-      if (!consumeRateLimit(analyticsLimits, clientAddress(request), Date.now(), 30)) {
+      if (!consumeRateLimit(analyticsLimits, clientAddress(request, env), Date.now(), 30)) {
         sendJson(response, 429, { error: 'تم تجاوز عدد المحاولات. حاول لاحقًا.' });
         return;
       }
@@ -383,6 +408,8 @@ function createServer(options) {
       }
       return;
     }
+    if (await approvalApi(request, response, requestUrl.pathname)) return;
+    if (await suggestionsApi(request, response, requestUrl.pathname)) return;
     if (await adminApi(request, response, requestUrl.pathname)) return;
     if (requestUrl.pathname === '/api/health' && request.method === 'GET') {
       sendJson(response, 200, { ok: true });
@@ -467,7 +494,7 @@ function createServer(options) {
         sendJson(response, 503, { error: 'إعدادات Gemini وTelegram غير مكتملة على الخادم.' });
         return;
       }
-      if (!consumeRateLimit(limits, clientAddress(request), Date.now())) {
+      if (!consumeRateLimit(limits, clientAddress(request, env), Date.now())) {
         sendJson(response, 429, { error: 'وصلت إلى حد الإرسال المؤقت. حاول لاحقًا.' });
         return;
       }
@@ -559,9 +586,9 @@ if (require.main === module) {
     console.log('Ahl Athar server listening on port ' + port);
     mediaLibrary.start().catch(function () {
       console.error('Telegram media intake could not be started.');
-      server.close(function () {});
+      if (process.env.TELEGRAM_MEDIA_REQUIRED === 'true') server.close(function () {});
     });
   });
 }
 
-module.exports = { createServer: createServer, loadEnvFile: loadEnvFile };
+module.exports = { createServer: createServer, loadEnvFile: loadEnvFile, clientAddress: clientAddress, consumeRateLimit: consumeRateLimit, RATE_LIMIT: RATE_LIMIT };

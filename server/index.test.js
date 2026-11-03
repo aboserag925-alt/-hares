@@ -3,7 +3,7 @@
 const assert = require('node:assert/strict');
 const http = require('node:http');
 const test = require('node:test');
-const { createServer } = require('./index');
+const { createServer, clientAddress, consumeRateLimit, RATE_LIMIT } = require('./index');
 
 const configuredEnv = {
   GEMINI_API_KEY: 'test-gemini-key',
@@ -381,4 +381,29 @@ test('adds allowlisted CORS headers to library and media responses', async funct
     assert.equal(file.headers.get('access-control-allow-origin'), 'https://app.example');
     assert.match(file.headers.get('access-control-expose-headers'), /Content-Range/i);
   });
+});
+
+test('ignores X-Forwarded-For unless TRUST_PROXY is explicitly enabled', function () {
+  const request={headers:{'x-forwarded-for':'203.0.113.8, 10.0.0.2'},socket:{remoteAddress:'192.0.2.4'}};
+  assert.equal(clientAddress(request,{}),'192.0.2.4');
+  assert.equal(clientAddress(request,{TRUST_PROXY:'false'}),'192.0.2.4');
+  assert.equal(clientAddress(request,{TRUST_PROXY:'true'}),'10.0.0.2');
+  const spoofed={headers:{'x-forwarded-for':'not-an-ip'},socket:{remoteAddress:'192.0.2.9'}};
+  assert.equal(clientAddress(spoofed,{TRUST_PROXY:'true'}),'192.0.2.9');
+});
+
+test('consumeRateLimit defaults to RATE_LIMIT when maximum is omitted', function () {
+  const limits = new Map();
+  for (let index = 0; index < RATE_LIMIT; index += 1) {
+    assert.equal(consumeRateLimit(limits, 'default-limit-client', 1000), true);
+  }
+  assert.equal(consumeRateLimit(limits, 'default-limit-client', 1000), false);
+});
+
+test('rate limiter bounds its in-memory key count and expires entries', function () {
+  const limits=new Map();
+  for(let i=0;i<10005;i++) consumeRateLimit(limits,'ip-'+i,1000,1);
+  assert.ok(limits.size<=10000);
+  assert.equal(consumeRateLimit(limits,'ip-10004',1001,1),false);
+  assert.equal(consumeRateLimit(limits,'ip-10004',100000000,1),true);
 });

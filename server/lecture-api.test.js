@@ -2,7 +2,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { validateLecture } = require('./lecture-api');
+const { createAdminApi, validateLecture } = require('./lecture-api');
 
 const valid = {
   title: 'شرح صحيح الإمام مسلم',
@@ -35,4 +35,34 @@ test('rejects invalid publication states and unknown fields', () => {
 
 test('supports partial updates without requiring a title', () => {
   assert.equal(validateLecture({ status: 'archived' }, true), null);
+});
+
+test('rejects empty partial updates', () => {
+  assert.match(validateLecture({}, true), /حقل واحد/);
+});
+
+test('POST to a specific lecture returns 405 and the supported item methods', async () => {
+  const api = createAdminApi({
+    env: {
+      SUPABASE_URL: 'https://project.example',
+      SUPABASE_ANON_KEY: 'anon',
+      SUPABASE_SERVICE_ROLE_KEY: 'service'
+    },
+    fetch: async () => { throw new Error('POST to an item must not call Supabase'); }
+  });
+  const request = {
+    method: 'POST',
+    headers: {},
+    [Symbol.asyncIterator]: async function* () {}
+  };
+  const response = {
+    headers: {},
+    setHeader(name, value) { this.headers[name] = value; },
+    writeHead(status, headers) { this.status = status; Object.assign(this.headers, headers || {}); },
+    end(body) { this.body = body; }
+  };
+  const handled = await api(request, response, '/api/lectures/123e4567-e89b-42d3-a456-426614174000');
+  assert.equal(handled, true);
+  assert.equal(response.status, 405);
+  assert.equal(response.headers.Allow, 'GET, PATCH, DELETE');
 });
