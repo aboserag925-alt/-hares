@@ -54,7 +54,7 @@ test('answers assistant callbacks without treating them as media approvals', asy
   const f = fixture();
   await f.assistant.processUpdate({ callback_query: { id: 'cb1', data: 'haress:help', message: { chat: { id: 42, type: 'private' } } } });
   assert.equal(f.calls.length, 2);
-  assert.match(f.calls[1].body.text, /الخصوصية/);
+  assert.match(f.calls[1].body.text, /معلومات خاصة/);
 });
 
 test('rejects messages longer than the supported limit', async function () {
