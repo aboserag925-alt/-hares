@@ -250,8 +250,8 @@ function createMediaLibrary(options) {
     }
     await telegram('sendMessage', {
       chat_id: mediaGroupId,
-      text: 'تم نشر المحتوى تلقائيًا في مكتبة استراحة أهل الأثر.\\nالعنوان: ' + item.title +
-        '\\nالتصنيف: ' + CATEGORY_NAMES[item.category]
+      text: 'تم نشر المحتوى تلقائيًا في مكتبة استراحة أهل الأثر.\nالعنوان: ' + item.title +
+        '\nالتصنيف: ' + CATEGORY_NAMES[item.category]
     });
   }
 
