@@ -11,7 +11,7 @@ function createTelegramAssistant(options) {
   const token = env.TELEGRAM_BOT_TOKEN;
   const reviewChatId = env.TELEGRAM_CHAT_ID;
   const siteUrl = (env.SITE_URL || 'https://aboserag925-alt.github.io/Haress/').replace(/\/$/, '') + '/';
-  const limits = new Map();
+  const limits = new Map();\n  const optedOut = new Set();
 
   async function call(method, payload) {
     if (!token) throw new Error('Telegram bot token is not configured.');
@@ -84,7 +84,7 @@ function createTelegramAssistant(options) {
     const chatId = message.chat.id;
     const text = typeof message.text === 'string' ? message.text.trim() : '';
     if (/^\/start(?:@\w+)?(?:\s|$)/i.test(text) || /^\/menu(?:@\w+)?$/i.test(text)) {
-      await send(chatId, 'مرحبًا بك في المساعد الرسمي لمنصة استراحة أهل الأثر. كيف أستطيع مساعدتك؟', mainMenu());
+      optedOut.delete(String(message.from.id));\n      await send(chatId, 'مرحبًا بك في المساعد الرسمي لمنصة استراحة أهل الأثر. كيف أستطيع مساعدتك؟', mainMenu());
       return true;
     }
     if (/^\/help(?:@\w+)?$/i.test(text)) {
@@ -92,10 +92,10 @@ function createTelegramAssistant(options) {
       return true;
     }
     if (/^\/stop(?:@\w+)?$/i.test(text)) {
-      await send(chatId, 'تم إيقاف معالجة الرسائل العادية في هذه المحادثة. لن تُرسل رسائلك التالية للمراجعة. لإعادة الاستخدام أرسل /start.');
+      optedOut.add(String(message.from.id));\n      await send(chatId, 'تم إيقاف معالجة الرسائل العادية في هذه المحادثة. لن تُرسل رسائلك التالية للمراجعة. لإعادة الاستخدام أرسل /start.');
       return true;
     }
-    if (!text) {
+    if (optedOut.has(String(message.from.id))) return true;\n    if (!text) {
       await send(chatId, 'أستقبل الرسائل النصية فقط حاليًا. أرسل /menu للمساعدة.');
       return true;
     }
