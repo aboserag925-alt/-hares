@@ -256,6 +256,10 @@ body,.app-shell,button,input,textarea,select{
 .site footer .design-signature{margin:0;padding:0;color:#8a8f88}
 @media(max-width:600px){.support-bottom{margin:24px 16px 12px;padding:16px;align-items:flex-start;flex-direction:column}.support-bottom .support-button{width:100%}.design-signature{text-align:center;margin-bottom:14px}}
 
+
+.quick-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:transform .35s cubic-bezier(.2,.7,.2,1),stroke-width .25s}
+.quick-item:hover .quick-icon svg,.quick-item:focus-visible .quick-icon svg{transform:rotate(-8deg) scale(1.12);stroke-width:2}
+@media(prefers-reduced-motion:reduce){.quick-icon svg{transition:none!important}}
 </style>
 </head>
 <body>
@@ -295,9 +299,9 @@ body,.app-shell,button,input,textarea,select{
   <div class="hero-foot"><span>بإشراف الدكتور خالد الحارس</span><span>من السبت إلى الخميس</span></div>
 </section>
 <section class="quick-strip" aria-label="محتويات المجلس">
-  <button type="button" class="quick-item" onclick="show('sched')"><span class="quick-icon">◷</span><span><b>مجالس العلم</b><small>مواعيد ودروس</small></span><i>←</i></button>
-  <button type="button" class="quick-item" onclick="show('media')"><span class="quick-icon">▤</span><span><b>المكتبة</b><small>صوتيات ومرئيات</small></span><i>←</i></button>
-  <button type="button" class="quick-item" onclick="show('adhkar')"><span class="quick-icon">۞</span><span><b>زاد المسلم</b><small>الأذكار اليومية</small></span><i>←</i></button>
+  <button type="button" class="quick-item" onclick="show('sched')"><span class="quick-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg></span><span><b>مجالس العلم</b><small>مواعيد ودروس</small></span><i>←</i></button>
+  <button type="button" class="quick-item" onclick="show('media')"><span class="quick-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20M8 7h8M8 10h8"/></svg></span><span><b>المكتبة</b><small>صوتيات ومرئيات</small></span><i>←</i></button>
+  <button type="button" class="quick-item" onclick="show('adhkar')"><span class="quick-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 2.1 4.2L19 5l-1.2 4.9L22 12l-4.2 2.1L19 19l-4.9-1.2L12 22l-2.1-4.2L5 19l1.2-4.9L2 12l4.2-2.1L5 5l4.9 1.2z"/><circle cx="12" cy="12" r="2.2"/></svg></span><span><b>زاد المسلم</b><small>الأذكار اليومية</small></span><i>←</i></button>
 </section>
 <div class="section-heading"><div><span>برنامج المجلس</span><h2>مجالس هذا الأسبوع</h2></div><small>العلم يُطلب بالمداومة</small></div>
 <div class="next"><small>الدرس القادم</small><b id="nx"></b><div class="count" id="cd"></div></div>
