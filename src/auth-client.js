@@ -141,6 +141,17 @@ window.ahlAuth = {
     if (result.error) throw result.error;
     return result.data.session ? result.data.session.access_token : null;
   },
+  requestPasswordReset: function (email, redirectTo, captchaToken) {
+    const options = { redirectTo: redirectTo };
+    if (captchaSiteKey) {
+      if (typeof captchaToken !== 'string' || !captchaToken.trim()) throw new Error('أكمل اختبار التحقق الأمني قبل المتابعة.');
+      options.captchaToken = captchaToken;
+    }
+    return requireClient().auth.resetPasswordForEmail(email, options);
+  },
+  updatePassword: function (password) {
+    return requireClient().auth.updateUser({ password: password });
+  },
   signOut: function () {
     return requireClient().auth.signOut();
   },
