@@ -19,7 +19,7 @@ var APP_FILES = [
   './vendor/ADHAN-LICENSE.txt',
   './vendor/SUPABASE-LICENSE.txt'
 ];
-var STATIC_FILE = /\\.(?:css|js|mjs|json|svg|png|jpe?g|webp|ico|woff2?|ttf|eot)$/i;
+var STATIC_FILE = /\.(?:css|js|mjs|json|svg|png|jpe?g|webp|ico|woff2?|ttf|eot)$/i;
 
 self.addEventListener('install', function (event) {
   event.waitUntil((async function () {
