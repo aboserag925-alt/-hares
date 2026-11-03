@@ -366,7 +366,8 @@ function createMediaLibrary(options) {
       await receiveFile(message);
       return;
     }
-    if (update.callback_query && String(update.callback_query.data || '').startsWith('media:')) {\n      await processCallback(update.callback_query);
+    if (update.callback_query && String(update.callback_query.data || '').startsWith('media:')) {
+      await processCallback(update.callback_query);
       return;
     }
     if (handleAssistantUpdate) await handleAssistantUpdate(update);
