@@ -9,7 +9,7 @@
 
 ## النشر على GitHub Pages
 
-يُنشر الموقع والتطبيق الثابتان تلقائيًا عبر `.github/workflows/pages.yml` عند الدفع إلى فرع `main` أو يدويًا من تبويب Actions. من إعدادات المستودع، اختر **Settings → Pages → Build and deployment → Source → GitHub Actions**. بعد نجاح سير العمل سيكون الموقع على `https://aboserag925-alt.github.io/-hares/`.
+يُنشر الموقع والتطبيق الثابتان تلقائيًا عبر `.github/workflows/pages.yml` عند الدفع إلى فرعَي `main` و`fix/istirahat-ahl-athar` أو يدويًا من تبويب Actions. من إعدادات المستودع، اختر **Settings → Pages → Build and deployment → Source → GitHub Actions**. يخزن عامل الخدمة ملفات الواجهة الثابتة المحلية فقط؛ ولا يخزن ردود تسجيل الدخول أو طلبات API أو أي طلبات لمواقع خارجية. بعد نجاح سير العمل سيكون الموقع على `https://aboserag925-alt.github.io/-hares/`.
 
 GitHub Pages لا يشغّل خادم Node.js؛ لذلك تحتاج الأسئلة ومكتبة ملفات Telegram إلى خادم HTTPS عام مستقل. بعد نشر الخادم أضف متغير المستودع `AHL_API_BASE_URL` من **Settings → Secrets and variables → Actions → Variables**، بقيمة أصل الخادم فقط مثل `https://api.example.com`، ثم أعد تشغيل سير عمل Pages. اضبط `ALLOWED_ORIGINS` في الخادم ليشمل أصل GitHub Pages `https://aboserag925-alt.github.io` (وأي نطاق مخصص تستخدمه). تبقى مفاتيح Gemini وTelegram وملفات المكتبة على الخادم ولا تُرفع إلى Pages.
 
