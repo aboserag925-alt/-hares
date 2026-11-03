@@ -144,6 +144,7 @@ textarea::placeholder{color:#777e75}
 .qibla-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 .auth-form{display:grid;gap:14px;max-width:520px;margin-top:18px}
 .auth-actions{display:flex;gap:10px;flex-wrap:wrap}
+.captcha-box{display:flex;justify-content:flex-start;min-height:65px;margin-top:2px}
 .auth-actions .btn{margin:0}
 .account-email{color:var(--gold2);font-weight:700;direction:ltr;text-align:right}
 .social-account{margin-top:14px}
@@ -355,6 +356,7 @@ textarea::placeholder{color:#777e75}
 <label class="field" for="authPassword">كلمة المرور
 <input id="authPassword" type="password" autocomplete="current-password" minlength="8" required placeholder="ثمانية أحرف على الأقل">
 </label>
+<div id="authCaptcha" class="captcha-box" hidden role="group" aria-label="التحقق الأمني"></div>
 <div class="auth-actions">
 <button id="signInBtn" class="btn" type="submit">تسجيل الدخول</button>
 <button id="signUpBtn" class="btn" type="button">إنشاء حساب</button>
