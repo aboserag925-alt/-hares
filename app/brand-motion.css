@@ -129,3 +129,38 @@ input,textarea,select{background:#fbfaf6!important;color:#173b2c!important;borde
 button,.link{background:#edf4ee!important;color:#0b5e3c!important;border-color:rgba(11,94,60,.18)!important}
 button.primary{background:linear-gradient(135deg,#0b5e3c,#14764e)!important;color:#fff!important}
 button.danger{color:#a23c32!important}
+
+
+/* Refined light landing-page composition */
+.orb{background:rgba(167,196,176,.22)!important;filter:blur(78px)!important}
+.hero{position:relative;isolation:isolate;padding:clamp(58px,8vw,104px) 0 clamp(64px,8vw,100px)!important;background:linear-gradient(135deg,#fffefa 0%,#f7f5ef 56%,#edf4ee 100%)!important}
+.hero:before{content:"";position:absolute;inset:18px 3.2%;z-index:-1;border:1px solid rgba(212,175,55,.22);border-radius:34px;pointer-events:none}
+.hero:after{content:"";position:absolute;z-index:-1;width:360px;height:360px;left:8%;top:8%;border:1px solid rgba(212,175,55,.16);border-radius:50%;box-shadow:0 0 0 24px rgba(212,175,55,.035),0 0 0 48px rgba(212,175,55,.025);pointer-events:none}
+.hero .wrap{gap:clamp(28px,5vw,72px)!important}
+.hero .emblem{width:min(100%,390px)!important;aspect-ratio:1;margin-inline:auto;display:grid;place-items:center;position:relative;border-radius:50%;background:radial-gradient(circle,#fff 0 32%,rgba(247,231,182,.48) 33%,rgba(255,255,255,.18) 66%,transparent 67%)!important;box-shadow:inset 0 0 0 1px rgba(212,175,55,.18),0 24px 70px rgba(11,94,60,.08)!important}
+.hero .emblem .ring{border-color:rgba(212,175,55,.52)!important;box-shadow:0 0 0 12px rgba(212,175,55,.045)!important}
+.hero .emblem .ring.b{border-color:rgba(11,94,60,.2)!important}
+.hero .emblem .core{width:66%!important;height:66%!important;border-radius:28%!important;padding:12px;background:#fff!important;border:2px solid #d4af37!important;box-shadow:0 18px 48px rgba(11,94,60,.14),0 0 0 9px rgba(212,175,55,.1)!important;overflow:hidden}
+.hero .emblem .core img{border-radius:20%!important;object-fit:contain!important}
+.hero .eyebrow{background:#fff!important;color:#0b5e3c!important;border-color:rgba(212,175,55,.55)!important;box-shadow:0 8px 24px rgba(11,94,60,.05)}
+h1.big{color:#0b5e3c!important;text-shadow:0 3px 0 rgba(212,175,55,.12)!important}
+h1.big:after{content:"أنت الجماعة ولو كنت وحدك";display:block;margin-top:20px;font:600 clamp(15px,2vw,20px) 'Cairo',sans-serif;letter-spacing:0;color:#557263;text-shadow:none}
+.hero .sheikh{background:#fff!important;color:#0b5e3c!important;border:1px solid rgba(212,175,55,.36)!important;box-shadow:0 8px 24px rgba(11,94,60,.05)}
+.hero .lead{color:#557263!important;line-height:2.05}
+.hero .support-button{box-shadow:0 9px 24px rgba(11,94,60,.14)!important}
+.strip{background:linear-gradient(90deg,#eef4ef,#fffdf8,#eef4ef)!important;border-block:1px solid rgba(212,175,55,.22)!important}
+.strip .track{color:#0b5e3c!important}
+section.s{background:#fbfaf6!important}
+section.s:nth-of-type(even){background:#f1f6f1!important}
+.t{color:#0b5e3c!important}
+.card{border-radius:22px!important;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease!important}
+.card:hover{transform:translateY(-5px)!important;box-shadow:0 20px 44px rgba(11,94,60,.1)!important;border-color:rgba(212,175,55,.55)!important}
+.card .n{color:#d4af37!important;font-weight:800}
+@media(max-width:760px){
+ .hero:before{inset:10px 3%;border-radius:22px}
+ .hero:after{width:220px;height:220px;left:-45px;top:20px}
+ .hero .wrap{grid-template-columns:1fr!important;gap:34px!important}
+ .hero .emblem{width:min(72vw,290px)!important;grid-row:1}
+ h1.big{font-size:clamp(42px,12vw,64px)!important}
+}
+@media(prefers-reduced-motion:reduce){.hero .emblem .ring{animation:none!important}}
