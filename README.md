@@ -9,7 +9,7 @@
 
 ## النشر على GitHub Pages
 
-يُنشر الموقع والتطبيق الثابتان تلقائيًا عبر `.github/workflows/pages.yml` عند الدفع إلى فرع `main` أو يدويًا من تبويب Actions. من إعدادات المستودع، اختر **Settings → Pages → Build and deployment → Source → GitHub Actions**. بعد نجاح سير العمل سيكون الموقع على `https://aboserag925-alt.github.io/-hares/`.
+يُنشر الموقع والتطبيق الثابتان تلقائيًا عبر `.github/workflows/pages.yml` عند الدفع إلى فرع `main` أو يدويًا من تبويب Actions. من إعدادات المستودع، اختر **Settings → Pages → Build and deployment → Source → GitHub Actions**. بعد نجاح سير العمل سيكون الموقع على `https://aboserag925-alt.github.io/Haress/`.
 
 ينشئ سير العمل صفحة `404.html` من الصفحة الرئيسية، ويبني موارد التطبيق ويتحقق من وجود الملفات المطلوبة قبل رفعها إلى Pages. عند غياب `AHL_API_BASE_URL` تبقى الصفحات الثابتة متاحة دون إرسال طلبات إلى API غير مهيأ.
 
@@ -74,7 +74,7 @@ TELEGRAM_MEDIA_GROUP_ID=-100...
 1. أنشئ مشروعًا في Supabase، واترك تأكيد البريد الإلكتروني مفعّلًا.
 2. نفّذ `supabase/schema.sql` في SQL Editor داخل مشروع Supabase. سيُنشئ جدول المزامنة مع سياسات RLS التي تمنع كل مستخدم من قراءة بيانات غيره.
 3. أضف `SUPABASE_URL` و`SUPABASE_ANON_KEY` إلى متغيرات GitHub Actions العامة لإعداد Pages، أو عرّفهما في بيئة البناء المحلية. ينشئ `build:app` إعداد المتصفح منهما. لا تستخدم `service_role` أو أي مفتاح سري في المتصفح.
-4. أضف عنوان الموقع إلى إعدادات Site URL وRedirect URLs في Supabase، ثم نفّذ `npm.cmd run build:app` عند البناء المحلي أو أعد تشغيل سير عمل Pages.
+4. اضبط إعدادات Supabase Auth → URL Configuration كما يلي: **Site URL** = `https://aboserag925-alt.github.io/Haress/`، وأضف إلى **Redirect URLs** النمط `https://aboserag925-alt.github.io/Haress/**` للسماح بالعودة إلى صفحات الموقع ومساراته. ثم نفّذ `npm.cmd run build:app` عند البناء المحلي أو أعد تشغيل سير عمل Pages.
 
 تُحفظ جلسة الدخول باستعمال Supabase Auth، وتُزامَن طريقة حساب الصلاة ومذهب العصر وتقدم الأذكار اليومي. إحداثيات الموقع لا تغادر الجهاز. يبقى استخدام الصلاة والقبلة والأذكار متاحًا دون حساب.
 
