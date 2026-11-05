@@ -52,3 +52,18 @@
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+/* Cinematic brand reveal */
+@keyframes brand-intro-in{from{opacity:0;transform:translateY(14px) scale(.94);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes brand-intro-out{to{opacity:0;visibility:hidden;transform:scale(1.025)}}
+@keyframes brand-intro-ring{to{transform:rotate(360deg)}}
+@keyframes brand-intro-line{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.haress-intro{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;overflow:hidden;background:radial-gradient(ellipse at 50% 44%,rgba(213,171,100,.13),transparent 34%),#080c0a;color:#f4f0e7;opacity:1;transition:opacity .55s ease,visibility .55s ease}
+.haress-intro.is-leaving{opacity:0;visibility:hidden;pointer-events:none}
+.haress-intro__content{position:relative;display:grid;justify-items:center;gap:15px;text-align:center;animation:brand-intro-in .8s cubic-bezier(.2,.75,.25,1) both}
+.haress-intro__logo{width:clamp(112px,24vw,154px);height:auto;position:relative;z-index:1;filter:drop-shadow(0 0 26px rgba(213,171,100,.25))}
+.haress-intro__halo{position:absolute;width:clamp(150px,32vw,210px);aspect-ratio:1;border:1px solid rgba(213,171,100,.35);border-left-color:transparent;border-radius:50%;animation:brand-intro-ring 9s linear infinite}
+.haress-intro__name{font:700 clamp(35px,8vw,52px) 'Reem Kufi','Cairo',sans-serif;letter-spacing:.04em;color:#f2d9a4;text-shadow:0 0 30px rgba(213,171,100,.2)}
+.haress-intro__tag{font:500 12px 'Cairo',sans-serif;color:#a9ada2;letter-spacing:.18em}
+.haress-intro__rule{width:100px;height:1px;margin-top:2px;background:linear-gradient(90deg,transparent,#d5ab64,transparent);transform-origin:center;animation:brand-intro-line .9s .35s both}
+@media(prefers-reduced-motion:reduce){.haress-intro__content,.haress-intro__halo,.haress-intro__rule{animation:none!important}.haress-intro{transition:none}}
