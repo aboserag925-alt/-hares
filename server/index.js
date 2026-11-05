@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const http = require('node:http');
+const net = require('node:net');
 const path = require('node:path');
 const { createMediaLibrary } = require('./media-library');
 const { createAdminApi } = require('./lecture-api');
@@ -142,8 +143,14 @@ async function readUtf8Json(response) {
   return JSON.parse(text);
 }
 
-function clientAddress(request) {
-  return request.socket.remoteAddress || 'unknown';
+function clientAddress(request, env) {
+  const remoteAddress = request.socket.remoteAddress || 'unknown';
+  // Only trust Cloudflare's client-IP header when the origin is explicitly configured behind Cloudflare.
+  if (!env || env.TRUST_PROXY !== 'true') return remoteAddress;
+  const forwardedAddress = request.headers['cf-connecting-ip'];
+  if (typeof forwardedAddress !== 'string') return remoteAddress;
+  const candidate = forwardedAddress.trim();
+  return net.isIP(candidate) ? candidate : remoteAddress;
 }
 
 function consumeRateLimit(limits, address, now) {
@@ -161,6 +168,48 @@ function consumeRateLimit(limits, address, now) {
   if (entry.count >= RATE_LIMIT) return false;
   entry.count += 1;
   return true;
+}
+
+async function verifyTurnstile(token, request, env, fetchImpl) {
+  if (!env.TURNSTILE_SECRET_KEY) return { ok: false, unavailable: true };
+  if (typeof token !== 'string' || token.length < 1 || token.length > 2048) {
+    return { ok: false, unavailable: false };
+  }
+
+  const form = new URLSearchParams();
+  form.set('secret', env.TURNSTILE_SECRET_KEY);
+  form.set('response', token);
+  const remoteAddress = clientAddress(request, env);
+  if (remoteAddress !== 'unknown' && net.isIP(remoteAddress)) form.set('remoteip', remoteAddress);
+
+  try {
+    const result = await fetchImpl(
+      'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: form.toString(),
+        signal: AbortSignal.timeout(10000)
+      }
+    );
+    if (!result.ok) return { ok: false, unavailable: true };
+    const payload = await readUtf8Json(result);
+    let expectedHostname = '';
+    try {
+      expectedHostname = new URL(request.headers.origin).hostname.toLowerCase();
+    } catch {
+      return { ok: false, unavailable: false };
+    }
+    const hostname = typeof payload.hostname === 'string' ? payload.hostname.toLowerCase() : '';
+    return {
+      ok: payload.success === true &&
+        payload.action === 'submit_question' &&
+        hostname === expectedHostname,
+      unavailable: false
+    };
+  } catch {
+    return { ok: false, unavailable: true };
+  }
 }
 
 function staticFilePath(requestUrl) {
@@ -279,7 +328,7 @@ function createServer(options) {
   const limits = new Map();
   const adminApi = createAdminApi({ env: env, fetch: fetchImpl });
   const rateLimit = function (request) {
-    return consumeRateLimit(limits, clientAddress(request), Date.now());
+    return consumeRateLimit(limits, clientAddress(request, env), Date.now());
   };
   const suggestionService = options.suggestionService || createSuggestionService({ env: env, fetch: fetchImpl });
   const taskService = options.taskService || createTaskService({ env: env, fetch: fetchImpl });
@@ -404,7 +453,7 @@ function createServer(options) {
         sendJson(response, 503, { error: 'إعدادات Gemini وTelegram غير مكتملة على الخادم.' });
         return;
       }
-      if (!consumeRateLimit(limits, clientAddress(request), Date.now())) {
+      if (!consumeRateLimit(limits, clientAddress(request, env), Date.now())) {
         sendJson(response, 429, { error: 'وصلت إلى حد الإرسال المؤقت. حاول لاحقًا.' });
         return;
       }
@@ -424,6 +473,24 @@ function createServer(options) {
       if (question.length < 5 || question.length > MAX_QUESTION_LENGTH) {
         sendJson(response, 400, { error: 'يجب أن يكون السؤال بين 5 و1600 حرف.' });
         return;
+      }
+
+
+      const turnstileEnabled = env.TURNSTILE_ENABLED === 'true' || Boolean(env.TURNSTILE_SECRET_KEY);
+      if (turnstileEnabled) {
+        if (!env.TURNSTILE_SECRET_KEY) {
+          sendJson(response, 503, { error: 'التحقق الأمني غير متاح حاليًا. حاول لاحقًا.' });
+          return;
+        }
+        const verification = await verifyTurnstile(body.turnstileToken, request, env, fetchImpl);
+        if (!verification.ok) {
+          sendJson(response, verification.unavailable ? 503 : 403, {
+            error: verification.unavailable
+              ? 'تعذر التحقق الأمني الآن. حاول لاحقًا.'
+              : 'فشل التحقق الأمني. أعد المحاولة.'
+          });
+          return;
+        }
       }
 
       try {

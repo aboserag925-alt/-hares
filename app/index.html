@@ -436,6 +436,8 @@ body,.app-shell,button,input,textarea,select{
 <h2>اكتب سؤالك</h2>
 <p class="section-subtitle">يُرسل السؤال إلى Gemini لإنشاء مسودة، ثم يُرسل السؤال والمسودة إلى وجهة Telegram للمراجعة. لا ترسل معلومات شخصية أو حساسة.</p>
 <textarea id="qt" maxlength="1600" placeholder="سؤالك أو ملاحظتك"></textarea>
+<div id="questionTurnstile" class="question-turnstile" hidden aria-label="التحقق الأمني"></div>
+<p id="questionTurnstileStatus" class="status" role="status" aria-live="polite" hidden></p>
 <label class="question-consent"><input id="questionConsent" type="checkbox"><span>أوافق على إرسال سؤالي إلى Gemini ثم Telegram للمراجعة.</span></label>
 <div class="question-actions"><button class="btn" id="sendQuestionBtn" type="button" disabled>أرسل السؤال للمراجعة</button><button class="btn" type="button" onclick="copyQ()">انسخ السؤال</button></div>
 <p class="status" id="qm" role="status" aria-live="polite">لن يُرسل السؤال قبل موافقتك.</p>
@@ -507,6 +509,7 @@ window.copySupportNumber = async function(button) {
 <script src="supabase-config.js"></script>
 <script src="runtime-config.js"></script>
 <script src="vendor/adhan.umd.min.js"></script>
+<script src="turnstile-config.js"></script>
 <script src="auth-client.js"></script>
 <script src="app.js"></script>
 </body>

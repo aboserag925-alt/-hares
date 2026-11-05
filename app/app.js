@@ -887,6 +887,73 @@ function copyQ() {
   });
 }
 
+var questionTurnstileWidgetId = null;
+var questionTurnstileLoadPromise = null;
+
+function questionTurnstileSiteKey() {
+  return typeof window.AHL_TURNSTILE_SITE_KEY === 'string'
+    ? window.AHL_TURNSTILE_SITE_KEY.trim()
+    : '';
+}
+
+function loadQuestionTurnstileApi() {
+  if (window.turnstile) return Promise.resolve();
+  if (questionTurnstileLoadPromise) return questionTurnstileLoadPromise;
+  questionTurnstileLoadPromise = new Promise(function (resolve, reject) {
+    var script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    script.async = true;
+    script.defer = true;
+    script.onload = function () {
+      if (window.turnstile) resolve();
+      else reject(new Error('Turnstile API unavailable'));
+    };
+    script.onerror = function () { reject(new Error('Turnstile API failed to load')); };
+    document.head.appendChild(script);
+  });
+  return questionTurnstileLoadPromise;
+}
+
+async function prepareQuestionTurnstile() {
+  var siteKey = questionTurnstileSiteKey();
+  var container = document.getElementById('questionTurnstile');
+  if (!siteKey) {
+    container.hidden = true;
+    return false;
+  }
+  container.hidden = false;
+  var turnstileStatus = document.getElementById('questionTurnstileStatus');
+  turnstileStatus.hidden = false;
+  try {
+    await loadQuestionTurnstileApi();
+    if (questionTurnstileWidgetId === null) {
+      questionTurnstileWidgetId = window.turnstile.render(container, {
+        sitekey: siteKey,
+        action: 'submit_question',
+        callback: function () {
+          setStatus(document.getElementById('questionTurnstileStatus'), 'اكتمل التحقق الأمني.');
+        },
+        'expired-callback': function () {
+          setStatus(document.getElementById('questionTurnstileStatus'), 'انتهت صلاحية التحقق. أعد التحقق.');
+        },
+        'error-callback': function () {
+          setStatus(document.getElementById('questionTurnstileStatus'), 'تعذر إكمال التحقق الأمني. أعد المحاولة.', true);
+        }
+      });
+    }
+    return true;
+  } catch (error) {
+    setStatus(document.getElementById('questionTurnstileStatus'), 'تعذر تحميل التحقق الأمني. تحقق من الاتصال وحاول مجددًا.', true);
+    return false;
+  }
+}
+
+function resetQuestionTurnstile() {
+  if (window.turnstile && questionTurnstileWidgetId !== null) {
+    window.turnstile.reset(questionTurnstileWidgetId);
+  }
+}
+
 async function sendQuestion() {
   var question = document.getElementById('qt').value.trim();
   var consent = document.getElementById('questionConsent').checked;
@@ -903,6 +970,21 @@ async function sendQuestion() {
     return;
   }
 
+  var turnstileToken = '';
+  if (questionTurnstileSiteKey()) {
+    var prepared = await prepareQuestionTurnstile();
+    if (!prepared) return;
+    try {
+      turnstileToken = window.turnstile.getResponse(questionTurnstileWidgetId) || '';
+    } catch (error) {
+      turnstileToken = '';
+    }
+    if (!turnstileToken) {
+      setStatus(status, 'أكمل التحقق الأمني قبل إرسال السؤال.', true);
+      return;
+    }
+  }
+
   button.disabled = true;
   draftBox.hidden = true;
   setStatus(status, 'جارٍ إعداد المسودة وإرسال السؤال للمراجعة…');
@@ -910,7 +992,7 @@ async function sendQuestion() {
     var response = await fetch(apiUrl('/api/questions'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
-      body: JSON.stringify({ question: question })
+      body: JSON.stringify(turnstileToken ? { question: question, turnstileToken: turnstileToken } : { question: question })
     });
     var result;
     try {
@@ -933,6 +1015,7 @@ async function sendQuestion() {
       : error.message;
     setStatus(status, message || 'تعذر إرسال السؤال. حاول لاحقًا.', true);
   } finally {
+    resetQuestionTurnstile();
     button.disabled = false;
   }
 }
@@ -987,6 +1070,8 @@ document.getElementById('compassBtn').addEventListener('click', startCompass);
 document.getElementById('saveAdhan').addEventListener('click', saveAdhanUrl);
 document.getElementById('questionConsent').addEventListener('change', function () {
   document.getElementById('sendQuestionBtn').disabled = !this.checked;
+  if (this.checked && questionTurnstileSiteKey()) prepareQuestionTurnstile();
+  if (!this.checked) resetQuestionTurnstile();
 });
 document.getElementById('sendQuestionBtn').addEventListener('click', sendQuestion);
 document.getElementById('mediaFilters').addEventListener('click', function (event) {

@@ -57,7 +57,13 @@ test('serves the app and health status without exposing environment values', asy
 
     const app = await fetch(baseUrl + '/app/');
     assert.equal(app.status, 200);
-    assert.match(await app.text(), /استراحة أهل الأثر/);
+    const appHtml = await app.text();
+    assert.match(appHtml, /استراحة أهل الأثر/);
+    assert.match(appHtml, /id="questionTurnstile"/);
+    assert.match(appHtml, /turnstile-config\.js/);
+    const turnstileConfig = await fetch(baseUrl + '/app/turnstile-config.js');
+    assert.equal(turnstileConfig.status, 200);
+    assert.match(await turnstileConfig.text(), /AHL_TURNSTILE_SITE_KEY/);
 
     const envFile = await fetch(baseUrl + '/.env');
     assert.equal(envFile.status, 404);
@@ -326,6 +332,156 @@ test('rejects question bodies that are not valid UTF-8', async function () {
   });
 });
 
+test('fails closed when Turnstile is enabled and the question has no token', async function () {
+  const provider = mockFetch();
+  const env = { ...configuredEnv, TURNSTILE_ENABLED: 'true', TURNSTILE_SECRET_KEY: 'test-turnstile-secret' };
+  await withServer({ env: env, fetch: provider.fetch }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/questions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({ question: 'ما حكم هذا السؤال؟' })
+    });
+    assert.equal(response.status, 403);
+    assert.match((await response.json()).error, /التحقق الأمني/);
+    assert.equal(provider.calls.length, 0);
+  });
+});
+
+test('fails closed when Turnstile rejects the submitted token', async function () {
+  const calls = [];
+  const provider = async function (url, options) {
+    calls.push({ url: url, options: options });
+    return {
+      ok: true,
+      arrayBuffer: async function () { return Buffer.from(JSON.stringify({ success: false }), 'utf8'); }
+    };
+  };
+  const env = { ...configuredEnv, TURNSTILE_ENABLED: 'true', TURNSTILE_SECRET_KEY: 'test-turnstile-secret' };
+  await withServer({ env: env, fetch: provider }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/questions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({ question: 'ما حكم هذا السؤال؟', turnstileToken: 'invalid-token' })
+    });
+    assert.equal(response.status, 403);
+    assert.equal(calls.length, 1);
+    assert.match(calls[0].url, /challenges\.cloudflare\.com\/turnstile\/v0\/siteverify/);
+  });
+});
+
+test('fails closed when Turnstile verification service is unavailable', async function () {
+  let calls = 0;
+  const provider = async function () {
+    calls += 1;
+    throw new Error('network unavailable');
+  };
+  const env = { ...configuredEnv, TURNSTILE_ENABLED: 'true', TURNSTILE_SECRET_KEY: 'test-turnstile-secret' };
+  await withServer({ env: env, fetch: provider }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/questions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({ question: 'ما حكم هذا السؤال؟', turnstileToken: 'some-token' })
+    });
+    assert.equal(response.status, 503);
+    assert.equal(calls, 1);
+  });
+});
+
+test('fails closed when Turnstile is enabled without a server secret', async function () {
+  const provider = mockFetch();
+  const env = { ...configuredEnv, TURNSTILE_ENABLED: 'true' };
+  await withServer({ env: env, fetch: provider.fetch }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/questions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({ question: 'ما حكم هذا السؤال؟', turnstileToken: 'some-token' })
+    });
+    assert.equal(response.status, 503);
+    assert.equal(provider.calls.length, 0);
+  });
+});
+
+test('rejects successful Turnstile responses with the wrong action or hostname', async function () {
+  const env = { ...configuredEnv, TURNSTILE_ENABLED: 'true', TURNSTILE_SECRET_KEY: 'test-turnstile-secret' };
+  for (const invalidPayload of [
+    { success: true, action: 'other_action', hostname: '127.0.0.1' },
+    { success: true, action: 'submit_question', hostname: 'attacker.example' }
+  ]) {
+    let providerCalls = 0;
+    const provider = async function () {
+      providerCalls += 1;
+      return {
+        ok: true,
+        arrayBuffer: async function () {
+          return Buffer.from(JSON.stringify(invalidPayload), 'utf8');
+        }
+      };
+    };
+    await withServer({ env: env, fetch: provider }, async function (baseUrl) {
+      const response = await fetch(baseUrl + '/api/questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+        body: JSON.stringify({ question: 'ما حكم هذا السؤال؟', turnstileToken: 'valid-looking-token' })
+      });
+      assert.equal(response.status, 403);
+      assert.equal(providerCalls, 1);
+    });
+  }
+});
+
+test('verifies Turnstile before contacting Gemini or Telegram and checks action and hostname', async function () {
+  const calls = [];
+  const provider = async function (url, options) {
+    calls.push({ url: url, options: options });
+    if (url.includes('challenges.cloudflare.com')) {
+      return {
+        ok: true,
+        arrayBuffer: async function () {
+          return Buffer.from(JSON.stringify({
+            success: true,
+            action: 'submit_question',
+            hostname: '127.0.0.1'
+          }), 'utf8');
+        }
+      };
+    }
+    if (url.includes('generativelanguage.googleapis.com')) {
+      return {
+        ok: true,
+        arrayBuffer: async function () {
+          return Buffer.from(JSON.stringify({
+            candidates: [{ content: { parts: [{ text: 'هذه مسودة للمراجعة.' }] } }]
+          }), 'utf8');
+        }
+      };
+    }
+    return {
+      ok: true,
+      arrayBuffer: async function () { return Buffer.from(JSON.stringify({ ok: true }), 'utf8'); }
+    };
+  };
+  const env = { ...configuredEnv, TURNSTILE_ENABLED: 'true', TURNSTILE_SECRET_KEY: 'test-turnstile-secret' };
+  await withServer({ env: env, fetch: provider }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/questions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({ question: 'ما حكم هذا السؤال؟', turnstileToken: 'valid-test-token' })
+    });
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { draft: 'هذه مسودة للمراجعة.', telegramSent: true });
+    assert.equal(calls.length, 3);
+    assert.match(calls[0].url, /siteverify/);
+    assert.match(calls[1].url, /generativelanguage\.googleapis\.com/);
+    assert.match(calls[2].url, /api\.telegram\.org/);
+    const verifyBody = new URLSearchParams(calls[0].options.body);
+    assert.equal(verifyBody.get('secret'), 'test-turnstile-secret');
+    assert.equal(verifyBody.get('response'), 'valid-test-token');
+    assert.equal(verifyBody.get('remoteip'), '127.0.0.1');
+    assert.equal(calls[1].options.body.includes('valid-test-token'), false);
+    assert.equal(calls[2].options.body.includes('valid-test-token'), false);
+  });
+});
+
 test('sends an Arabic question to Gemini and the draft to the configured Telegram chat', async function () {
   const provider = mockFetch();
   await withServer({ env: configuredEnv, fetch: provider.fetch }, async function (baseUrl) {
@@ -449,6 +605,57 @@ test('limits each client to five question requests per fifteen-minute window', a
 
     assert.deepEqual(statuses, [200, 200, 200, 200, 200, 429]);
     assert.equal(provider.calls.length, 10);
+  });
+});
+
+test('uses the validated Cloudflare client IP for rate limiting only when TRUST_PROXY is enabled', async function () {
+  const provider = mockFetch();
+  const env = { ...configuredEnv, TRUST_PROXY: 'true' };
+  await withServer({ env: env, fetch: provider.fetch }, async function (baseUrl) {
+    const statuses = [];
+    for (let index = 0; index < 6; index += 1) {
+      const response = await fetch(baseUrl + '/api/questions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Origin: baseUrl,
+          'CF-Connecting-IP': '203.0.113.10'
+        },
+        body: JSON.stringify({ question: 'سؤال من العميل خلف الوكيل رقم ' + index })
+      });
+      statuses.push(response.status);
+    }
+    assert.deepEqual(statuses, [200, 200, 200, 200, 200, 429]);
+    const otherClient = await fetch(baseUrl + '/api/questions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: baseUrl,
+        'CF-Connecting-IP': '203.0.113.11'
+      },
+      body: JSON.stringify({ question: 'سؤال من عميل آخر خلف الوكيل' })
+    });
+    assert.equal(otherClient.status, 200);
+  });
+});
+
+test('ignores spoofed Cloudflare client-IP headers unless TRUST_PROXY is enabled', async function () {
+  const provider = mockFetch();
+  await withServer({ env: configuredEnv, fetch: provider.fetch }, async function (baseUrl) {
+    const statuses = [];
+    for (let index = 0; index < 6; index += 1) {
+      const response = await fetch(baseUrl + '/api/questions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Origin: baseUrl,
+          'CF-Connecting-IP': '198.51.100.' + (index + 1)
+        },
+        body: JSON.stringify({ question: 'سؤال مباشر رقم ' + index })
+      });
+      statuses.push(response.status);
+    }
+    assert.deepEqual(statuses, [200, 200, 200, 200, 200, 429]);
   });
 });
 
