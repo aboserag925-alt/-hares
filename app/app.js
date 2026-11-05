@@ -922,6 +922,8 @@ async function prepareQuestionTurnstile() {
     return false;
   }
   container.hidden = false;
+  var turnstileStatus = document.getElementById('questionTurnstileStatus');
+  turnstileStatus.hidden = false;
   try {
     await loadQuestionTurnstileApi();
     if (questionTurnstileWidgetId === null) {

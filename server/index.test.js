@@ -401,6 +401,34 @@ test('fails closed when Turnstile is enabled without a server secret', async fun
   });
 });
 
+test('rejects successful Turnstile responses with the wrong action or hostname', async function () {
+  const env = { ...configuredEnv, TURNSTILE_ENABLED: 'true', TURNSTILE_SECRET_KEY: 'test-turnstile-secret' };
+  for (const invalidPayload of [
+    { success: true, action: 'other_action', hostname: '127.0.0.1' },
+    { success: true, action: 'submit_question', hostname: 'attacker.example' }
+  ]) {
+    let providerCalls = 0;
+    const provider = async function () {
+      providerCalls += 1;
+      return {
+        ok: true,
+        arrayBuffer: async function () {
+          return Buffer.from(JSON.stringify(invalidPayload), 'utf8');
+        }
+      };
+    };
+    await withServer({ env: env, fetch: provider }, async function (baseUrl) {
+      const response = await fetch(baseUrl + '/api/questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+        body: JSON.stringify({ question: 'ما حكم هذا السؤال؟', turnstileToken: 'valid-looking-token' })
+      });
+      assert.equal(response.status, 403);
+      assert.equal(providerCalls, 1);
+    });
+  }
+});
+
 test('verifies Turnstile before contacting Gemini or Telegram and checks action and hostname', async function () {
   const calls = [];
   const provider = async function (url, options) {
