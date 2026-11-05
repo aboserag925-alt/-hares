@@ -14,8 +14,8 @@ class HaresAISupervisor {
     for (const name of names) {
       const agent=this.agents[name];
       if (!agent || typeof agent.run!=='function') {
-        if (name==='security') {
-          const report={agent:'security',status:'BLOCKED',data:{blocked:true,reason:'Security agent unavailable'},warnings:['Required security review could not run']};
+        if (name==='security' || name==='verifier') {
+          const report={agent:name,status:'BLOCKED',data:{blocked:true,reason:'Security agent unavailable'},warnings:['Required security review could not run']};
           reports.push(report);
           task={...task,tainted:true,status:'FAILED'};
           break;

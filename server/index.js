@@ -1,10 +1,9 @@
-'use strict';
-
 const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
 const { createMediaLibrary } = require('./media-library');
-const { createAdminApi } = require('./lecture-api');
+
+  const { createAdminApi } = require('./lecture-api');
 
 const PUBLIC_ROOT = path.resolve(__dirname, '..');
 const MAX_BODY_BYTES = 16 * 1024;

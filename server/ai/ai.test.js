@@ -27,3 +27,5 @@ test('approval gate accepts persisted snake-case approval records',()=>{
  assert.equal(assertApproval({approved:true,approval_id:'db-approval',risk:'critical'},'implement'),true);
  assert.equal(assertApproval({human_approved:true,human_approval_id:'db-merge-approval'},'merge'),true);
 });
+
+test('supervisor fails closed when required verifier agent is missing',async()=>{const pass={run:async()=>({status:'PASS',data:{}})};const supervisor=new HaresAISupervisor({security:pass,developer:pass,test:pass});const r=await supervisor.analyze({id:'task-verifier-missing',type:'implementation'});assert.equal(r.task.status,'FAILED');assert.equal(r.task.tainted,true);assert.equal(r.reports.at(-1).agent,'verifier');assert.equal(r.reports.at(-1).status,'BLOCKED');});
