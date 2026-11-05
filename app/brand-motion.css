@@ -1,0 +1,54 @@
+/* HAress visual identity — cinematic gold motion system
+   Lightweight CSS-only effects; respects reduced-motion and touch devices. */
+:root{
+  --brand-ink:#090d0b;
+  --brand-panel:#121916;
+  --brand-gold:#d5ab64;
+  --brand-champagne:#f2d9a4;
+  --brand-sage:#99b9a2;
+  --brand-glow:rgba(213,171,100,.22);
+  --brand-ease:cubic-bezier(.2,.75,.25,1);
+}
+@keyframes haress-aura{
+  0%,100%{filter:drop-shadow(0 0 5px rgba(213,171,100,.12))}
+  50%{filter:drop-shadow(0 0 16px rgba(213,171,100,.34))}
+}
+@keyframes haress-sheen{
+  0%,65%,100%{background-position:200% 0}
+  82%{background-position:-200% 0}
+}
+@keyframes haress-orbit{to{transform:rotate(360deg)}}
+@keyframes haress-reveal{
+  from{opacity:0;transform:translateY(16px) scale(.985);filter:blur(5px)}
+  to{opacity:1;transform:none;filter:blur(0)}
+}
+.haress-brand-mark,.brand-mark{
+  position:relative;isolation:isolate;
+  border-color:rgba(213,171,100,.42)!important;
+  box-shadow:0 0 0 1px rgba(213,171,100,.06),0 10px 34px rgba(0,0,0,.3),0 0 30px var(--brand-glow);
+  animation:haress-aura 5.5s ease-in-out infinite;
+}
+.haress-brand-mark::after,.brand-mark::after{
+  content:"";position:absolute;inset:-5px;border:1px solid rgba(242,217,164,.2);
+  border-radius:inherit;pointer-events:none;opacity:.7;
+}
+.brand-gold-sheen{
+  background-image:linear-gradient(105deg,var(--brand-gold) 20%,var(--brand-champagne) 42%,#fff4d7 50%,var(--brand-gold) 62%);
+  background-size:240% 100%;background-position:200% 0;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:haress-sheen 8s ease-in-out infinite;
+}
+.brand-reveal{animation:haress-reveal .8s var(--brand-ease) both}
+.brand-orbit{animation:haress-orbit 36s linear infinite}
+:focus-visible{outline:2px solid var(--brand-champagne);outline-offset:4px}
+@media(hover:hover) and (pointer:fine){
+  .brand-interactive{transition:transform .28s var(--brand-ease),border-color .28s,box-shadow .28s}
+  .brand-interactive:hover{transform:translateY(-3px);border-color:rgba(213,171,100,.48);box-shadow:0 16px 42px rgba(0,0,0,.25),0 0 24px rgba(213,171,100,.08)}
+}
+@media(max-width:640px){
+  .brand-orbit{animation-duration:52s}
+  .brand-interactive:hover{transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
