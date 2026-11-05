@@ -164,3 +164,13 @@ section.s:nth-of-type(even){background:#f1f6f1!important}
  h1.big{font-size:clamp(42px,12vw,64px)!important}
 }
 @media(prefers-reduced-motion:reduce){.hero .emblem .ring{animation:none!important}}
+
+
+/* Arabic typography system: Tajawal for readable UI, Alexandria for display */
+:root{--font-ui:'Tajawal',system-ui,-apple-system,'Segoe UI',sans-serif;--font-display:'Alexandria','Tajawal',sans-serif}
+html,body,button,input,textarea,select{font-family:var(--font-ui)!important}
+h1,h2,h3,h4,h5,h6,.logo,.hero-kufi,.brand-title,.haress-intro__name{font-family:var(--font-display)!important;letter-spacing:-.035em}
+p,li,label,.btn,.nav a,.card,.row,.stat,.item{font-family:var(--font-ui)!important}
+h1.big{font-weight:800;letter-spacing:-.055em;line-height:1.28}
+h2.t,.t{font-weight:800;letter-spacing:-.04em}
+.haress-intro__tag{font-family:var(--font-ui)!important;font-weight:600}
