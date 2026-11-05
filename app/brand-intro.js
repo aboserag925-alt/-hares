@@ -10,7 +10,7 @@
     var layer=document.createElement('div');
     layer.className='haress-intro';
     layer.setAttribute('role','presentation');
-    layer.innerHTML='<div class="haress-intro__content"><span class="haress-intro__halo" aria-hidden="true"></span><img class="haress-intro__logo" alt="" src="'+logoUrl+'"><div class="haress-intro__name">حارس</div><div class="haress-intro__tag">ثقة · حماية · ذكاء</div><span class="haress-intro__rule" aria-hidden="true"></span></div>';
+    layer.innerHTML='<div class="haress-intro__content"><span class="haress-intro__halo" aria-hidden="true"></span><img class="haress-intro__logo" alt="" src="'+logoUrl+'"><div class="haress-intro__name">حارس</div><div class="haress-intro__tag">لأن المعرفة أمانة</div><span class="haress-intro__rule" aria-hidden="true"></span></div>';
     document.body.appendChild(layer);
     window.setTimeout(function(){layer.classList.add('is-leaving');},1450);
     window.setTimeout(function(){if(layer.parentNode)layer.parentNode.removeChild(layer);},2100);
