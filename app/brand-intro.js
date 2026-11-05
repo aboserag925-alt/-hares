@@ -1,12 +1,12 @@
 (function(){
   'use strict';
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var scriptUrl=document.currentScript&&document.currentScript.src;\n  var key='haress-brand-intro-seen';
+  var scriptUrl=document.currentScript&&document.currentScript.src;
+  var key='haress-brand-intro-seen';
   try{if(reduce||sessionStorage.getItem(key)==='1')return;sessionStorage.setItem(key,'1');}catch(_){if(reduce)return;}
   function show(){
     if(!document.body||document.querySelector('.haress-intro'))return;
-    var script=document.currentScript;
-    var logoUrl=new URL('../assets/brand-mark.svg',script&&script.src?script.src:location.href).href;
+    var logoUrl=new URL('../assets/brand-mark-light.svg',scriptUrl||location.href).href;
     var layer=document.createElement('div');
     layer.className='haress-intro';
     layer.setAttribute('role','presentation');
