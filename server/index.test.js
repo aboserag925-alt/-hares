@@ -64,6 +64,190 @@ test('serves the app and health status without exposing environment values', asy
   });
 });
 
+test('HTTP suggestions API accepts public suggestions and exposes admin listing only to verified admins', async function () {
+  const suggestion = {
+    id: '123e4567-e89b-42d3-a456-426614174000',
+    category: 'feature',
+    title: 'تحسين البحث',
+    description: 'إضافة بحث أسرع إلى مكتبة الدروس'
+  };
+  const submitted = [];
+  const env = {
+    ...configuredEnv,
+    SUPABASE_URL: 'https://project.example',
+    SUPABASE_ANON_KEY: 'public-key',
+    SUPABASE_SERVICE_ROLE_KEY: 'service-key'
+  };
+  const provider = mockFetch();
+  provider.fetch = async function (url, options) {
+    provider.calls.push({ url: url, options: options });
+    if (url.endsWith('/auth/v1/user')) {
+      return {
+        ok: true,
+        status: 200,
+        json: async function () { return { id: 'verified-admin' }; }
+      };
+    }
+    if (url.includes('/rest/v1/admin_users?')) {
+      return {
+        ok: true,
+        status: 200,
+        json: async function () { return [{ user_id: 'verified-admin' }]; }
+      };
+    }
+    throw new Error('Unexpected upstream request');
+  };
+  const suggestionService = {
+    submit: async function (input, userId) {
+      submitted.push({ input: input, userId: userId });
+      return suggestion;
+    },
+    list: async function () { return [suggestion]; }
+  };
+
+  await withServer({
+    env: env,
+    fetch: provider.fetch,
+    suggestionService: suggestionService,
+    taskService: { recordHumanApproval: async function () { throw new Error('Unexpected approval'); } }
+  }, async function (baseUrl) {
+    const createResponse = await fetch(baseUrl + '/api/suggestions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({
+        category: 'feature',
+        title: 'تحسين البحث',
+        description: 'إضافة بحث أسرع إلى مكتبة الدروس'
+      })
+    });
+    assert.equal(createResponse.status, 201);
+    assert.deepEqual((await createResponse.json()).item, suggestion);
+    assert.deepEqual(submitted, [{
+      input: {
+        category: 'feature',
+        title: 'تحسين البحث',
+        description: 'إضافة بحث أسرع إلى مكتبة الدروس'
+      },
+      userId: null
+    }]);
+
+    const unauthorized = await fetch(baseUrl + '/api/admin/suggestions', {
+      headers: { Origin: baseUrl }
+    });
+    assert.equal(unauthorized.status, 403);
+
+    const adminList = await fetch(baseUrl + '/api/admin/suggestions', {
+      headers: { Origin: baseUrl, Authorization: 'Bearer valid-admin-token' }
+    });
+    assert.equal(adminList.status, 200);
+    assert.deepEqual((await adminList.json()).items, [suggestion]);
+    assert.equal(provider.calls.length, 2);
+  });
+});
+
+test('HTTP AI approval API verifies admin identity and records decisions through TaskService', async function () {
+  const env = {
+    ...configuredEnv,
+    SUPABASE_URL: 'https://project.example',
+    SUPABASE_ANON_KEY: 'public-key',
+    SUPABASE_SERVICE_ROLE_KEY: 'service-key'
+  };
+  const provider = mockFetch();
+  provider.fetch = async function (url, options) {
+    provider.calls.push({ url: url, options: options });
+    if (url.endsWith('/auth/v1/user')) {
+      return {
+        ok: true,
+        status: 200,
+        json: async function () { return { id: 'verified-admin' }; }
+      };
+    }
+    if (url.includes('/rest/v1/admin_users?')) {
+      return {
+        ok: true,
+        status: 200,
+        json: async function () { return [{ user_id: 'verified-admin' }]; }
+      };
+    }
+    throw new Error('Unexpected upstream request');
+  };
+  const approvals = [];
+  const taskService = {
+    recordHumanApproval: async function (input) {
+      approvals.push(input);
+      return 'approval-record-id';
+    }
+  };
+  const taskId = '123e4567-e89b-42d3-a456-426614174000';
+
+  await withServer({
+    env: env,
+    fetch: provider.fetch,
+    suggestionService: { submit: async function () {}, list: async function () {} },
+    taskService: taskService
+  }, async function (baseUrl) {
+    const unauthorized = await fetch(baseUrl + '/api/admin/ai/tasks/' + taskId + '/approval', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({ action: 'IMPLEMENT', decision: 'APPROVED' })
+    });
+    assert.equal(unauthorized.status, 403);
+    assert.deepEqual(approvals, []);
+
+    const response = await fetch(baseUrl + '/api/admin/ai/tasks/' + taskId + '/approval', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: baseUrl,
+        Authorization: 'Bearer valid-admin-token'
+      },
+      body: JSON.stringify({
+        action: 'IMPLEMENT',
+        decision: 'APPROVED',
+        reason: 'راجع المشرف المهمة'
+      })
+    });
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { approvalId: 'approval-record-id' });
+    assert.deepEqual(approvals, [{
+      taskId: taskId,
+      actorUserId: 'verified-admin',
+      action: 'IMPLEMENT',
+      decision: 'APPROVED',
+      reason: 'راجع المشرف المهمة'
+    }]);
+  });
+});
+
+test('CORS preflight allows only required admin methods and headers', async function () {
+  await withServer({ env: configuredEnv, fetch: mockFetch().fetch }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/admin/suggestions/123e4567-e89b-42d3-a456-426614174000', {
+      method: 'OPTIONS',
+      headers: {
+        Origin: baseUrl,
+        'Access-Control-Request-Method': 'PATCH',
+        'Access-Control-Request-Headers': 'authorization,content-type'
+      }
+    });
+    assert.equal(response.status, 204);
+    assert.equal(response.headers.get('access-control-allow-methods'), 'GET, HEAD, POST, PATCH, DELETE, OPTIONS');
+    assert.equal(response.headers.get('access-control-allow-headers'), 'Content-Type, Range, Authorization');
+    assert.doesNotMatch(response.headers.get('access-control-allow-methods'), /\*/);
+    assert.doesNotMatch(response.headers.get('access-control-allow-headers'), /\*/);
+
+    const deletePreflight = await fetch(baseUrl + '/api/lectures/123e4567-e89b-42d3-a456-426614174000', {
+      method: 'OPTIONS',
+      headers: {
+        Origin: baseUrl,
+        'Access-Control-Request-Method': 'DELETE',
+        'Access-Control-Request-Headers': 'authorization'
+      }
+    });
+    assert.equal(deletePreflight.status, 204);
+    assert.match(deletePreflight.headers.get('access-control-allow-methods'), /\bDELETE\b/);
+  });
+});
+
 test('publishes only approved library items and serves their files safely', async function () {
   const fileId = '123e4567-e89b-42d3-a456-426614174000';
   let approved = false;
@@ -299,8 +483,9 @@ test('handles allowlisted CORS preflight requests for API endpoints', async func
     });
     assert.equal(response.status, 204);
     assert.equal(response.headers.get('access-control-allow-origin'), 'https://app.example');
-    assert.equal(response.headers.get('access-control-allow-methods'), 'GET, HEAD, POST, OPTIONS');
+    assert.equal(response.headers.get('access-control-allow-methods'), 'GET, HEAD, POST, PATCH, DELETE, OPTIONS');
     assert.match(response.headers.get('access-control-allow-headers'), /Content-Type/i);
+    assert.match(response.headers.get('access-control-allow-headers'), /Authorization/i);
     assert.equal(response.headers.get('vary'), 'Origin');
   });
 });

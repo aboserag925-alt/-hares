@@ -16,6 +16,21 @@ test('security agent blocks prohibited auth/RLS bypass signals case-insensitivel
 test('security agent safely handles malformed affected areas',async()=>{const security=require('./agents/security-agent');const r=await security.run({input:{affectedAreas:'auth_bypass'}});assert.equal(r.status,'BLOCKED');});
 test('supervisor stops when security agent blocks a task',async()=>{const security=require('./agents/security-agent');const supervisor=new HaresAISupervisor({security});const r=await supervisor.analyze({id:'task-1',type:'security',affectedAreas:['rls_disabled']});assert.equal(r.task.status,'FAILED');assert.equal(r.task.tainted,true);});
 test('supervisor fails closed when a required security agent is missing',async()=>{const supervisor=new HaresAISupervisor({});const r=await supervisor.analyze({id:'task-2',type:'implementation'});assert.equal(r.task.status,'FAILED');assert.equal(r.task.tainted,true);assert.equal(r.reports[0].status,'BLOCKED');});
+test('implementation fails closed before running agents when the verifier is missing',async()=>{
+ const calls=[];
+ const supervisor=new HaresAISupervisor({
+  security:{run:async()=>{calls.push('security');return {agent:'security',status:'PASS',data:{}};}},
+  developer:{run:async()=>{calls.push('developer');}},
+  test:{run:async()=>{calls.push('test');}}
+ });
+ const r=await supervisor.analyze({id:'task-verifier-missing',type:'implementation'});
+ assert.equal(r.task.status,'FAILED');
+ assert.equal(r.task.tainted,true);
+ assert.deepEqual(calls,[]);
+ assert.equal(r.reports.length,1);
+ assert.equal(r.reports[0].agent,'verifier');
+ assert.equal(r.reports[0].status,'BLOCKED');
+});
 test('supervisor fails closed when required security review throws',async()=>{const supervisor=new HaresAISupervisor({security:{run:async()=>{throw Error('review unavailable')}}});const r=await supervisor.analyze({id:'task-3',type:'security'});assert.equal(r.task.status,'FAILED');assert.equal(r.task.tainted,true);});
 
 test('database approval fields are accepted only when backed by approval IDs',()=>{
@@ -29,3 +44,4 @@ test('approval gate accepts persisted snake-case approval records',()=>{
 });
 
 test('supervisor fails closed when required verifier agent is missing',async()=>{const pass={run:async()=>({status:'PASS',data:{}})};const supervisor=new HaresAISupervisor({security:pass,developer:pass,test:pass});const r=await supervisor.analyze({id:'task-verifier-missing',type:'implementation'});assert.equal(r.task.status,'FAILED');assert.equal(r.task.tainted,true);assert.equal(r.reports.at(-1).agent,'verifier');assert.equal(r.reports.at(-1).status,'BLOCKED');});
+test('supervisor fails closed when the verifier cannot produce a passing result',async()=>{const pass={run:async()=>({status:'PASS',data:{}})};const supervisor=new HaresAISupervisor({security:pass,developer:pass,test:pass,verifier:{run:async()=>({status:'NEEDS_REVIEW',data:{}})}});const r=await supervisor.analyze({id:'task-verifier-review',type:'implementation'});assert.equal(r.task.status,'FAILED');assert.equal(r.task.tainted,true);});
