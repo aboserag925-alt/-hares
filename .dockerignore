@@ -1,8 +1,10 @@
 .git
-node_modules/
-storage/
-README.md
-docker-compose.yml
+.github
+node_modules
+storage
 .env
 .env.*
 !.env.example
+_site
+coverage
+npm-debug.log*

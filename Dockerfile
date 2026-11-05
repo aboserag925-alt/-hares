@@ -1,13 +1,23 @@
+FROM node:22-alpine AS build
+WORKDIR /build
+ARG SUPABASE_URL
+ARG SUPABASE_ANON_PUBLIC
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN SUPABASE_URL="$SUPABASE_URL" SUPABASE_ANON_KEY="$SUPABASE_ANON_PUBLIC" npm run build:app
+
 FROM node:22-alpine
 ENV NODE_ENV=production
 ENV PORT=8080
 ENV HOST=0.0.0.0
 WORKDIR /srv/ahl-athar
-COPY --chown=node:node index.html ./index.html
-COPY --chown=node:node app/ ./app/
-COPY --chown=node:node assets/ ./assets/
-COPY --chown=node:node screens/ ./screens/
-COPY --chown=node:node server/ ./server/
+COPY --from=build --chown=node:node /build/index.html ./index.html
+COPY --from=build --chown=node:node /build/runtime-config.js ./runtime-config.js
+COPY --from=build --chown=node:node /build/app/ ./app/
+COPY --from=build --chown=node:node /build/assets/ ./assets/
+COPY --from=build --chown=node:node /build/screens/ ./screens/
+COPY --from=build --chown=node:node /build/server/ ./server/
 RUN mkdir -p storage/media && chown -R node:node storage
 VOLUME ["/srv/ahl-athar/storage"]
 USER node
