@@ -71,7 +71,7 @@
 
 /* Light emerald-and-gold identity — approved visual direction */
 :root{
-  color-scheme:light;
+  color-scheme:light!important;
   --brand-ink:#f7f5ef;
   --brand-panel:#ffffff;
   --brand-gold:#d4af37;
