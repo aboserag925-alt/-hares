@@ -1,10 +1,12 @@
-'use strict';
-
 const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
 const { createMediaLibrary } = require('./media-library');
 const { createAdminApi } = require('./lecture-api');
+const { createSuggestionsApi } = require('./suggestions/suggestion-api');
+const { createSuggestionService } = require('./suggestions/suggestion-service');
+const { createApprovalApi } = require('./ai/approval-api');
+const { createTaskService } = require('./ai/task-service');
 
 const PUBLIC_ROOT = path.resolve(__dirname, '..');
 const MAX_BODY_BYTES = 16 * 1024;
@@ -177,13 +179,11 @@ function staticFilePath(requestUrl) {
     return null;
   }
   if (segments.length === 0) segments = ['index.html'];
-  const isRootRuntimeConfig = segments.length === 1 && segments[0] === 'runtime-config.js';
   if (segments[0] !== 'index.html' &&
-      !isRootRuntimeConfig &&
       segments[0] !== 'app' && segments[0] !== 'assets' && segments[0] !== 'screens') {
     return null;
   }
-  if ((segments[0] === 'index.html' || isRootRuntimeConfig) && segments.length !== 1) return null;
+  if (segments[0] === 'index.html' && segments.length !== 1) return null;
 
   const filePath = path.resolve(PUBLIC_ROOT, ...segments);
   return filePath.startsWith(PUBLIC_ROOT + path.sep) || filePath === path.join(PUBLIC_ROOT, 'index.html')
@@ -277,7 +277,24 @@ function createServer(options) {
   const env = options.env || process.env;
   const fetchImpl = options.fetch || global.fetch;
   const limits = new Map();
-  const lectureApi = createAdminApi({ env: env, fetch: fetchImpl });
+  const adminApi = createAdminApi({ env: env, fetch: fetchImpl });
+  const rateLimit = function (request) {
+    return consumeRateLimit(limits, clientAddress(request), Date.now());
+  };
+  const suggestionService = options.suggestionService || createSuggestionService({ env: env, fetch: fetchImpl });
+  const taskService = options.taskService || createTaskService({ env: env, fetch: fetchImpl });
+  const suggestionsApi = createSuggestionsApi({
+    env: env,
+    fetch: fetchImpl,
+    service: suggestionService,
+    rateLimit: rateLimit
+  });
+  const approvalApi = createApprovalApi({
+    env: env,
+    fetch: fetchImpl,
+    taskService: taskService,
+    rateLimit: rateLimit
+  });
   const mediaLibrary = options.mediaLibrary || createMediaLibrary({
     env: env,
     fetch: fetchImpl,
@@ -301,7 +318,9 @@ function createServer(options) {
         return;
       }
     }
-    if (await lectureApi(request, response, requestUrl.pathname)) return;
+    if (await suggestionsApi(request, response, requestUrl.pathname)) return;
+    if (await approvalApi(request, response, requestUrl.pathname)) return;
+    if (await adminApi(request, response, requestUrl.pathname)) return;
     if (requestUrl.pathname === '/api/health' && request.method === 'GET') {
       sendJson(response, 200, { ok: true });
       return;
