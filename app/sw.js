@@ -2,7 +2,7 @@
    Authenticated/API and third-party responses are deliberately never cached. */
 'use strict';
 
-var CACHE_NAME = 'ahl-athar-v15';
+var CACHE_NAME = 'ahl-athar-v16';
 var APP_FILES = [
   './',
   './index.html',
@@ -12,6 +12,7 @@ var APP_FILES = [
   './icon-512.svg',
   './tailwind.css',
   './app.js',
+  './community.js',
   './auth-client.js',
   './supabase-config.js',
   './runtime-config.js',
