@@ -9,8 +9,8 @@ var S = [
   ['الخميس', 'عظماء الإسلام', 'منوعات ومقتطفات وحوارات']
 ];
 var names = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-var prayerSections = ['sched', 'prayers', 'qibla', 'adhkar', 'media', 'q', 'account', 'about'];
-var prayerTabs = ['t1', 't2', 't3', 't4', 't5', 't6', 't8', 't7'];
+var prayerSections = ['sched', 'prayers', 'qibla', 'adhkar', 'media', 'q', 'account', 'about', 'debates', 'forum'];
+var prayerTabs = ['t1', 't2', 't3', 't4', 't5', 't6', 't8', 't7', 't9', 't10'];
 var prayerNames = {
   fajr: 'الفجر',
   sunrise: 'الشروق',
@@ -205,6 +205,7 @@ function show(sectionId) {
   if (sectionId === 'qibla') updateQibla();
   if (sectionId === 'adhkar') renderAdhkar();
   if (sectionId === 'media') loadMediaLibrary();
+  if ((sectionId === 'debates' || sectionId === 'forum') && window.ahlCommunity) window.ahlCommunity.load(sectionId);
 }
 
 function renderMediaLibrary() {
@@ -1113,6 +1114,8 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+if (location.hash === '#debates' || location.hash === '#forum') show(location.hash.slice(1));
+window.addEventListener('hashchange', function () { if (location.hash === '#debates' || location.hash === '#forum') show(location.hash.slice(1)); });
 buildSchedule();
 loadPublishedLectures();
 updateLessonCountdown();
