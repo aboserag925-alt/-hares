@@ -95,7 +95,7 @@ function formatTime(date) {
 
 function cairo() {
   var parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Africa/Cairo',
+    timeZone: 'Africa/Tajawal',
     weekday: 'short',
     hour: 'numeric',
     minute: 'numeric',
@@ -285,7 +285,7 @@ async function loadMediaLibrary() {
 }
 
 function methodForTimezone() {
-  if (deviceTimezone === 'Africa/Cairo') return 'egypt';
+  if (deviceTimezone === 'Africa/Tajawal') return 'egypt';
   if (/^Asia\/(Riyadh|Makkah|Kuwait|Qatar|Bahrain)$/.test(deviceTimezone)) return 'umm';
   if (deviceTimezone === 'Asia/Dubai') return 'dubai';
   if (deviceTimezone === 'Asia/Karachi') return 'karachi';
