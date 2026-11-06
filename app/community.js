@@ -5,6 +5,8 @@
   var anonKey = typeof config.anonKey === 'string' ? config.anonKey : '';
   var loaded = { debates: false, forum: false };
   var activeTopic = { debates: null, forum: null };
+  var cachedUser = null;
+  var userResolved = false;
 
   function el(tag, className, text) {
     var node = document.createElement(tag);
@@ -42,11 +44,14 @@
     return payload;
   }
   function signedIn() {
-    return Boolean(window.ahlAuth && window.ahlAuth.configured);
+    return userResolved && Boolean(cachedUser);
   }
   async function currentUser() {
-    if (!signedIn()) return null;
-    return window.ahlAuth.getCurrentUser();
+    if (!window.ahlAuth || !window.ahlAuth.configured) { cachedUser = null; userResolved = true; return null; }
+    try { cachedUser = await window.ahlAuth.getCurrentUser(); }
+    catch (error) { cachedUser = null; }
+    userResolved = true;
+    return cachedUser;
   }
   function makeLoginPrompt(container) {
     var note = el('div', 'community-empty', 'القراءة متاحة للجميع. للمشاركة وإنشاء موضوع، سجّل الدخول أولًا.');
@@ -172,6 +177,7 @@
   async function load(section) {
     if (section !== 'debates' && section !== 'forum') return;
     var kind = section === 'debates' ? 'debate' : 'forum';
+    await currentUser();
     var createHost = document.getElementById(section + 'Create');
     createForm(kind, createHost);
     status(section,'جارٍ تحميل الموضوعات…');
@@ -183,4 +189,5 @@
     } catch(error){ status(section,error.message,true); }
   }
   window.ahlCommunity = { load: load };
+  if (location.hash === '#debates' || location.hash === '#forum') load(location.hash.slice(1));
 })();
