@@ -141,6 +141,11 @@ window.ahlAuth = {
     if (result.error) throw result.error;
     return result.data.session ? result.data.session.access_token : null;
   },
+  getCurrentUser: async function () {
+    const result = await requireClient().auth.getUser();
+    if (result.error) throw result.error;
+    return result.data.user || null;
+  },
   requestPasswordReset: function (email, redirectTo, captchaToken) {
     const options = { redirectTo: redirectTo };
     if (captchaSiteKey) {
