@@ -201,6 +201,10 @@ textarea::placeholder{color:#777e75}
 </style>
 
 <script src="brand-intro.js" defer></script>
+
+<style>
+.community-section{margin-top:12px}.community-list{display:grid;gap:12px;margin-top:16px}.community-topic{padding:18px;border:1px solid rgba(213,171,100,.18);border-radius:17px;background:linear-gradient(145deg,rgba(25,32,29,.94),rgba(18,23,21,.96))}.community-topic h3{margin:0 0 7px;color:var(--gold2);font-size:17px}.community-topic p{margin:7px 0;color:var(--muted);line-height:1.85;white-space:pre-wrap;overflow-wrap:anywhere}.community-meta{display:flex;flex-wrap:wrap;gap:8px;color:var(--muted);font-size:11px}.community-form{display:grid;gap:10px;margin:14px 0;padding:16px;border:1px solid rgba(213,171,100,.2);border-radius:16px;background:rgba(213,171,100,.035)}.community-form input,.community-form textarea,.community-form select{width:100%;min-width:0;padding:12px;border:1px solid rgba(213,171,100,.22);border-radius:11px;background:#0e1311;color:var(--text);font:inherit}.community-form textarea{min-height:90px;resize:vertical}.community-actions{display:flex;flex-wrap:wrap;gap:8px}.community-post{margin:10px 0;padding:13px;border-right:2px solid var(--gold);border-radius:10px;background:rgba(255,255,255,.025)}.community-post p{white-space:pre-wrap;overflow-wrap:anywhere}.community-empty{padding:18px;text-align:center;color:var(--muted);border:1px dashed rgba(213,171,100,.2);border-radius:14px}.community-toggle{min-height:38px;padding:7px 13px;border:1px solid rgba(213,171,100,.28);border-radius:11px;background:rgba(213,171,100,.07);color:var(--gold2);font:inherit;font-size:12px}.community-form label{display:grid;gap:6px;color:var(--muted);font-size:12px}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -257,6 +261,8 @@ textarea::placeholder{color:#777e75}
 <button class="tab" id="t6" type="button" aria-pressed="false" onclick="show('q')">الأسئلة</button>
 <button class="tab" id="t7" type="button" aria-pressed="false" onclick="show('about')">عن المجلس</button>
 <button class="tab" id="t8" type="button" aria-pressed="false" onclick="show('account')">حسابي</button>
+<button class="tab" id="t9" type="button" aria-pressed="false" onclick="show('debates')">المناظرات</button>
+<button class="tab" id="t10" type="button" aria-pressed="false" onclick="show('forum')">المنتدى</button>
 </nav>
 <section id="sched" aria-label="جدول الدروس الأسبوعي"></section>
 <section id="prayers" hidden>
@@ -414,6 +420,25 @@ textarea::placeholder{color:#777e75}
 <section id="about" hidden>
 <div class="card"><h2>عن المجلس</h2><p class="leading-relaxed">مجلس لتدارس العلم والأدب، فيه دروس يومية في الحديث والعقيدة والتفسير والفقه.</p><p class="leading-relaxed">الدروس: السبت إلى الخميس، الساعة 7:00 والساعة 10:00 مساءً. الجمعة بلا دروس.</p><nav class="social-links" aria-label="حسابات المجلس"><a class="social-link" href="https://www.youtube.com/@Khaled_Najm" target="_blank" rel="noopener noreferrer" aria-label="يوتيوب"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg></a><a class="social-link" href="https://www.tiktok.com/@d.khaled.4" target="_blank" rel="noopener noreferrer" aria-label="تيك توك"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 6.2a5.5 5.5 0 0 1-3.4-4.8V1h-4.1v15.4a3.3 3.3 0 1 1-2.8-3.2v-4.2a7.5 7.5 0 1 0 6.9 7.4V8.5a9.5 9.5 0 0 0 5.5 1.8V6.2a5.5 5.5 0 0 1-2.1 0Z"/></svg></a><a class="social-link" href="https://t.me/khaled_najm1" target="_blank" rel="noopener noreferrer" aria-label="تيليجرام"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 3.2a1.5 1.5 0 0 0-1.6-.2L2.1 10.1c-1.3.5-1.3 1.2-.2 1.6l4.7 1.5 1.8 5.6c.2.6.1.8.7.8.5 0 .7-.2 1-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.2-15c.2-.7-.1-1.1-.2-1.4ZM8.1 12.9l10.3-6.5c.5-.3.9-.1.5.2l-8.5 7.7-.3 3.1-2-4.5Z"/></svg></a></nav><button class="btn" onclick="share()">شارك التطبيق</button><button class="btn" id="inst" hidden onclick="install()">ثبّت على الهاتف</button></div>
 </section>
+
+<section id="debates" hidden class="community-section">
+  <div class="card">
+    <div class="section-heading"><div><span>حوار علمي موثق</span><h2>الحوارات والمناظرات</h2></div><small>جولات • أدلة • مراجع</small></div>
+    <p class="section-subtitle">مناظرات مرتبة بين أطراف محددة. تُعرض المشاركات المنشورة للجميع، ويحتاج إنشاء موضوع أو الرد إلى تسجيل الدخول.</p>
+    <p id="debatesStatus" class="status" role="status" aria-live="polite">جارٍ تحميل المناظرات…</p>
+    <div id="debatesCreate"></div>
+    <div id="debatesList" class="community-list"></div>
+  </div>
+</section>
+<section id="forum" hidden class="community-section">
+  <div class="card">
+    <div class="section-heading"><div><span>مجتمع أهل الأثر</span><h2>منتدى المناقشات</h2></div><small>موضوعات • تعليقات • تبادل علمي</small></div>
+    <p class="section-subtitle">اطرح موضوعًا أو شارك في نقاش قائم. القراءة متاحة للجميع، والكتابة للأعضاء المسجلين فقط.</p>
+    <p id="forumStatus" class="status" role="status" aria-live="polite">جارٍ تحميل المناقشات…</p>
+    <div id="forumCreate"></div>
+    <div id="forumList" class="community-list"></div>
+  </div>
+</section>
 <footer class="site-footer">
   <span class="footer-mark" aria-hidden="true">أ</span>
   <strong>استراحة أهل الأثر</strong>
@@ -434,6 +459,7 @@ textarea::placeholder{color:#777e75}
 <script src="vendor/adhan.umd.min.js"></script>
 <script src="auth-client.js"></script>
 <script src="app.js"></script>
+<script src="community.js"></script>
 <script>
 if ("serviceWorker" in navigator && location.protocol === "https:") {
   window.addEventListener("load", function () {
