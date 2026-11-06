@@ -74,7 +74,7 @@ as $$
 $$;
 
 revoke all on function public.community_is_admin() from public, anon;
-grant execute on function public.community_is_admin() to authenticated;
+grant execute on function public.community_is_admin() to anon, authenticated;
 
 drop policy if exists "Community topics are publicly readable when published" on public.community_topics;
 create policy "Community topics are publicly readable when published"
