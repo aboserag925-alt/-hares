@@ -100,6 +100,9 @@ function createMediaLibrary(options) {
   const indexPath = path.join(storageDirectory, 'media-index.json');
   const botToken = env.TELEGRAM_BOT_TOKEN;
   const mediaGroupId = env.TELEGRAM_MEDIA_GROUP_ID || env.TELEGRAM_CHAT_ID;
+  const mediaEnabled = env.TELEGRAM_MEDIA_ENABLED === 'true';
+  const assistantEnabled = env.TELEGRAM_BOT_ENABLED === 'true';
+  const handleAssistantUpdate = options.handleAssistantUpdate;
   let items = [];
   let offset = null;
   let initialized = false;
@@ -174,6 +177,13 @@ function createMediaLibrary(options) {
   async function receiveFile(message) {
     const attachment = getAttachment(message);
     if (!attachment) return;
+    if (!await isGroupAdministrator(message.from && message.from.id)) {
+      await telegram('sendMessage', {
+        chat_id: mediaGroupId,
+        text: 'رفع المحتوى للنشر المباشر متاح لمشرفي المجموعة فقط.'
+      });
+      return;
+    }
     if (items.filter(function (item) { return item.status === 'approved' || item.status === 'pending'; }).length >= MAX_LIBRARY_ITEMS) {
       await telegram('sendMessage', {
         chat_id: mediaGroupId,
@@ -225,7 +235,9 @@ function createMediaLibrary(options) {
       kind: attachment.kind,
       category: categoryFromCaption(caption, attachment.defaultCategory),
       title: cleanTitle(caption, attachment.fileName),
-      status: 'pending',
+      status: 'approved',
+      approvedAt: new Date().toISOString(),
+      approvedByTelegramId: String(message.from.id),
       uploadedAt: new Date((message.date || Date.now() / 1000) * 1000).toISOString()
     };
     items.push(item);
@@ -236,14 +248,11 @@ function createMediaLibrary(options) {
       await fs.rm(storedPath, { force: true });
       throw error;
     }
-    try {
-      await sendReviewMessage(item);
-    } catch (error) {
-      items = items.filter(function (candidate) { return candidate.id !== id; });
-      await save();
-      await fs.rm(storedPath, { force: true });
-      throw error;
-    }
+    await telegram('sendMessage', {
+      chat_id: mediaGroupId,
+      text: 'تم نشر المحتوى تلقائيًا في مكتبة استراحة أهل الأثر.\nالعنوان: ' + item.title +
+        '\nالتصنيف: ' + CATEGORY_NAMES[item.category]
+    });
   }
 
   async function isGroupAdministrator(userId) {
@@ -360,12 +369,16 @@ function createMediaLibrary(options) {
   async function processUpdate(update) {
     await initialize();
     const message = update.message;
-    if (message && String(message.chat.id) === String(mediaGroupId)) {
+    if ((mediaEnabled || !assistantEnabled) && message && mediaGroupId && String(message.chat.id) === String(mediaGroupId)) {
       if (await removeApprovedMedia(message)) return;
       await receiveFile(message);
       return;
     }
-    if (update.callback_query) await processCallback(update.callback_query);
+    if ((mediaEnabled || !assistantEnabled) && update.callback_query && String(update.callback_query.data || '').startsWith('media:')) {
+      await processCallback(update.callback_query);
+      return;
+    }
+    if (handleAssistantUpdate) await handleAssistantUpdate(update);
   }
 
   async function pollLoop() {
@@ -390,9 +403,9 @@ function createMediaLibrary(options) {
   }
 
   async function start() {
-    if (env.TELEGRAM_MEDIA_ENABLED !== 'true') return;
-    if (!botToken || !mediaGroupId) {
-      throw new Error('Telegram media requires a bot token and a group ID.');
+    if (!mediaEnabled && !assistantEnabled) return;
+    if (!botToken || (mediaEnabled && !mediaGroupId)) {
+      throw new Error('Telegram requires a bot token and a group ID when media intake is enabled.');
     }
     await initialize();
     running = true;
