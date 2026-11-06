@@ -2,7 +2,7 @@
    Authenticated/API and third-party responses are deliberately never cached. */
 'use strict';
 
-var CACHE_NAME = 'ahl-athar-v16';
+var CACHE_NAME = 'ahl-athar-v17';
 var APP_FILES = [
   './',
   './index.html',
