@@ -32,6 +32,8 @@ jobs:
           node --check app/app.js
           node --check app/suggestions.js
           node --check app/admin-suggestions.js
+          node --check app/community.js
+          node --check app/community-admin.js
           node --check app/sw.js
           node --check app/pwa-assets.test.js
           node --check scripts/build-auth.mjs
