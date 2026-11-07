@@ -11,6 +11,7 @@ var S = [
 var names = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 var prayerSections = ['sched', 'prayers', 'qibla', 'adhkar', 'media', 'q', 'account', 'about'];
 var prayerTabs = ['t1', 't2', 't3', 't4', 't5', 't6', 't8', 't7'];
+var sectionStack = ['sched'];
 var prayerNames = {
   fajr: 'الفجر',
   sunrise: 'الشروق',
@@ -196,36 +197,69 @@ function updateLessonCountdown() {
   }
 }
 
-function show(sectionId) {
+function renderSectionStack() {
+  var activeSection = sectionStack[sectionStack.length - 1];
   prayerSections.forEach(function (id, index) {
-    var active = id === sectionId;
+    var position = sectionStack.indexOf(id);
+    var visible = position !== -1;
     var section = document.getElementById(id);
-    section.hidden = !active;
+    section.hidden = !visible;
+    section.classList.toggle('app-section-overlay', visible && position > 0);
+    if (visible && position > 0) section.style.zIndex = String(15 + position);
+    else section.style.removeProperty('z-index');
     var tab = document.getElementById(prayerTabs[index]);
+    var active = id === activeSection;
     tab.className = 'tab' + (active ? ' on' : '');
     tab.setAttribute('aria-pressed', active ? 'true' : 'false');
   });
+}
 
-  var isSchedule = sectionId === 'sched';
+function closeTopSection() {
+  if (sectionStack.length <= 1) return;
+  sectionStack.pop();
+  renderSectionStack();
+  var active = sectionStack[sectionStack.length - 1];
+  if (active === 'qibla') updateQibla();
+}
+
+function show(sectionId) {
+  if (prayerSections.indexOf(sectionId) === -1) return;
+  var top = sectionStack[sectionStack.length - 1];
+  if (sectionId === 'sched') {
+    sectionStack = ['sched'];
+  } else if (sectionId !== top) {
+    var existing = sectionStack.indexOf(sectionId);
+    if (existing >= 0) sectionStack = sectionStack.slice(0, existing + 1);
+    else sectionStack.push(sectionId);
+  }
+  renderSectionStack();
+
+  var isSchedule = sectionStack[sectionStack.length - 1] === 'sched';
   var scheduleHeading = document.querySelector('.section-heading');
   var nextLesson = document.querySelector('.next');
   if (scheduleHeading) scheduleHeading.hidden = !isSchedule;
   if (nextLesson) nextLesson.hidden = !isSchedule;
 
-  var target = document.getElementById(sectionId);
-  if (target) {
-    target.setAttribute('tabindex', '-1');
-    target.scrollIntoView({
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-      block: 'start'
-    });
-    target.focus({ preventScroll: true });
-  }
-
   if (sectionId === 'qibla') updateQibla();
   if (sectionId === 'adhkar') renderAdhkar();
   if (sectionId === 'media') loadMediaLibrary();
 }
+
+prayerSections.forEach(function (id) {
+  if (id === 'sched') return;
+  var section = document.getElementById(id);
+  section.addEventListener('click', function (event) {
+    var contentSelector = [
+      '.card', '.note', 'button', 'a', 'input', 'select', 'textarea', 'label',
+      'audio', '[role="button"]', '[contenteditable="true"]'
+    ].join(', ');
+    if (!event.target.closest(contentSelector)) closeTopSection();
+  });
+});
+
+document.addEventListener('keydown', function (event) {
+  if (event.key === 'Escape') closeTopSection();
+});
 
 function renderMediaLibrary() {
   var container = document.getElementById('mediaItems');
