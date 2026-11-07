@@ -38,3 +38,29 @@ test('all PWA manifest and offline-cache files exist within the app', function (
     assert.ok(fs.existsSync(path.join(appDirectory, asset.replace(/^\.\//, ''))), asset);
   }
 });
+
+
+test('shield PWA icons use the approved Arabic shield identity', function () {
+  for (const name of ['icon.svg', 'icon-192.svg', 'icon-512.svg']) {
+    const svg = fs.readFileSync(path.join(appDirectory, name), 'utf8');
+    assert.match(svg, /حرس/);
+    assert.match(svg, /الحدود/);
+  }
+  assert.ok(manifest.icons.some(function (entry) { return entry.src === 'icon-192.svg'; }));
+  assert.ok(manifest.icons.some(function (entry) { return entry.src === 'icon-512.svg'; }));
+});
+
+test('service worker caches local static assets only and excludes private traffic', function () {
+  const worker = fs.readFileSync(path.join(appDirectory, 'sw.js'), 'utf8');
+  assert.ok(worker.includes("request.method !== 'GET'"));
+  assert.ok(worker.includes("request.headers.has('authorization')"));
+  assert.ok(worker.includes('url.origin !== self.location.origin'));
+  assert.ok(worker.includes("url.pathname.indexOf('/api/') !== -1"));
+  assert.ok(worker.includes('!STATIC_FILE.test(url.pathname) || url.search'));
+  assert.ok(worker.includes('var STATIC_FILE = /\\.(?:css|js'));
+  const start = worker.indexOf('var APP_FILES = [');
+  const end = worker.indexOf('];', start);
+  assert.ok(start >= 0 && end > start);
+  const files = [...worker.slice(start, end).matchAll(/'([^']+)'/g)].map(function (match) { return match[1]; });
+  for (const file of files) assert.ok(fs.existsSync(path.join(appDirectory, file)), 'missing app-shell file: ' + file);
+});
