@@ -198,6 +198,18 @@ textarea::placeholder{color:#777e75}
 .site-footer .designer-credit{margin-top:7px;color:#777d73;font-size:9px;letter-spacing:.04em}
 @media(max-width:480px){.beta-banner{margin-bottom:11px;padding:8px 10px;font-size:10px}.motto-panel{gap:8px;margin-bottom:20px;padding:13px 10px}.site-footer{margin-top:26px;padding-top:20px}}
 
+
+/* Quran radio controls */
+.radio-tab{border-color:rgba(213,171,100,.34)!important;background:linear-gradient(135deg,rgba(213,171,100,.13),rgba(213,171,100,.04))!important;color:var(--gold2)!important}
+.radio-panel{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px 16px;margin:0 0 16px;border:1px solid rgba(213,171,100,.3);border-radius:16px;background:linear-gradient(135deg,rgba(25,32,29,.98),rgba(18,23,21,.98));box-shadow:0 12px 32px rgba(0,0,0,.2)}
+.radio-panel[hidden]{display:none}
+.radio-panel strong{color:var(--gold2);margin-inline-end:auto}
+.radio-panel button{min-height:38px;padding:7px 13px;border:1px solid rgba(213,171,100,.35);border-radius:11px;background:rgba(213,171,100,.08);color:var(--gold2);font:inherit;font-size:13px}
+.radio-panel label{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}
+.radio-panel input[type=range]{width:105px;accent-color:var(--gold)}
+.radio-status{flex-basis:100%;margin:0;color:var(--muted);font-size:12px}
+@media(max-width:620px){.tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.radio-panel strong{flex-basis:100%}}
+
 </style>
 
 <script src="brand-intro.js" defer></script>
@@ -261,9 +273,18 @@ textarea::placeholder{color:#777e75}
 <button class="tab" id="t6" type="button" aria-pressed="false" onclick="show('q')">الأسئلة</button>
 <button class="tab" id="t7" type="button" aria-pressed="false" onclick="show('about')">عن المجلس</button>
 <button class="tab" id="t8" type="button" aria-pressed="false" onclick="show('account')">حسابي</button>
+<button class="tab radio-tab" id="quranRadioButton" type="button" aria-expanded="false" aria-controls="quranRadioPanel">إذاعة القرآن الكريم</button>
 <button class="tab" id="t9" type="button" aria-pressed="false" onclick="show('debates')">المناظرات</button>
 <button class="tab" id="t10" type="button" aria-pressed="false" onclick="show('forum')">المنتدى</button>
 </nav>
+<section class="radio-panel" id="quranRadioPanel" hidden aria-label="مشغل إذاعة القرآن الكريم">
+  <strong>إذاعة القرآن الكريم من القاهرة</strong>
+  <button id="quranRadioPlay" type="button">تشغيل</button>
+  <button id="quranRadioMute" type="button" aria-pressed="false">كتم</button>
+  <label for="quranRadioVolume">مستوى الصوت <input id="quranRadioVolume" type="range" min="0" max="1" step="0.05" value="0.18"></label>
+  <p class="radio-status" id="quranRadioStatus" role="status" aria-live="polite">محاولة بدء البث عند دخول المنصة. قد يتطلب المتصفح ضغطة منك للسماح بالصوت.</p>
+  <audio id="quranRadioAudio" preload="none" playsinline></audio>
+</section>
 <section id="sched" aria-label="جدول الدروس الأسبوعي"></section>
 <section id="prayers" hidden>
 <div class="card">
