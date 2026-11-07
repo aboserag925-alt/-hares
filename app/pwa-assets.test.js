@@ -110,3 +110,26 @@ test('Google OAuth and member activity use own-row RLS tables', function () {
   assert.ok(migration.includes('alter table public.member_activity enable row level security'));
   assert.ok(migration.includes('(select auth.uid()) = user_id'));
 });
+
+test('forum and debates require moderation before public publication', function () {
+  const appScript = fs.readFileSync(path.join(appDirectory, 'app.js'), 'utf8');
+  const community = fs.readFileSync(path.join(appDirectory, 'community.js'), 'utf8');
+  const moderation = fs.readFileSync(path.join(appDirectory, 'community-admin.js'), 'utf8');
+  const migration = fs.readFileSync(path.join(appDirectory, '../supabase/migrations/202611070003_community_moderation.sql'), 'utf8');
+  const adminHtml = fs.readFileSync(path.join(appDirectory, 'admin.html'), 'utf8');
+  assert.ok(html.includes('id="debates"'));
+  assert.ok(html.includes('id="forum"'));
+  assert.ok(appScript.includes("'debates', 'forum'"));
+  assert.ok(community.includes("status: 'pending'"));
+  assert.ok(community.includes("status:'pending'"));
+  assert.ok(moderation.includes('getAccessToken'));
+  assert.ok(moderation.includes("status: 'published'"));
+  assert.ok(adminHtml.includes('communityModerationPanel'));
+  assert.ok(migration.includes("status text not null default 'pending'"));
+  assert.ok(migration.includes('alter table public.community_topics enable row level security'));
+  assert.ok(migration.includes('alter table public.community_posts enable row level security'));
+  assert.ok(migration.includes('set search_path ='));
+  assert.ok(migration.includes("status = 'pending'"));
+  assert.ok(migration.includes('community_topics_rate_limit'));
+  assert.ok(migration.includes('community_posts_rate_limit'));
+});
