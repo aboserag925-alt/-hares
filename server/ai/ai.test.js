@@ -50,10 +50,10 @@ const fs=require('node:fs');
 const path=require('node:path');
 test('AI approval RPC is hardened with an empty search_path and service-role-only execution',()=>{
  const migration=fs.readFileSync(path.resolve(__dirname,'../../supabase/migrations/202611020001_suggestions_ai.sql'),'utf8');
- assert.match(migration,/security definer\\s+set search_path = ''/i);
- assert.match(migration,/revoke all on function public\\.record_ai_approval\\([^;]+\\) from public, anon, authenticated;/i);
- assert.match(migration,/grant execute on function public\\.record_ai_approval\\([^;]+\\) to service_role;/i);
- assert.match(migration,/public\\.admin_users/);
- assert.match(migration,/public\\.ai_tasks/);
+ assert.match(migration,/security definer\s+set search_path = ''/i);
+ assert.match(migration,/revoke all on function public\.record_ai_approval\([^;]+\) from public, anon, authenticated;/i);
+ assert.match(migration,/grant execute on function public\.record_ai_approval\([^;]+\) to service_role;/i);
+ assert.match(migration,/public\.admin_users/);
+ assert.match(migration,/public\.ai_tasks/);
  assert.doesNotMatch(migration,/set search_path = public/i);
 });
