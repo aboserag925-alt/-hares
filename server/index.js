@@ -650,25 +650,31 @@ function createServer(options) {
       }
 
       try {
-        const draft = await createQuestionDraft(question, env, fetchImpl);
+        const generated = await createQuestionDrafts(question, env, fetchImpl);
+        const draft = generated.drafts.gemini || generated.drafts.grok;
+        const modelDetails = env.GROK_API_KEY
+          ? { drafts: generated.drafts, modelStatus: generated.modelStatus }
+          : {};
         try {
-          await sendToTelegram(question, draft, env, fetchImpl);
+          await sendToTelegram(question, generated.drafts, env, fetchImpl);
         } catch (error) {
-          sendJson(response, 502, {
+          sendJson(response, 502, Object.assign({
             error: error.message,
             draft: draft,
             telegramSent: false
-          });
+          }, modelDetails));
           return;
         }
-        sendJson(response, 200, { draft: draft, telegramSent: true });
+        sendJson(response, 200, Object.assign({
+          draft: draft,
+          telegramSent: true
+        }, modelDetails));
       } catch (error) {
         if (error.name === 'TimeoutError' || error.name === 'AbortError') {
           sendJson(response, 504, { error: 'انتهت مهلة الاتصال بالخدمة. حاول لاحقًا.' });
           return;
         }
-        if (error.message === 'تعذر إنشاء مسودة الآن. حاول لاحقًا.' ||
-            error.message === 'لم تُنتج الخدمة مسودة صالحة. حاول لاحقًا.') {
+        if (error.message === 'تعذر إنشاء مسودة من النماذج المتاحة.') {
           sendJson(response, 502, { error: error.message });
           return;
         }
