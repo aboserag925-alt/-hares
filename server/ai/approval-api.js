@@ -27,7 +27,7 @@ function createApprovalApi({env,fetch:fetchImpl=global.fetch,taskService,rateLim
    const user=await authenticate(req);if(!user){send(res,403,{error:'هذه العملية متاحة للمشرفين المصرح لهم فقط.'});return true;}
    const input=await readBody(req);
    const allowed=new Set(['action','decision','reason']);
-   if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(k=>!allowed.has(k))||!['IMPLEMENT','MERGE'].includes(input.action)||!['APPROVED','REJECTED'].includes(input.decision)|| (input.reason!==undefined&&typeof input.reason!=='string')){send(res,400,{error:'بيانات الموافقة غير صالحة.'});return true;}
+   if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(k=>!allowed.has(k))||!['IMPLEMENT','MERGE'].includes(input.action)||!['APPROVED','REJECTED'].includes(input.decision)|| (input.reason!==undefined&&typeof input.reason!=='string')||(input.decision==='REJECTED'&&(!input.reason||!input.reason.trim()))){send(res,400,{error:'بيانات الموافقة غير صالحة.'});return true;}
    const approvalId=await taskService.recordHumanApproval({taskId:match[1],actorUserId:user.id,action:input.action,decision:input.decision,reason:input.reason||''});
    send(res,200,{approvalId});
   }catch(error){send(res,error.statusCode||409,{error:error.statusCode?error.message:'تعذر تسجيل القرار. تحقق من حالة المهمة وصلاحيات المشرف.'});}
