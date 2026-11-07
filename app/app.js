@@ -1101,6 +1101,42 @@ document.getElementById('adhanAudio').addEventListener('ended', function () {
   setStatus(audioStatus, 'انتهى التسجيل.');
 });
 
+function initQuranRadio() {
+  var button = document.getElementById('quranRadioButton');
+  var panel = document.getElementById('quranRadioPanel');
+  var station = document.getElementById('quranRadioStation');
+  var openButton = document.getElementById('quranRadioOpen');
+  var status = document.getElementById('quranRadioStatus');
+  if (!button || !panel || !station || !openButton || !status) return;
+
+  var officialStations = {
+    cairo: { name: 'إذاعة القرآن الكريم من القاهرة', url: 'https://misrquran.gov.eg/' },
+    saudi: { name: 'إذاعة القرآن الكريم من السعودية', url: 'https://radioplus.sba.sa/ar/live/4' }
+  };
+  function selectedStation() {
+    return officialStations[station.value] || officialStations.cairo;
+  }
+  function syncPanel() {
+    button.setAttribute('aria-expanded', panel.hidden ? 'false' : 'true');
+    button.textContent = panel.hidden ? 'إذاعة القرآن الكريم' : 'إغلاق الإذاعة';
+  }
+  button.addEventListener('click', function () {
+    panel.hidden = !panel.hidden;
+    syncPanel();
+  });
+  station.addEventListener('change', function () {
+    status.textContent = 'المحطة المختارة: ' + selectedStation().name + '. اضغط «فتح البث الرسمي» للانتقال إلى موقعها.';
+  });
+  openButton.addEventListener('click', function () {
+    var selected = selectedStation();
+    var opened = window.open(selected.url, '_blank', 'noopener,noreferrer');
+    status.textContent = opened
+      ? 'تم طلب فتح الموقع الرسمي لـ' + selected.name + '.'
+      : 'منع المتصفح فتح نافذة جديدة. اسمح بالنوافذ المنبثقة ثم أعد المحاولة.';
+  });
+  syncPanel();
+}
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(function () {
     setStatus(prayerStatus, 'تعذر تفعيل الاستخدام دون اتصال في هذا المتصفح.', true);
@@ -1113,6 +1149,7 @@ updateLessonCountdown();
 loadSavedSettings();
 renderAdhkar();
 initAuth();
+initQuranRadio();
 setInterval(updateLessonCountdown, 1000);
 setInterval(function () { updatePrayerTimes(false); }, 60000);
 setInterval(updateNextPrayerCountdown, 1000);
