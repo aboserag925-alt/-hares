@@ -36,7 +36,6 @@ jobs:
           node --check server/ai/platform-analysis-api.test.js
           node --check app/app.js
           node --check app/suggestions.js
-          node --check app/admin-suggestions.js
           node --check app/community.js
           node --check app/community-admin.js
           node --check app/visitor-counter.js
@@ -51,6 +50,11 @@ jobs:
       - run: docker build --tag ahl-athar:verify .
       - name: Check patch whitespace
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || github.sha + '^' }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-        run: git diff --check "$BASE_SHA...$HEAD_SHA"
+        run: |
+          if [ -n "$BASE_SHA" ]; then
+            git diff --check "$BASE_SHA...$HEAD_SHA"
+          else
+            git diff --check "$HEAD_SHA^" "$HEAD_SHA"
+          fi
