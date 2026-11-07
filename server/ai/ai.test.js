@@ -60,6 +60,9 @@ test('AI approval RPC is hardened with an empty search_path and service-role-onl
  assert.match(migration,/pg_catalog\\.jsonb_build_object/);
  assert.match(migration,/pg_catalog\\.left/);
  assert.match(migration,/A reason is required when rejecting an approval/);
+ const hardening=fs.readFileSync(path.resolve(__dirname,'../../supabase/migrations/202611070005_ai_approval_hardening.sql'),'utf8');
+ assert.match(hardening,/security definer\\s+set search_path = ''/i);
+ assert.match(hardening,/grant execute on function public\\.record_ai_approval\\([^;]+\\) to service_role;/i);
 });
 
 test('untrusted AI tasks remain tainted unless created by a trusted internal caller',()=>{
