@@ -4,6 +4,7 @@ const crypto = require('node:crypto');
 const net = require('node:net');
 const path = require('node:path');
 const { createMediaLibrary } = require('./media-library');
+const { createTelegramAssistant } = require('./telegram-assistant');
 const { createAdminApi } = require('./lecture-api');
 const { createSuggestionsApi } = require('./suggestions/suggestion-api');
 const { createSuggestionService } = require('./suggestions/suggestion-service');
@@ -359,10 +360,12 @@ function createServer(options) {
     taskService: taskService,
     rateLimit: rateLimit
   });
+  const telegramAssistant = createTelegramAssistant({ env: env, fetch: fetchImpl });
   const mediaLibrary = options.mediaLibrary || createMediaLibrary({
     env: env,
     fetch: fetchImpl,
-    storageDirectory: options.storageDirectory
+    storageDirectory: options.storageDirectory,
+    handleAssistantUpdate: function (update) { return telegramAssistant.processUpdate(update); }
   });
 
   return http.createServer(async function (request, response) {
