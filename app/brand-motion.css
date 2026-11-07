@@ -1,0 +1,228 @@
+/* HAress visual identity — cinematic gold motion system
+   Lightweight CSS-only effects; respects reduced-motion and touch devices. */
+:root{
+  --brand-ink:#090d0b;
+  --brand-panel:#121916;
+  --brand-gold:#d5ab64;
+  --brand-champagne:#f2d9a4;
+  --brand-sage:#99b9a2;
+  --brand-glow:rgba(213,171,100,.22);
+  --brand-ease:cubic-bezier(.2,.75,.25,1);
+}
+@keyframes haress-aura{
+  0%,100%{filter:drop-shadow(0 0 5px rgba(213,171,100,.12))}
+  50%{filter:drop-shadow(0 0 16px rgba(213,171,100,.34))}
+}
+@keyframes haress-sheen{
+  0%,65%,100%{background-position:200% 0}
+  82%{background-position:-200% 0}
+}
+@keyframes haress-orbit{to{transform:rotate(360deg)}}
+@keyframes haress-reveal{
+  from{opacity:0;transform:translateY(16px) scale(.985);filter:blur(5px)}
+  to{opacity:1;transform:none;filter:blur(0)}
+}
+.haress-brand-mark,.brand-mark{
+  position:relative;isolation:isolate;
+  border-color:rgba(213,171,100,.42)!important;
+  box-shadow:0 0 0 1px rgba(213,171,100,.06),0 10px 34px rgba(0,0,0,.3),0 0 30px var(--brand-glow);
+  animation:haress-aura 5.5s ease-in-out infinite;
+}
+.haress-brand-mark::after,.brand-mark::after{
+  content:"";position:absolute;inset:-5px;border:1px solid rgba(242,217,164,.2);
+  border-radius:inherit;pointer-events:none;opacity:.7;
+}
+.brand-gold-sheen{
+  background-image:linear-gradient(105deg,var(--brand-gold) 20%,var(--brand-champagne) 42%,#fff4d7 50%,var(--brand-gold) 62%);
+  background-size:240% 100%;background-position:200% 0;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:haress-sheen 8s ease-in-out infinite;
+}
+.brand-reveal{animation:haress-reveal .8s var(--brand-ease) both}
+.brand-orbit{animation:haress-orbit 36s linear infinite}
+:focus-visible{outline:2px solid var(--brand-champagne);outline-offset:4px}
+@media(hover:hover) and (pointer:fine){
+  .brand-interactive{transition:transform .28s var(--brand-ease),border-color .28s,box-shadow .28s}
+  .brand-interactive:hover{transform:translateY(-3px);border-color:rgba(213,171,100,.48);box-shadow:0 16px 42px rgba(0,0,0,.25),0 0 24px rgba(213,171,100,.08)}
+}
+@media(max-width:640px){
+  .brand-orbit{animation-duration:52s}
+  .brand-interactive:hover{transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+/* Cinematic brand reveal */
+@keyframes brand-intro-in{from{opacity:0;transform:translateY(14px) scale(.94);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes brand-intro-out{to{opacity:0;visibility:hidden;transform:scale(1.025)}}
+@keyframes brand-intro-ring{to{transform:rotate(360deg)}}
+@keyframes brand-intro-line{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.haress-intro{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;overflow:hidden;background:radial-gradient(ellipse at 50% 44%,rgba(213,171,100,.13),transparent 34%),#080c0a;color:#f4f0e7;opacity:1;transition:opacity .55s ease,visibility .55s ease}
+.haress-intro.is-leaving{opacity:0;visibility:hidden;pointer-events:none}
+.haress-intro__content{position:relative;display:grid;justify-items:center;gap:15px;text-align:center;animation:brand-intro-in .8s cubic-bezier(.2,.75,.25,1) both}
+.haress-intro__logo{width:clamp(112px,24vw,154px);height:auto;position:relative;z-index:1;filter:drop-shadow(0 0 26px rgba(213,171,100,.25))}
+.haress-intro__halo{position:absolute;width:clamp(150px,32vw,210px);aspect-ratio:1;border:1px solid rgba(213,171,100,.35);border-left-color:transparent;border-radius:50%;animation:brand-intro-ring 9s linear infinite}
+.haress-intro__name{font:700 clamp(35px,8vw,52px) 'Reem Kufi','Cairo',sans-serif;letter-spacing:.04em;color:#f2d9a4;text-shadow:0 0 30px rgba(213,171,100,.2)}
+.haress-intro__tag{font:500 12px 'Cairo',sans-serif;color:#a9ada2;letter-spacing:.18em}
+.haress-intro__rule{width:100px;height:1px;margin-top:2px;background:linear-gradient(90deg,transparent,#d5ab64,transparent);transform-origin:center;animation:brand-intro-line .9s .35s both}
+@media(prefers-reduced-motion:reduce){.haress-intro__content,.haress-intro__halo,.haress-intro__rule{animation:none!important}.haress-intro{transition:none}}
+
+
+/* Light emerald-and-gold identity — approved visual direction */
+:root{
+  color-scheme:light!important;
+  --brand-ink:#f7f5ef;
+  --brand-panel:#ffffff;
+  --brand-gold:#d4af37;
+  --brand-champagne:#f7e7b6;
+  --brand-sage:#a7c4b0;
+  --brand-emerald:#0b5e3c;
+  --brand-glow:rgba(212,175,55,.18);
+}
+body{background:#f7f5ef!important;color:#173b2c!important}
+.site{background:#fbfaf6!important;color:#173b2c!important}
+.nav{background:rgba(255,255,255,.9)!important;border-bottom-color:rgba(11,94,60,.14)!important;box-shadow:0 5px 24px rgba(17,58,42,.06)}
+.nav a{color:#426653!important}
+.nav a:hover,.nav .logo{color:#0b5e3c!important}
+.logo{color:#0b5e3c!important}
+.btn.fill{background:linear-gradient(135deg,#0b5e3c,#14764e)!important;color:#fff!important;box-shadow:0 10px 26px rgba(11,94,60,.16)!important}
+.btn.line{border-color:#d4af37!important;color:#0b5e3c!important}
+.eyebrow,.sheikh{background:#fff!important;color:#0b5e3c!important;border-color:rgba(11,94,60,.18)!important}
+.dot{background:#d4af37!important}
+.gold,.brand-gold-sheen{background-image:linear-gradient(90deg,#0b5e3c,#d4af37,#0b5e3c)!important}
+.lead,.sub,.card p,footer,.track span{color:#557263!important}
+.social-icon{background:#fff!important;color:#0b5e3c!important;border-color:rgba(11,94,60,.18)!important}
+.support-button{background:linear-gradient(135deg,#0b5e3c,#14764e)!important;color:#fff!important;border-color:#d4af37!important}
+.strip{background:#eef4ef!important;border-color:rgba(11,94,60,.12)!important}
+.track span.g{color:#0b5e3c!important}
+.card,.row,.majlis{background:#fff!important;color:#173b2c!important;border-color:rgba(11,94,60,.14)!important;box-shadow:0 12px 35px rgba(17,58,42,.06)}
+.card p,.row span{color:#557263!important}
+.card h3,.row b{color:#0b5e3c!important}
+.card .n{color:#a7c4b0!important}
+.thumb{background:linear-gradient(135deg,#edf4ee,#fff)!important;color:#0b5e3c!important}
+footer{border-top-color:rgba(11,94,60,.15)!important}
+footer a{color:#0b5e3c!important}
+.mobile-menu-toggle,.mobile-site-menu{background:#fff!important;color:#0b5e3c!important;border-color:rgba(11,94,60,.18)!important;box-shadow:0 12px 32px rgba(17,58,42,.1)}
+.mobile-site-menu a{color:#0b5e3c!important}
+.mobile-site-menu a:hover,.mobile-site-menu a:focus-visible{background:#edf4ee!important;color:#0b5e3c!important}
+dialog.support-dialog{background:#fff!important;color:#173b2c!important;border-color:#d4af37!important;box-shadow:0 24px 80px rgba(17,58,42,.2)!important}
+dialog.support-dialog::backdrop{background:rgba(12,39,27,.35)!important}
+.support-dialog>p,.wallet-detail p{color:#557263!important}
+.wallet-detail{background:#f7f5ef!important;border-color:rgba(11,94,60,.14)!important}
+.wallet-detail summary{color:#0b5e3c!important}
+:focus-visible{outline-color:#d4af37!important}
+.haress-brand-mark,.brand-mark{box-shadow:0 0 0 1px rgba(212,175,55,.12),0 10px 34px rgba(11,94,60,.1),0 0 26px rgba(212,175,55,.12)!important}
+.haress-brand-mark::after,.brand-mark::after{border-color:rgba(11,94,60,.18)!important}
+.haress-intro{background:radial-gradient(ellipse at 50% 44%,rgba(212,175,55,.16),transparent 36%),#f7f5ef!important;color:#0b5e3c!important}
+.haress-intro__name{color:#0b5e3c!important;text-shadow:0 4px 18px rgba(212,175,55,.2)!important}
+.haress-intro__tag{color:#557263!important}
+.haress-intro__halo{border-color:rgba(212,175,55,.48)!important;border-left-color:transparent!important}
+.haress-intro__rule{background:linear-gradient(90deg,transparent,#d4af37,transparent)!important}
+
+/* App and admin surfaces */
+.next,.panel,.item,.media-card,.stat,.filters,.compass{background:#fff!important;color:#173b2c!important;border-color:rgba(11,94,60,.15)!important;box-shadow:0 12px 35px rgba(17,58,42,.06)!important}
+.next::before{background:radial-gradient(ellipse at 0 50%,rgba(212,175,55,.13),transparent 48%)!important}
+h1,h2,h3,.doctor,label,.stat strong,.item h3{color:#0b5e3c!important}
+header p,.muted,.status,.stat span{color:#557263!important}
+input,textarea,select{background:#fbfaf6!important;color:#173b2c!important;border-color:rgba(11,94,60,.22)!important}
+button,.link{background:#edf4ee!important;color:#0b5e3c!important;border-color:rgba(11,94,60,.18)!important}
+button.primary{background:linear-gradient(135deg,#0b5e3c,#14764e)!important;color:#fff!important}
+button.danger{color:#a23c32!important}
+
+
+/* Refined light landing-page composition */
+.orb{background:rgba(167,196,176,.22)!important;filter:blur(78px)!important}
+.hero{position:relative;isolation:isolate;padding:clamp(58px,8vw,104px) 0 clamp(64px,8vw,100px)!important;background:linear-gradient(135deg,#fffefa 0%,#f7f5ef 56%,#edf4ee 100%)!important}
+.hero:before{content:"";position:absolute;inset:18px 3.2%;z-index:-1;border:1px solid rgba(212,175,55,.22);border-radius:34px;pointer-events:none}
+.hero:after{content:"";position:absolute;z-index:-1;width:360px;height:360px;left:8%;top:8%;border:1px solid rgba(212,175,55,.16);border-radius:50%;box-shadow:0 0 0 24px rgba(212,175,55,.035),0 0 0 48px rgba(212,175,55,.025);pointer-events:none}
+.hero .wrap{gap:clamp(28px,5vw,72px)!important}
+.hero .emblem{width:min(100%,390px)!important;aspect-ratio:1;margin-inline:auto;display:grid;place-items:center;position:relative;border-radius:50%;background:radial-gradient(circle,#fff 0 32%,rgba(247,231,182,.48) 33%,rgba(255,255,255,.18) 66%,transparent 67%)!important;box-shadow:inset 0 0 0 1px rgba(212,175,55,.18),0 24px 70px rgba(11,94,60,.08)!important}
+.hero .emblem .ring{border-color:rgba(212,175,55,.52)!important;box-shadow:0 0 0 12px rgba(212,175,55,.045)!important}
+.hero .emblem .ring.b{border-color:rgba(11,94,60,.2)!important}
+.hero .emblem .core{width:66%!important;height:66%!important;border-radius:28%!important;padding:12px;background:#fff!important;border:2px solid #d4af37!important;box-shadow:0 18px 48px rgba(11,94,60,.14),0 0 0 9px rgba(212,175,55,.1)!important;overflow:hidden}
+.hero .emblem .core img{border-radius:20%!important;object-fit:contain!important}
+.hero .eyebrow{background:#fff!important;color:#0b5e3c!important;border-color:rgba(212,175,55,.55)!important;box-shadow:0 8px 24px rgba(11,94,60,.05)}
+h1.big{color:#0b5e3c!important;text-shadow:0 3px 0 rgba(212,175,55,.12)!important}
+h1.big:after{content:"أنت الجماعة ولو كنت وحدك";display:block;margin-top:20px;font:600 clamp(15px,2vw,20px) 'Cairo',sans-serif;letter-spacing:0;color:#557263;text-shadow:none}
+.hero .sheikh{background:#fff!important;color:#0b5e3c!important;border:1px solid rgba(212,175,55,.36)!important;box-shadow:0 8px 24px rgba(11,94,60,.05)}
+.hero .lead{color:#557263!important;line-height:2.05}
+.hero .support-button{box-shadow:0 9px 24px rgba(11,94,60,.14)!important}
+.strip{background:linear-gradient(90deg,#eef4ef,#fffdf8,#eef4ef)!important;border-block:1px solid rgba(212,175,55,.22)!important}
+.strip .track{color:#0b5e3c!important}
+section.s{background:#fbfaf6!important}
+section.s:nth-of-type(even){background:#f1f6f1!important}
+.t{color:#0b5e3c!important}
+.card{border-radius:22px!important;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease!important}
+.card:hover{transform:translateY(-5px)!important;box-shadow:0 20px 44px rgba(11,94,60,.1)!important;border-color:rgba(212,175,55,.55)!important}
+.card .n{color:#d4af37!important;font-weight:800}
+@media(max-width:760px){
+ .hero:before{inset:10px 3%;border-radius:22px}
+ .hero:after{width:220px;height:220px;left:-45px;top:20px}
+ .hero .wrap{grid-template-columns:1fr!important;gap:34px!important}
+ .hero .emblem{width:min(72vw,290px)!important;grid-row:1}
+ h1.big{font-size:clamp(42px,12vw,64px)!important}
+}
+@media(prefers-reduced-motion:reduce){.hero .emblem .ring{animation:none!important}}
+
+
+/* Arabic typography system: Tajawal for readable UI, Alexandria for display */
+:root{--font-ui:'Tajawal',system-ui,-apple-system,'Segoe UI',sans-serif;--font-display:'Alexandria','Tajawal',sans-serif}
+html,body,button,input,textarea,select{font-family:var(--font-ui)!important}
+h1,h2,h3,h4,h5,h6,.logo,.hero-kufi,.brand-title,.haress-intro__name{font-family:var(--font-display)!important;letter-spacing:-.035em}
+p,li,label,.btn,.nav a,.card,.row,.stat,.item{font-family:var(--font-ui)!important}
+h1.big{font-weight:800;letter-spacing:-.055em;line-height:1.28}
+h2.t,.t{font-weight:800;letter-spacing:-.04em}
+.haress-intro__tag{font-family:var(--font-ui)!important;font-weight:600}
+
+/* Identity Motion v2 — restrained 3D depth and time-based reveals */
+@keyframes haress-shield-float{
+  0%,100%{transform:translateY(0) rotateX(0) rotateY(0)}
+  50%{transform:translateY(-5px) rotateX(2deg) rotateY(-2deg)}
+}
+@keyframes haress-depth-in{
+  from{opacity:0;transform:perspective(900px) translateY(28px) rotateX(7deg) scale(.985);filter:blur(3px)}
+  to{opacity:1;transform:perspective(900px) translateY(0) rotateX(0) scale(1);filter:blur(0)}
+}
+.haress-intro__logo{
+  transform-style:preserve-3d;
+  animation:haress-shield-float 5.8s ease-in-out infinite;
+  filter:drop-shadow(0 16px 24px rgba(11,94,60,.18));
+}
+.haress-intro__content{perspective:1000px;transform-style:preserve-3d}
+.haress-intro__name{
+  font-family:'Noto Naskh Arabic',serif!important;
+  letter-spacing:0!important;
+  color:#0b5e3c!important;
+}
+.haress-intro__tag{font-family:'Noto Naskh Arabic',serif!important;letter-spacing:0!important}
+@media(hover:hover) and (pointer:fine){
+  .hero .emblem{
+    transform-style:preserve-3d;
+    transition:transform .65s cubic-bezier(.2,.75,.25,1),box-shadow .65s ease;
+  }
+  .hero .emblem:hover{
+    transform:perspective(900px) rotateX(5deg) rotateY(-7deg) translateY(-5px);
+    box-shadow:inset 0 0 0 1px rgba(212,175,55,.24),0 32px 80px rgba(11,94,60,.16)!important;
+  }
+  .card,.quick-item,.next{
+    transform-style:preserve-3d;
+    transition:transform .38s cubic-bezier(.2,.75,.25,1),box-shadow .38s ease!important;
+  }
+  .card:hover,.quick-item:hover,.next:hover{
+    transform:perspective(850px) translateY(-5px) rotateX(2deg) rotateY(-1deg)!important;
+  }
+}
+/* Scroll/time choreography: supported browsers reveal each card as it enters view. */
+@supports(animation-timeline:view()){
+  .card,.quick-item{
+    animation:haress-depth-in linear both;
+    animation-timeline:view();
+    animation-range:entry 0% entry 78%;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .haress-intro__logo{animation:none!important}
+  .hero .emblem,.card,.quick-item,.next{transform:none!important;transition:none!important}
+  .card,.quick-item{animation:none!important}
+}
