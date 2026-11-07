@@ -24,7 +24,7 @@ button{cursor:pointer}
 header{display:grid;grid-template-columns:72px 1fr;grid-template-rows:auto auto;column-gap:18px;align-items:end;padding:8px 0 24px;text-align:right;animation:enter .7s cubic-bezier(.2,.7,.2,1) both}
 .logo{grid-row:1/5;width:68px;height:68px;padding:7px;border-radius:22px;border:1px solid var(--line);background:linear-gradient(145deg,rgba(213,171,100,.16),rgba(153,185,162,.08));box-shadow:0 8px 28px rgba(0,0,0,.24);transition:transform .35s,border-color .35s;animation:logo-aura 5s ease-in-out infinite}
 header:hover .logo{transform:rotate(-5deg) scale(1.04);border-color:rgba(213,171,100,.55)}
-h1{align-self:end;font-family:'Aref Ruqaa','Cairo',serif;font-size:clamp(25px,3vw,33px);letter-spacing:0;margin:0;color:var(--gold2)}
+h1{align-self:end;font-family:'Noto Naskh Arabic','Cairo',serif;font-size:clamp(25px,3vw,33px);letter-spacing:0;margin:0;color:var(--gold2)}
 header p{align-self:start;margin:4px 0 0;color:var(--muted);font-size:14px}
 .doctor{display:inline-flex;align-items:center;gap:8px;align-self:start;margin-top:8px;color:var(--gold2);font-size:13px;font-weight:650;letter-spacing:.01em}
 .doctor::before{width:18px;height:1px;background:linear-gradient(90deg,transparent,var(--gold));content:""}
@@ -355,6 +355,8 @@ body,.app-shell,button,input,textarea,select{
 
 .methodology{display:block;align-self:start;margin-top:2px;color:var(--muted);font-size:10px;font-weight:600;line-height:1.6}
 @media(max-width:680px){.methodology{font-size:9px}}
+
+header h1,header p,.doctor,.blessing,.methodology{font-family:'Noto Naskh Arabic','Cairo',serif!important;letter-spacing:0!important}
 </style>
 </head>
 <body>
