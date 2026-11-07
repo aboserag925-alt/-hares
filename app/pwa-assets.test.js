@@ -64,3 +64,25 @@ test('service worker caches local static assets only and excludes private traffi
   const files = [...worker.slice(start, end).matchAll(/'([^']+)'/g)].map(function (match) { return match[1]; });
   for (const file of files) assert.ok(fs.existsSync(path.join(appDirectory, file)), 'missing app-shell file: ' + file);
 });
+
+
+test('account recovery and optional CAPTCHA are wired on user and admin screens', function () {
+  const accountHtml = html;
+  const accountScript = fs.readFileSync(path.join(appDirectory, 'app.js'), 'utf8');
+  const adminHtml = fs.readFileSync(path.join(appDirectory, 'admin.html'), 'utf8');
+  const authSource = fs.readFileSync(path.join(appDirectory, '../src/auth-client.js'), 'utf8');
+  const buildScript = fs.readFileSync(path.join(appDirectory, '../scripts/build-auth.mjs'), 'utf8');
+  const pagesWorkflow = fs.readFileSync(path.join(appDirectory, '../.github/workflows/pages.yml'), 'utf8');
+  assert.ok(accountHtml.includes('id="authCaptcha"'));
+  assert.ok(accountHtml.includes('id="passwordRecoveryPanel"'));
+  assert.ok(accountHtml.includes('id="resetPasswordBtn"'));
+  assert.ok(accountScript.includes("state.event === 'PASSWORD_RECOVERY'"));
+  assert.ok(accountScript.includes('requestPasswordReset'));
+  assert.ok(accountScript.includes('updatePassword'));
+  assert.ok(authSource.includes('resetPasswordForEmail'));
+  assert.ok(authSource.includes('window.ahlCaptcha'));
+  assert.ok(adminHtml.includes('id="adminCaptcha"'));
+  assert.ok(adminHtml.includes('window.ahlAuth.signIn'));
+  assert.ok(buildScript.includes('TURNSTILE_SITE_KEY'));
+  assert.ok(pagesWorkflow.includes('TURNSTILE_SITE_KEY'));
+});
