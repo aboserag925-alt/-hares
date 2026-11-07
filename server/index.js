@@ -404,44 +404,6 @@ async function sendToTelegram(question, drafts, env, fetchImpl) {
     throw new Error('تعذر تأكيد إرسال السؤال إلى Telegram.');
   }
 }
-async function sendToTelegram(question, draft, env, fetchImpl) {
-  const message = 'سؤال للمراجعة من التطبيق:\n\n' + question +
-    '\n\nمسودة Gemini غير معتمدة:\n' + draft;
-  let result;
-  try {
-    result = await fetchImpl(
-      'https://api.telegram.org/bot' + env.TELEGRAM_BOT_TOKEN + '/sendMessage',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          Accept: 'application/json; charset=utf-8'
-        },
-        signal: AbortSignal.timeout(15000),
-        body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text: message })
-      }
-    );
-  } catch {
-    console.error('Telegram request could not be completed');
-    throw new Error('تعذر تأكيد إرسال السؤال إلى Telegram.');
-  }
-  if (!result.ok) {
-    console.error('Telegram request failed with status ' + result.status);
-    throw new Error('تعذر تأكيد إرسال السؤال إلى Telegram.');
-  }
-  let payload;
-  try {
-    payload = await readUtf8Json(result);
-  } catch {
-    console.error('Telegram returned an invalid response');
-    throw new Error('تعذر تأكيد إرسال السؤال إلى Telegram.');
-  }
-  if (!payload.ok) {
-    console.error('Telegram rejected a question message');
-    throw new Error('تعذر تأكيد إرسال السؤال إلى Telegram.');
-  }
-}
-
 function createServer(options) {
   options = options || {};
   const env = options.env || process.env;
