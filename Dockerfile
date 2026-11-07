@@ -9,7 +9,6 @@ COPY --chown=node:node assets/ ./assets/
 COPY --chown=node:node screens/ ./screens/
 COPY --chown=node:node server/ ./server/
 RUN mkdir -p storage/media && chown -R node:node storage
-VOLUME ["/srv/ahl-athar/storage"]
 USER node
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s CMD node -e "fetch('http://127.0.0.1:8080/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
