@@ -1296,36 +1296,122 @@ function initQuranRadio() {
   var button = document.getElementById('quranRadioButton');
   var panel = document.getElementById('quranRadioPanel');
   var station = document.getElementById('quranRadioStation');
+  var audio = document.getElementById('quranRadioAudio');
   var openButton = document.getElementById('quranRadioOpen');
+  var muteButton = document.getElementById('quranRadioMute');
   var status = document.getElementById('quranRadioStatus');
-  if (!button || !panel || !station || !openButton || !status) return;
+  if (!button || !panel || !station || !audio || !openButton || !muteButton || !status) return;
 
-  var officialStations = {
-    cairo: { name: 'إذاعة القرآن الكريم من القاهرة', url: 'https://misrquran.gov.eg/' },
-    saudi: { name: 'إذاعة القرآن الكريم من السعودية', url: 'https://radioplus.sba.sa/ar/live/4' }
+  var stations = {
+    cairo: {
+      name: 'إذاعة القرآن الكريم من القاهرة',
+      streamUrl: 'https://stream.radiojar.com/8s5u5tpdtwzuv',
+      officialUrl: 'https://misrquran.gov.eg/'
+    },
+    saudi: {
+      name: 'إذاعة القرآن الكريم من السعودية',
+      streamUrl: null,
+      officialUrl: 'https://radioplus.sba.sa/ar/live/4'
+    }
   };
+  var volumeTimer = null;
+
   function selectedStation() {
-    return officialStations[station.value] || officialStations.cairo;
+    return stations[station.value] || stations.cairo;
+  }
+  function setStatus(message) {
+    status.textContent = message;
   }
   function syncPanel() {
     button.setAttribute('aria-expanded', panel.hidden ? 'false' : 'true');
-    button.textContent = panel.hidden ? 'إذاعة القرآن الكريم' : 'إغلاق الإذاعة';
+    button.textContent = panel.hidden
+      ? (station.value === 'cairo' && !audio.paused ? 'إذاعة القرآن الكريم • تعمل' : 'إذاعة القرآن الكريم')
+      : 'إغلاق الإذاعة';
   }
+  function syncMute() {
+    muteButton.textContent = audio.muted ? 'إلغاء الكتم' : 'كتم الإذاعة';
+    muteButton.setAttribute('aria-pressed', audio.muted ? 'true' : 'false');
+  }
+  function scheduleVolumeRise() {
+    if (volumeTimer) window.clearTimeout(volumeTimer);
+    volumeTimer = window.setTimeout(function () {
+      if (!audio.paused && !audio.muted && station.value === 'cairo') audio.volume = 0.16;
+    }, 5000);
+  }
+  function startCairoStream() {
+    var selected = selectedStation();
+    if (!selected.streamUrl) return;
+    if (audio.src !== selected.streamUrl) {
+      audio.src = selected.streamUrl;
+      audio.load();
+    }
+    audio.volume = 0.06;
+    if (audio.muted) {
+      setStatus('الإذاعة مكتومة حسب اختيارك السابق. اضغط «إلغاء الكتم» للاستماع.');
+      return;
+    }
+    var playResult = audio.play();
+    if (playResult && typeof playResult.catch === 'function') {
+      playResult.catch(function () {
+        setStatus('المتصفح منع التشغيل التلقائي. افتح الإذاعة واضغط تشغيل من مشغل الصوت.');
+        button.textContent = 'إذاعة القرآن الكريم — اضغط للتشغيل';
+      });
+    }
+  }
+  function selectStation() {
+    var selected = selectedStation();
+    if (selected.streamUrl) {
+      startCairoStream();
+      setStatus('المحطة المختارة: ' + selected.name + '. يبدأ البث بمستوى منخفض ثم يرتفع تدريجيًا بعد خمس ثوانٍ.');
+    } else {
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
+      setStatus('للاستماع إلى الإذاعة السعودية، اضغط «فتح الموقع الرسمي».');
+    }
+    syncPanel();
+  }
+
   button.addEventListener('click', function () {
     panel.hidden = !panel.hidden;
     syncPanel();
   });
-  station.addEventListener('change', function () {
-    status.textContent = 'المحطة المختارة: ' + selectedStation().name + '. اضغط «فتح البث الرسمي» للانتقال إلى موقعها.';
-  });
+  station.addEventListener('change', selectStation);
   openButton.addEventListener('click', function () {
     var selected = selectedStation();
-    var opened = window.open(selected.url, '_blank', 'noopener,noreferrer');
-    status.textContent = opened
-      ? 'تم طلب فتح الموقع الرسمي لـ' + selected.name + '.'
-      : 'منع المتصفح فتح نافذة جديدة. اسمح بالنوافذ المنبثقة ثم أعد المحاولة.';
+    var opened = window.open(selected.officialUrl, '_blank', 'noopener,noreferrer');
+    if (!opened) setStatus('منع المتصفح فتح نافذة جديدة. اسمح بالنوافذ المنبثقة ثم أعد المحاولة.');
   });
+  muteButton.addEventListener('click', function () {
+    audio.muted = !audio.muted;
+    try {
+      if (audio.muted) localStorage.setItem('ahl_quran_radio_muted', '1');
+      else localStorage.removeItem('ahl_quran_radio_muted');
+    } catch (error) {}
+    syncMute();
+    if (!audio.muted && station.value === 'cairo' && audio.paused) startCairoStream();
+    if (audio.muted) setStatus('تم كتم الإذاعة وحفظ اختيارك.');
+  });
+  audio.addEventListener('play', function () {
+    setStatus('يُبث الآن: ' + selectedStation().name + '. مستوى الصوت سيرتفع قليلًا بعد خمس ثوانٍ.');
+    scheduleVolumeRise();
+    syncPanel();
+  });
+  audio.addEventListener('pause', syncPanel);
+  audio.addEventListener('error', function () {
+    setStatus('تعذر تحميل البث المباشر. يمكنك فتح الموقع الرسمي للمحطة المختارة.');
+  });
+
+  try {
+    audio.muted = localStorage.getItem('ahl_quran_radio_muted') === '1';
+  } catch (error) {
+    audio.muted = false;
+  }
+  audio.volume = 0.06;
+  syncMute();
   syncPanel();
+  if (audio.muted) setStatus('تم حفظ اختيار الكتم. اضغط «إلغاء الكتم» للاستماع.');
+  else startCairoStream();
 }
 
 if ('serviceWorker' in navigator) {
