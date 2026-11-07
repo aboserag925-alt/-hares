@@ -18,6 +18,8 @@ var APP_FILES = [
   './app.js',
   './suggestions.js',
   './admin-suggestions.js',
+  './community.js',
+  './community-admin.js',
   './auth-client.js',
   './supabase-config.js',
   './turnstile-config.js',
