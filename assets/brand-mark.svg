@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+<title id="title">حرس الحدود</title>
+<desc id="desc">درع أخضر بسيط بإطار ذهبي رفيع، تتوسطه عبارة حرس الحدود فقط</desc>
+<defs>
+  <linearGradient id="shield" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#168052"/>
+    <stop offset=".52" stop-color="#0b5e3c"/>
+    <stop offset="1" stop-color="#06442d"/>
+  </linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#f7e7b6"/>
+    <stop offset=".5" stop-color="#d4af37"/>
+    <stop offset="1" stop-color="#b88b2b"/>
+  </linearGradient>
+</defs>
+<path d="M256 28 455 104v142c0 119-76 197-199 238C133 443 57 365 57 246V104Z"
+      fill="url(#shield)" stroke="url(#gold)" stroke-width="13" stroke-linejoin="round"/>
+<path d="M256 49 434 117v127c0 105-66 174-178 213C144 418 78 349 78 244V117Z"
+      fill="none" stroke="#f7e7b6" stroke-opacity=".38" stroke-width="2.5" stroke-linejoin="round"/>
+<text x="256" y="224" text-anchor="middle" direction="rtl" unicode-bidi="plaintext"
+      fill="#fff" font-family="'Noto Naskh Arabic',serif" font-size="68" font-weight="700">حرس</text>
+<text x="256" y="310" text-anchor="middle" direction="rtl" unicode-bidi="plaintext"
+      fill="#fff" font-family="'Noto Naskh Arabic',serif" font-size="62" font-weight="700">الحدود</text>
+</svg>
