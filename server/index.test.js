@@ -41,7 +41,7 @@ function mockFetch() {
       calls.push({ url: url, options: options });
       if (url.includes('generativelanguage.googleapis.com')) {
         return jsonResponse({
-          candidates: [{ content: { parts: [{ text: 'هذه مسودة للمراجعة.' }] } }]
+          steps: [{ type: 'model_output', content: [{ type: 'text', text: 'هذه مسودة للمراجعة.' }] }]
         });
       }
       return jsonResponse({ ok: true });
@@ -545,7 +545,7 @@ test('reports Telegram delivery failure while preserving the generated draft', a
         ok: true,
         arrayBuffer: async function () {
           return Buffer.from(JSON.stringify({
-            candidates: [{ content: { parts: [{ text: 'مسودة صالحة للمراجعة.' }] } }]
+            steps: [{ type: 'model_output', content: [{ type: 'text', text: 'مسودة صالحة للمراجعة.' }] }]
           }), 'utf8');
         }
       };
