@@ -34,6 +34,7 @@ jobs:
           node --check app/admin-suggestions.js
           node --check app/sw.js
           node --check app/pwa-assets.test.js
+          node --check scripts/build-auth.mjs
       - run: npm test
       - run: npm run build:app
       - run: docker build --tag ahl-athar:verify .
