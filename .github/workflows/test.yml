@@ -36,6 +36,8 @@ jobs:
           node --check app/community-admin.js
           node --check app/visitor-counter.js
           node --check server/daily-visitors-api.test.js
+          node --check server/telegram-assistant.js
+          node --check server/media-library.js
           node --check app/sw.js
           node --check app/pwa-assets.test.js
           node --check scripts/build-auth.mjs
