@@ -96,3 +96,17 @@ test('app sections support stacked overlays and outside-tap dismissal', function
   assert.ok(appScript.includes("event.key === 'Escape'"));
   assert.ok(html.includes('Context-preserving section overlays'));
 });
+
+test('Google OAuth and member activity use own-row RLS tables', function () {
+  const auth = fs.readFileSync(path.join(appDirectory, '../src/auth-client.js'), 'utf8');
+  const appScript = fs.readFileSync(path.join(appDirectory, 'app.js'), 'utf8');
+  const migration = fs.readFileSync(path.join(appDirectory, '../supabase/migrations/202611070002_member_accounts.sql'), 'utf8');
+  assert.ok(html.includes('id="googleSignInBtn"'));
+  assert.ok(appScript.includes('signInWithGoogle'));
+  assert.ok(auth.includes('signInWithOAuth'));
+  assert.ok(auth.includes('saveMemberProfile'));
+  assert.ok(auth.includes('logActivity'));
+  assert.ok(migration.includes('alter table public.member_profiles enable row level security'));
+  assert.ok(migration.includes('alter table public.member_activity enable row level security'));
+  assert.ok(migration.includes('(select auth.uid()) = user_id'));
+});
