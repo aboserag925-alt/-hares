@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   var config = window.AHL_SUPABASE_CONFIG || {};
-  var base = typeof config.url === 'string' ? config.url.replace(/\\/+$/, '') : '';
+  var base = typeof config.url === 'string' ? config.url.replace(/\/+$/, '') : '';
   var anonKey = typeof config.anonKey === 'string' ? config.anonKey : '';
   var host = document.getElementById('communityAdminList');
   var statusNode = document.getElementById('communityAdminStatus');
