@@ -1,0 +1,11 @@
+{
+  "appId": "org.ahlathar.mobile",
+  "appName": "استراحة أهل الأثر",
+  "webDir": "app",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
