@@ -28,7 +28,7 @@ create table if not exists public.ai_tasks (
   confidence numeric(4,3) check (confidence is null or confidence between 0 and 1),
   requires_approval boolean not null default true,
   approved boolean not null default false,
-  tainted boolean not null default false,
+  tainted boolean not null default true,
   source text not null default 'suggestion',
   affected_areas text[] not null default '{}',
   created_at timestamptz not null default now(),
@@ -108,13 +108,26 @@ declare
   v_task public.ai_tasks%rowtype;
   v_approval_id uuid;
 begin
-  if p_action not in ('IMPLEMENT','MERGE') or p_decision not in ('APPROVED','REJECTED') then
-    raise exception 'Invalid approval action';
+  if p_task_id is null or p_actor_user_id is null
+     or p_action is null or p_decision is null
+     or p_action not in ('IMPLEMENT','MERGE')
+     or p_decision not in ('APPROVED','REJECTED') then
+    raise exception 'Invalid approval request';
   end if;
-  if not exists (select 1 from public.admin_users where user_id = p_actor_user_id) then
+  if p_decision = 'REJECTED'
+     and pg_catalog.char_length(pg_catalog.btrim(coalesce(p_reason,''))) = 0 then
+    raise exception 'A reason is required when rejecting an approval';
+  end if;
+  if not exists (
+    select 1 from public.admin_users
+    where user_id = p_actor_user_id
+  ) then
     raise exception 'Administrator authorization required';
   end if;
-  select * into v_task from public.ai_tasks where id = p_task_id for update;
+  select * into v_task
+  from public.ai_tasks
+  where id = p_task_id
+  for update;
   if not found then raise exception 'AI task not found'; end if;
   if v_task.tainted then raise exception 'Tainted tasks cannot be approved'; end if;
   if p_action = 'IMPLEMENT' and v_task.status <> 'WAITING_APPROVAL' then
@@ -123,31 +136,33 @@ begin
   if p_action = 'MERGE' and v_task.status <> 'READY_FOR_REVIEW' then
     raise exception 'Task is not ready for human review';
   end if;
+
   insert into public.ai_approvals(task_id,approved_by,action,decision,reason)
-  values (p_task_id,p_actor_user_id,p_action,p_decision,left(coalesce(p_reason,''),1000))
+  values (p_task_id,p_actor_user_id,p_action,p_decision,pg_catalog.left(coalesce(p_reason,''),1000))
   returning id into v_approval_id;
+
   if p_action = 'IMPLEMENT' then
     update public.ai_tasks
       set status = case when p_decision = 'APPROVED' then 'APPROVED' else 'REJECTED' end,
           approved = (p_decision = 'APPROVED'),
           approval_id = v_approval_id,
-          updated_at = now()
+          updated_at = pg_catalog.now()
       where id = p_task_id;
-  elsif p_action = 'MERGE' and p_decision = 'APPROVED' then
+  elsif p_action = 'MERGE' then
     update public.ai_tasks
-      set status = 'HUMAN_APPROVED',
-          human_approved = true,
+      set status = case when p_decision = 'APPROVED' then 'HUMAN_APPROVED' else 'REJECTED' end,
+          human_approved = (p_decision = 'APPROVED'),
           human_approval_id = v_approval_id,
-          updated_at = now()
+          updated_at = pg_catalog.now()
       where id = p_task_id;
   end if;
+
   insert into public.ai_audit_events(event_type,actor_user_id,metadata)
   values (
-    case when p_action = 'IMPLEMENT' and p_decision = 'APPROVED' then 'ai.approval.granted'
-         when p_decision = 'REJECTED' then 'ai.approval.rejected'
+    case when p_decision = 'REJECTED' then 'ai.approval.rejected'
          else 'ai.approval.granted' end,
     p_actor_user_id,
-    jsonb_build_object('task_id',p_task_id,'result',p_decision,'status',p_action)
+    pg_catalog.jsonb_build_object('task_id',p_task_id,'result',p_decision,'status',p_action)
   );
   return v_approval_id;
 end;
