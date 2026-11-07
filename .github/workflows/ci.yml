@@ -38,14 +38,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run complete test suite
-        run: |
-          node --test \
-            server/index.test.js \
-            server/media-library.test.js \
-            server/lecture-api.test.js \
-            server/suggestions/suggestion.test.js \
-            server/ai/ai.test.js \
-            server/ai/approval-api.test.js
+        run: npm test
       - name: Build web application
         run: npm run build:app
       - name: Check whitespace in committed changes
