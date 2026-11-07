@@ -324,6 +324,34 @@ body,.app-shell,button,input,textarea,select{
 
 .visitor-count{display:flex;align-items:center;justify-content:center;gap:6px;color:var(--muted,#a9ada2);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}.visitor-count b{color:var(--gold2,#f2d9a4)}
 .question-draft p{white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* Compact mobile identity and persistent blessing */
+.blessing{display:block;align-self:start;margin-top:3px;color:var(--green);font-size:12px;font-weight:650;line-height:1.6;opacity:1;visibility:visible}
+.logo{width:58px;height:58px;padding:6px;border-radius:18px}
+.social-link{min-width:34px;height:34px;padding:0 8px;font-size:10px}
+.social-link svg{width:15px;height:15px}
+.support-button{min-height:42px;padding:0 15px;font-size:12px}
+@media(max-width:680px){
+ .wrap{width:min(100% - 24px,560px);padding-top:14px}
+ header{grid-template-columns:48px minmax(0,1fr);column-gap:10px;padding-bottom:15px}
+ .logo{grid-row:1/6;width:44px;height:44px;padding:5px;border-radius:14px}
+ h1{font-size:clamp(20px,5.4vw,25px);line-height:1.5}
+ header p{font-size:11px;margin-top:2px}
+ .doctor{font-size:11px;margin-top:4px}
+ .blessing{font-size:11px;margin-top:1px}
+ .app-social{gap:6px;margin-top:8px}
+ .social-link{min-width:30px;height:30px;padding:0 7px;border-radius:10px;font-size:9px}
+ .social-link svg{width:14px;height:14px}
+ .support-prompt{margin-top:8px}
+ .support-button{min-height:36px;padding:0 12px;border-width:1px;font-size:10px}
+}
+@media(max-width:390px){
+ header{grid-template-columns:40px minmax(0,1fr);column-gap:8px}
+ .logo{width:38px;height:38px}
+ h1{font-size:19px}
+ .app-social .social-link span{display:none}
+ .app-social .social-link{width:30px;padding:0}
+}
 </style>
 </head>
 <body>
@@ -333,6 +361,7 @@ body,.app-shell,button,input,textarea,select{
 <h1>استراحة أهل الأثر</h1>
 <p>مجلس تدارس العلم والأدب</p>
 <span class="doctor">بإشراف الدكتور خالد الحارس</span>
+<span class="blessing">غفر الله لهم</span>
 <nav class="social-links app-social" aria-label="حسابات المجلس على المنصات">
 <a class="social-link" href="https://www.youtube.com/@Khaled_Najm" target="_blank" rel="noopener noreferrer" aria-label="قناة يوتيوب">
 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg>
