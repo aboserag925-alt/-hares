@@ -156,7 +156,6 @@ function createTelegramAssistant(options) {
       }
       return true;
     }
-    if (/^\/help(?:@\w+)?$/i.test(text)) return true;
     let stopped;
     try {
       stopped = await isOptedOut(userId);
