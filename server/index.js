@@ -10,6 +10,8 @@ const { createSuggestionsApi } = require('./suggestions/suggestion-api');
 const { createSuggestionService } = require('./suggestions/suggestion-service');
 const { createApprovalApi } = require('./ai/approval-api');
 const { createTaskService } = require('./ai/task-service');
+const { analyzeSuggestion } = require('./ai/platform-analysis');
+const { createPlatformAnalysisApi } = require('./ai/platform-analysis-api');
 
 const PUBLIC_ROOT = path.resolve(__dirname, '..');
 const MAX_BODY_BYTES = 16 * 1024;
@@ -417,6 +419,14 @@ function createServer(options) {
   };
   const suggestionService = options.suggestionService || createSuggestionService({ env: env, fetch: fetchImpl });
   const taskService = options.taskService || createTaskService({ env: env, fetch: fetchImpl });
+  const platformAnalysisApi = createPlatformAnalysisApi({
+    env: env,
+    fetch: fetchImpl,
+    suggestionService: suggestionService,
+    taskService: taskService,
+    analyze: analyzeSuggestion,
+    rateLimit: rateLimit
+  });
   const suggestionsApi = createSuggestionsApi({
     env: env,
     fetch: fetchImpl,
@@ -523,6 +533,7 @@ function createServer(options) {
       }
       return;
     }
+    if (await platformAnalysisApi(request, response, requestUrl.pathname)) return;
     if (await suggestionsApi(request, response, requestUrl.pathname)) return;
     if (await approvalApi(request, response, requestUrl.pathname)) return;
     if (await adminApi(request, response, requestUrl.pathname)) return;
