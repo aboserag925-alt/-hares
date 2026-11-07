@@ -198,6 +198,16 @@ textarea::placeholder{color:#777e75}
 .site-footer .designer-credit{margin-top:7px;color:#777d73;font-size:9px;letter-spacing:.04em}
 @media(max-width:480px){.beta-banner{margin-bottom:11px;padding:8px 10px;font-size:10px}.motto-panel{gap:8px;margin-bottom:20px;padding:13px 10px}.site-footer{margin-top:26px;padding-top:20px}}
 
+
+/* Official Quran radio selector */
+.radio-panel{display:flex;flex-wrap:wrap;align-items:center;gap:.75rem;margin:1rem auto;padding:1rem;max-width:1100px;border:1px solid rgba(190,151,72,.45);border-radius:14px;background:rgba(15,55,42,.96);color:#fff;}
+.radio-panel[hidden]{display:none;}
+.radio-panel strong{flex-basis:100%;}
+.radio-panel label{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;}
+.radio-panel select,.radio-panel button{max-width:100%;min-height:42px;padding:.55rem .8rem;border-radius:9px;border:1px solid #c7a45b;font:inherit;}
+.radio-panel button{background:#c7a45b;color:#142c23;cursor:pointer;}
+.radio-status{flex-basis:100%;margin:0;overflow-wrap:anywhere;}
+@media(max-width:600px){.radio-panel{margin:.65rem .5rem;padding:.75rem;}.radio-panel label{width:100%;}.radio-panel select{flex:1;min-width:0;}}
 </style>
 
 <script src="brand-intro.js" defer></script>
@@ -257,7 +267,20 @@ textarea::placeholder{color:#777e75}
 <button class="tab" id="t6" type="button" aria-pressed="false" onclick="show('q')">الأسئلة</button>
 <button class="tab" id="t7" type="button" aria-pressed="false" onclick="show('about')">عن المجلس</button>
 <button class="tab" id="t8" type="button" aria-pressed="false" onclick="show('account')">حسابي</button>
+<button class="tab radio-tab" id="quranRadioButton" type="button" aria-expanded="false" aria-controls="quranRadioPanel">إذاعة القرآن الكريم</button>
 </nav>
+<section class="radio-panel" id="quranRadioPanel" hidden aria-label="روابط البث الرسمي لإذاعة القرآن الكريم">
+  <strong>إذاعة القرآن الكريم — البث الرسمي</strong>
+  <label for="quranRadioStation">اختر الإذاعة
+    <select id="quranRadioStation">
+      <option value="cairo" selected>القاهرة — مصر (الافتراضي)</option>
+      <option value="saudi">إذاعة القرآن الكريم — السعودية</option>
+    </select>
+  </label>
+  <button id="quranRadioOpen" type="button">فتح البث الرسمي</button>
+  <p class="radio-status" id="quranRadioStatus" role="status" aria-live="polite">المحطة الافتراضية: إذاعة القرآن الكريم من القاهرة.</p>
+</section>
+
 <section id="sched" aria-label="جدول الدروس الأسبوعي"></section>
 <section id="prayers" hidden>
 <div class="card">
