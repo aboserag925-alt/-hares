@@ -133,3 +133,15 @@ test('forum and debates require moderation before public publication', function 
   assert.ok(migration.includes('community_topics_rate_limit'));
   assert.ok(migration.includes('community_posts_rate_limit'));
 });
+
+test('daily visitor counter respects Do Not Track and uses no raw visitor data in the UI', function () {
+  const counter = fs.readFileSync(path.join(appDirectory, 'visitor-counter.js'), 'utf8');
+  assert.ok(counter.includes("navigator.doNotTrack === '1'"));
+  assert.ok(counter.includes('ahl_daily_visitor_id'));
+  assert.ok(counter.includes('/api/analytics/visit'));
+  assert.ok(counter.includes("value.textContent"));
+  assert.ok(counter.includes('data.visitors'));
+  assert.ok(!counter.includes('navigator.geolocation'));
+  assert.ok(html.includes('data-daily-visitors'));
+  assert.ok(fs.readFileSync(path.join(appDirectory, '../index.html'), 'utf8').includes('data-daily-visitors'));
+});
