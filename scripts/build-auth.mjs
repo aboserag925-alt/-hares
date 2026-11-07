@@ -9,6 +9,7 @@ const vendorDirectory = resolve(appDirectory, 'vendor');
 const localConfig = resolve(appDirectory, 'supabase-config.js');
 const supabaseUrl = (process.env.SUPABASE_URL || '').trim();
 const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || '').trim();
+const captchaSiteKey = (process.env.TURNSTILE_SITE_KEY || '').trim();
 
 if (Boolean(supabaseUrl) !== Boolean(supabaseAnonKey)) {
   throw new Error('SUPABASE_URL and SUPABASE_ANON_KEY must be configured together.');
@@ -48,7 +49,7 @@ await build({
 });
 
 if (supabaseUrl) {
-  const config = { url: new URL(supabaseUrl).origin, anonKey: supabaseAnonKey };
+  const config = { url: new URL(supabaseUrl).origin, anonKey: supabaseAnonKey, captchaSiteKey };
   await writeFile(
     localConfig,
     `window.AHL_SUPABASE_CONFIG = ${JSON.stringify(config, null, 2)};\n`,
