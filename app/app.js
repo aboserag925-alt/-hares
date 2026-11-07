@@ -789,7 +789,7 @@ function setAccountState(state) {
   var recovery = document.getElementById('passwordRecoveryPanel');
   var message = document.getElementById('authMessage');
   if (state.event === 'PASSWORD_RECOVERY') passwordRecoveryMode = true;
-  if (state.event === 'SIGNED_OUT') passwordRecoveryMode = false;
+  if (state.event === 'SIGNED_OUT') { passwordRecoveryMode = false; lastActivitySection = null; }
   if (!state.configured) {
     accountUser = null;
     activeSyncUserId = null;
