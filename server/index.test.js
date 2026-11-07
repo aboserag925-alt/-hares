@@ -450,7 +450,7 @@ test('verifies Turnstile before contacting Gemini or Telegram and checks action 
         ok: true,
         arrayBuffer: async function () {
           return Buffer.from(JSON.stringify({
-            candidates: [{ content: { parts: [{ text: 'هذه مسودة للمراجعة.' }] } }]
+            steps: [{ type: 'model_output', content: [{ type: 'text', text: 'هذه مسودة للمراجعة.' }] }]
           }), 'utf8');
         }
       };
