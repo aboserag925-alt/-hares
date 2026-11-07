@@ -145,3 +145,19 @@ test('daily visitor counter respects Do Not Track and uses no raw visitor data i
   assert.ok(html.includes('data-daily-visitors'));
   assert.ok(fs.readFileSync(path.join(appDirectory, '../index.html'), 'utf8').includes('data-daily-visitors'));
 });
+
+test('support dialogs close by backdrop or mobile back without navigating away', function () {
+  const vm = require('node:vm');
+  const appScript = fs.readFileSync(path.join(appDirectory, 'app.js'), 'utf8');
+  const rootHtml = fs.readFileSync(path.join(appDirectory, '../index.html'), 'utf8');
+  assert.ok(appScript.includes('function openAppSupportDialog()'));
+  assert.ok(appScript.includes('event.target === appSupportDialog'));
+  assert.ok(appScript.includes("window.addEventListener('popstate'"));
+  assert.ok(rootHtml.includes('function openSiteSupportDialog()'));
+  assert.ok(rootHtml.includes('event.target===siteSupportDialog'));
+  for (const documentText of [html, rootHtml]) {
+    for (const match of documentText.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/g)) {
+      if (match[1].trim()) new vm.Script(match[1]);
+    }
+  }
+});
