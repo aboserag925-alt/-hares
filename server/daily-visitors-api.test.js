@@ -18,7 +18,7 @@ test('daily visitor endpoint stores only a per-day SHA-256 hash and returns an e
   const serviceKey = 'server-only-test-key';
   const fetchImpl = async function (url, options) {
     calls.push({ url: String(url), options: options || {} });
-    if (options && options.method === 'GET') {
+    if (String(url).includes('select=visitor_hash')) {
       return { ok: true, headers: { get: function (name) { return name.toLowerCase() === 'content-range' ? '0-0/7' : null; } } };
     }
     return { ok: true, headers: { get: function () { return null; } } };
