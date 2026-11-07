@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "start": "node server/index.js",
-    "test": "node --test server/index.test.js server/media-library.test.js server/lecture-api.test.js server/suggestions/suggestion.test.js server/ai/ai.test.js server/ai/approval-api.test.js server/ai/task-service.test.js server/ai/platform-analysis.test.js app/pwa-assets.test.js server/daily-visitors-api.test.js server/telegram-assistant.test.js",
+    "test": "node --test server/index.test.js server/media-library.test.js server/lecture-api.test.js server/suggestions/suggestion.test.js server/ai/ai.test.js server/ai/approval-api.test.js server/ai/task-service.test.js server/ai/platform-analysis.test.js server/ai/platform-analysis-api.test.js app/pwa-assets.test.js server/daily-visitors-api.test.js server/telegram-assistant.test.js",
     "build:adhan": "node scripts/copy-adhan.mjs",
     "build:auth": "node scripts/build-auth.mjs",
     "build:app": "npm run build:adhan && npm run build:auth && npm run build:css",
