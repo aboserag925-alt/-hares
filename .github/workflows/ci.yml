@@ -6,6 +6,7 @@ on:
       - "feat/**"
       - "fix/**"
       - "integrate/**"
+      - "integration/**"
       - main
   pull_request:
     branches:
