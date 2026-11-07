@@ -33,6 +33,7 @@ var accountUser = null;
 var passwordRecoveryMode = false;
 var accountSyncTimer = null;
 var activeSyncUserId = null;
+var lastActivitySection = null;
 var mediaItems = [];
 var activeMediaCategory = 'all';
 var prayerStatus = document.getElementById('locationStatus');
@@ -245,6 +246,10 @@ function show(sectionId) {
   if (scheduleHeading) scheduleHeading.hidden = !isSchedule;
   if (nextLesson) nextLesson.hidden = !isSchedule;
 
+  if (accountUser && window.ahlAuth && window.ahlAuth.configured && lastActivitySection !== sectionId) {
+    lastActivitySection = sectionId;
+    window.ahlAuth.logActivity(accountUser.id, 'section_view', { section: sectionId }).catch(function () {});
+  }
   if (sectionId === 'qibla') updateQibla();
   if (sectionId === 'adhkar') renderAdhkar();
   if (sectionId === 'media') loadMediaLibrary();
@@ -791,11 +796,13 @@ function setAccountState(state) {
     configMissing.hidden = false;
     form.hidden = true;
     signedIn.hidden = true;
+    document.getElementById('googleSignInBtn').hidden = true;
     setStatus(message, 'أضف إعدادات Supabase لتفعيل الحسابات.');
     return;
   }
   configMissing.hidden = true;
   accountUser = state.user;
+  document.getElementById('googleSignInBtn').hidden = Boolean(state.user) || passwordRecoveryMode;
   if (passwordRecoveryMode) {
     form.hidden = true;
     signedIn.hidden = true;
@@ -815,6 +822,16 @@ function setAccountState(state) {
   signedIn.hidden = false;
   document.getElementById('accountEmail').textContent = state.user.email || '';
   setStatus(message, 'تسجيل الدخول محفوظ تلقائيًا على هذا الجهاز.');
+  if (state.event === 'SIGNED_IN' || state.event === 'INITIAL_SESSION') {
+    window.ahlAuth.saveMemberProfile(state.user).then(function () {
+      if (state.event !== 'SIGNED_IN') return;
+      return window.ahlAuth.logActivity(state.user.id, 'login', {
+        provider: state.user.app_metadata && state.user.app_metadata.provider || 'email'
+      });
+    }).catch(function (error) {
+      setStatus(message, 'تم الدخول، لكن تعذر حفظ سجل العضوية. تأكد من تطبيق ترحيل حسابات الأعضاء.', true);
+    });
+  }
   if (activeSyncUserId !== state.user.id) {
     activeSyncUserId = state.user.id;
     window.setTimeout(function () {
@@ -827,6 +844,7 @@ function setAuthBusy(busy) {
   document.getElementById('signInBtn').disabled = busy;
   document.getElementById('signUpBtn').disabled = busy;
   document.getElementById('resetPasswordBtn').disabled = busy;
+  document.getElementById('googleSignInBtn').disabled = busy;
 }
 
 function handleSignIn(event) {
@@ -887,6 +905,17 @@ function handleSignUp() {
   });
 }
 
+
+function handleGoogleSignIn() {
+  setAuthBusy(true);
+  setStatus(document.getElementById('authMessage'), 'جارٍ تحويلك إلى Google لتسجيل الدخول…');
+  window.ahlAuth.signInWithGoogle().then(function (result) {
+    if (result.error) throw result.error;
+  }).catch(function (error) {
+    setStatus(document.getElementById('authMessage'), 'تعذر تسجيل الدخول باستخدام Google: ' + error.message, true);
+    setAuthBusy(false);
+  });
+}
 
 function handlePasswordReset() {
   var emailInput = document.getElementById('authEmail');
@@ -964,6 +993,7 @@ function initAuth() {
   }
   document.getElementById('authForm').addEventListener('submit', handleSignIn);
   document.getElementById('signUpBtn').addEventListener('click', handleSignUp);
+  document.getElementById('googleSignInBtn').addEventListener('click', handleGoogleSignIn);
   document.getElementById('resetPasswordBtn').addEventListener('click', handlePasswordReset);
   document.getElementById('saveNewPasswordBtn').addEventListener('click', handlePasswordUpdate);
   document.getElementById('cancelPasswordRecoveryBtn').addEventListener('click', function () {
