@@ -15,9 +15,9 @@ function createTaskService({env,fetch:fetchImpl=global.fetch}) {
       const risk=assess({affectedAreas:Array.isArray(input.affectedAreas)?input.affectedAreas:[]});
       const rows=await request('/rest/v1/ai_tasks?select=*',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({
         suggestion_id:input.suggestionId||null,status:'PROPOSED',risk:risk.risk,confidence:null,
-        requires_approval:risk.requiresApproval,approved:false,tainted:false,
+        requires_approval:risk.requiresApproval,approved:false,tainted:input.trustedSource!==true,
         source:input.source==='suggestion'?'suggestion':'internal',
-        affected_areas:Array.isArray(input.affectedAreas)?input.affectedAreas.filter(x=>typeof x==='string').slice(0,30):[]
+        affected_areas:Array.isArray(input.affectedAreas)?input.affectedAreas.filter(x=>typeof x==='string').map(x=>x.trim().toLowerCase().slice(0,80)).filter(Boolean).slice(0,30):[]
       })});
       const task=rows[0];
       try{await audit.record({event:'ai.task.created',suggestionId:task.suggestion_id,metadata:{task_id:task.id,risk:task.risk,affected_areas:task.affected_areas}});}catch{console.error('AI task audit event could not be recorded');}
@@ -28,7 +28,7 @@ function createTaskService({env,fetch:fetchImpl=global.fetch}) {
       return rows[0]||null;
     },
     async recordHumanApproval({taskId,actorUserId,action,decision,reason=''}) {
-      if(!taskId||!actorUserId||!['IMPLEMENT','MERGE'].includes(action)||!['APPROVED','REJECTED'].includes(decision)) throw new TypeError('Invalid approval request');
+      if(!taskId||!actorUserId||!['IMPLEMENT','MERGE'].includes(action)||!['APPROVED','REJECTED'].includes(decision)||(decision==='REJECTED'&&typeof reason!=='string'||decision==='REJECTED'&&!reason.trim())) throw new TypeError('Invalid approval request');
       const rows=await request('/rest/v1/rpc/record_ai_approval',{method:'POST',body:JSON.stringify({p_task_id:taskId,p_actor_user_id:actorUserId,p_action:action,p_decision:decision,p_reason:String(reason).slice(0,1000)})});
       return rows;
     }
