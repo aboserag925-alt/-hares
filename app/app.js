@@ -1389,7 +1389,14 @@ function initQuranRadio() {
       else localStorage.removeItem('ahl_quran_radio_muted');
     } catch (error) {}
     syncMute();
-    if (!audio.muted && station.value === 'cairo' && audio.paused) startCairoStream();
+    if (!audio.muted && station.value === 'cairo') {
+      if (audio.paused) startCairoStream();
+      else {
+        audio.volume = 0.06;
+        scheduleVolumeRise();
+        setStatus('تم إلغاء الكتم. سيرتفع مستوى الصوت قليلًا بعد خمس ثوانٍ.');
+      }
+    }
     if (audio.muted) setStatus('تم كتم الإذاعة وحفظ اختيارك.');
   });
   audio.addEventListener('play', function () {
