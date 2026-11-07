@@ -136,6 +136,53 @@ window.ahlAuth = {
     }
     return requireClient().auth.signUp(credentials);
   },
+  signInWithGoogle: function () {
+    const redirectTo = window.location.origin + window.location.pathname;
+    return requireClient().auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: redirectTo, queryParams: { prompt: 'select_account' } }
+    });
+  },
+  getCurrentUser: async function () {
+    const result = await requireClient().auth.getUser();
+    if (result.error) throw result.error;
+    return result.data.user || null;
+  },
+  saveMemberProfile: async function (user) {
+    if (!user || typeof user.id !== 'string') throw new TypeError('Invalid member profile');
+    const metadata = user.user_metadata || {};
+    const displayName = String(metadata.full_name || metadata.name || '').trim().slice(0, 100) || null;
+    let avatarUrl = null;
+    try {
+      const parsed = new URL(String(metadata.avatar_url || metadata.picture || ''));
+      if (parsed.protocol === 'https:') avatarUrl = parsed.href.slice(0, 2048);
+    } catch (error) {}
+    const result = await requireClient().from('member_profiles').upsert({
+      user_id: user.id,
+      email: String(user.email || '').slice(0, 320) || null,
+      display_name: displayName,
+      avatar_url: avatarUrl,
+      last_seen_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+    if (result.error) throw result.error;
+  },
+  logActivity: async function (userId, eventType, metadata) {
+    const allowedEvents = ['login', 'section_view', 'dhikr_progress'];
+    if (typeof userId !== 'string' || !allowedEvents.includes(eventType)) throw new TypeError('Invalid member activity');
+    const safeMetadata = {};
+    const input = metadata && typeof metadata === 'object' && !Array.isArray(metadata) ? metadata : {};
+    for (const key of ['provider', 'section', 'period', 'item', 'count']) {
+      const value = input[key];
+      if (typeof value === 'string') safeMetadata[key] = value.slice(0, 100);
+      else if (typeof value === 'number' && Number.isFinite(value)) safeMetadata[key] = value;
+    }
+    const result = await requireClient().from('member_activity').insert({
+      user_id: userId,
+      event_type: eventType,
+      metadata: safeMetadata
+    });
+    if (result.error) throw result.error;
+  },
   getAccessToken: async function () {
     const result = await requireClient().auth.getSession();
     if (result.error) throw result.error;
