@@ -532,7 +532,7 @@ test('rejects provider responses that are not valid UTF-8', async function () {
     });
     assert.equal(response.status, 502);
     assert.deepEqual(await response.json(), {
-      error: 'تعذر معالجة السؤال الآن. حاول لاحقًا.'
+      error: 'تعذر إنشاء مسودة من النماذج المتاحة.'
     });
   });
 });
