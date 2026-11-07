@@ -24,6 +24,7 @@ function classifyRisk(areas=[], declared='low') {
 function requiresHumanApproval(risk) { return risk==='high'||risk==='critical'; }
 function canTransition(from,to,task={}) {
   if (!TRANSITIONS[from] || !TRANSITIONS[from].includes(to)) return false;
+  if (task.tainted===true && ['APPROVED','IMPLEMENTING','HUMAN_APPROVED','MERGED'].includes(to)) return false;
   const approvalId=task.approvalId||task.approval_id;
   const humanApprovalId=task.humanApprovalId||task.human_approval_id;
   const humanApproved=task.humanApproved===true||task.human_approved===true;

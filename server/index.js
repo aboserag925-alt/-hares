@@ -1,13 +1,17 @@
 const fs = require('node:fs');
 const http = require('node:http');
+const crypto = require('node:crypto');
 const net = require('node:net');
 const path = require('node:path');
 const { createMediaLibrary } = require('./media-library');
+const { createTelegramAssistant } = require('./telegram-assistant');
 const { createAdminApi } = require('./lecture-api');
 const { createSuggestionsApi } = require('./suggestions/suggestion-api');
 const { createSuggestionService } = require('./suggestions/suggestion-service');
 const { createApprovalApi } = require('./ai/approval-api');
 const { createTaskService } = require('./ai/task-service');
+const { analyzeSuggestion } = require('./ai/platform-analysis');
+const { createPlatformAnalysisApi } = require('./ai/platform-analysis-api');
 
 const PUBLIC_ROOT = path.resolve(__dirname, '..');
 const MAX_BODY_BYTES = 16 * 1024;
@@ -153,7 +157,7 @@ function clientAddress(request, env) {
   return net.isIP(candidate) ? candidate : remoteAddress;
 }
 
-function consumeRateLimit(limits, address, now) {
+function consumeRateLimit(limits, address, now, maximum) {
   if (limits.size > 10000) {
     limits.forEach(function (entry, key) {
       if (entry.resetAt <= now) limits.delete(key);
@@ -165,7 +169,7 @@ function consumeRateLimit(limits, address, now) {
     entry = { count: 0, resetAt: now + RATE_WINDOW_MS };
     limits.set(address, entry);
   }
-  if (entry.count >= RATE_LIMIT) return false;
+  if (entry.count >= (maximum || RATE_LIMIT)) return false;
   entry.count += 1;
   return true;
 }
@@ -212,6 +216,18 @@ async function verifyTurnstile(token, request, env, fetchImpl) {
   }
 }
 
+function cairoDateKey(date) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Africa/Cairo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(date || new Date());
+  const values = {};
+  parts.forEach(function (part) { values[part.type] = part.value; });
+  return values.year + '-' + values.month + '-' + values.day;
+}
+
 function staticFilePath(requestUrl) {
   let pathname;
   try {
@@ -240,52 +256,122 @@ function staticFilePath(requestUrl) {
     : null;
 }
 
+const QUESTION_SYSTEM_PROMPT = 'أنت مساعد يصوغ مسودات أولية باللغة العربية لعرضها على عالم شرعي للمراجعة. لا تقدّم المسودة كفتوى أو حكم معتمد، ولا تدّع أنك عالم. إذا احتاج السؤال إلى فتوى خاصة أو كان الدليل غير متحقق، فصرّح بذلك وأحل السائل إلى الدكتور خالد للمراجعة. لا تختلق آيات أو أحاديث أو مراجع. اجعل الرد موجزًا ومحترمًا، واختم بالتنبيه أن المسودة غير معتمدة حتى يراجعها الدكتور خالد.';
+
 async function createQuestionDraft(question, env, fetchImpl) {
   const model = env.GEMINI_MODEL || 'gemini-3.8-flash';
   if (!/^[A-Za-z0-9._-]{1,80}$/.test(model)) throw new Error('Invalid Gemini model configuration');
-
-  const result = await fetchImpl(
-    'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-        Accept: 'application/json; charset=utf-8',
-        'x-goog-api-key': env.GEMINI_API_KEY
-      },
-      signal: AbortSignal.timeout(30000),
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: question }] }],
-        systemInstruction: {
-          parts: [{
-            text: 'أنت مساعد يصوغ مسودة أولية باللغة العربية لعرضها على عالم شرعي للمراجعة. لا تقدّم المسودة كفتوى أو حكم معتمد، ولا تدّع أنك عالم. إذا احتاج السؤال إلى فتوى خاصة أو كان الدليل غير متحقق، فصرّح بذلك وأحل السائل إلى الدكتور خالد للمراجعة. لا تختلق آيات أو أحاديث أو مراجع. اجعل الرد موجزًا ومحترمًا، واختم بالتنبيه أن المسودة غير معتمدة حتى يراجعها الدكتور خالد.'
-          }]
-        },
-        generationConfig: { maxOutputTokens: 700, temperature: 0.2 }
-      })
-    }
-  );
+  const result = await fetchImpl('https://generativelanguage.googleapis.com/v1beta/interactions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      Accept: 'application/json; charset=utf-8',
+      'x-goog-api-key': env.GEMINI_API_KEY
+    },
+    signal: AbortSignal.timeout(30000),
+    body: JSON.stringify({
+      model: model,
+      input: question,
+      system_instruction: QUESTION_SYSTEM_PROMPT,
+      generation_config: { max_output_tokens: 700, thinking_level: 'low' },
+      store: false
+    })
+  });
   if (!result.ok) {
-    console.error('Gemini request failed with status ' + result.status);
-    throw new Error('تعذر إنشاء مسودة الآن. حاول لاحقًا.');
+    console.error('Gemini interaction failed with status ' + result.status);
+    throw new Error('تعذر إنشاء مسودة Gemini الآن.');
   }
-
   const payload = await readUtf8Json(result);
-  const draft = payload.candidates && payload.candidates[0] &&
-    payload.candidates[0].content && payload.candidates[0].content.parts
-      ? payload.candidates[0].content.parts
-        .map(function (part) { return typeof part.text === 'string' ? part.text : ''; })
-        .join('')
-        .trim()
-      : '';
-  if (!draft) throw new Error('لم تُنتج الخدمة مسودة صالحة. حاول لاحقًا.');
-  if (draft.length <= MAX_DRAFT_LENGTH) return draft;
-  return draft.slice(0, MAX_DRAFT_LENGTH).trimEnd() + '\n[اختُصر الرد لطوله.]';
+  const text = typeof payload.output_text === 'string'
+    ? payload.output_text
+    : (payload.steps || [])
+      .filter(function (step) { return step.type === 'model_output'; })
+      .flatMap(function (step) { return step.content || []; })
+      .filter(function (part) { return part.type === 'text' && typeof part.text === 'string'; })
+      .map(function (part) { return part.text; })
+      .join('');
+  const draft = text.trim();
+  if (!draft) throw new Error('لم يُنتج Gemini مسودة صالحة.');
+  return draft.length <= MAX_DRAFT_LENGTH ? draft : draft.slice(0, MAX_DRAFT_LENGTH).trimEnd() + '\n[اختُصر الرد لطوله.]';
 }
 
-async function sendToTelegram(question, draft, env, fetchImpl) {
-  const message = 'سؤال للمراجعة من التطبيق:\n\n' + question +
-    '\n\nمسودة Gemini غير معتمدة:\n' + draft;
+async function createGrokDraft(question, env, fetchImpl) {
+  const model = env.GROK_MODEL || 'grok-4.7';
+  if (!/^[A-Za-z0-9._-]{1,80}$/.test(model)) throw new Error('Invalid Grok model configuration');
+  const result = await fetchImpl('https://api.x.ai/v1/responses', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      Accept: 'application/json; charset=utf-8',
+      Authorization: 'Bearer ' + env.GROK_API_KEY
+    },
+    signal: AbortSignal.timeout(30000),
+    body: JSON.stringify({
+      model: model,
+      store: false,
+      max_output_tokens: 700,
+      input: [
+        { role: 'system', content: QUESTION_SYSTEM_PROMPT },
+        { role: 'user', content: question }
+      ]
+    })
+  });
+  if (!result.ok) {
+    console.error('Grok request failed with status ' + result.status);
+    throw new Error('تعذر إنشاء مسودة Grok الآن.');
+  }
+  const payload = await readUtf8Json(result);
+  const text = typeof payload.output_text === 'string'
+    ? payload.output_text
+    : (payload.output || [])
+      .filter(function (item) { return item.type === 'message'; })
+      .flatMap(function (item) { return item.content || []; })
+      .filter(function (part) {
+        return (part.type === 'output_text' || part.type === 'text') && typeof part.text === 'string';
+      })
+      .map(function (part) { return part.text; })
+      .join('');
+  const draft = text.trim();
+  if (!draft) throw new Error('لم يُنتج Grok مسودة صالحة.');
+  return draft.length <= MAX_DRAFT_LENGTH ? draft : draft.slice(0, MAX_DRAFT_LENGTH).trimEnd() + '\n[اختُصر الرد لطوله.]';
+}
+
+async function createQuestionDrafts(question, env, fetchImpl) {
+  const jobs = [
+    { name: 'gemini', run: createQuestionDraft(question, env, fetchImpl) }
+  ];
+  if (env.GROK_API_KEY) jobs.push({ name: 'grok', run: createGrokDraft(question, env, fetchImpl) });
+  const results = await Promise.allSettled(jobs.map(function (job) { return job.run; }));
+  const drafts = {};
+  const modelStatus = { gemini: 'failed', grok: env.GROK_API_KEY ? 'failed' : 'disabled' };
+  results.forEach(function (result, index) {
+    const name = jobs[index].name;
+    if (result.status === 'fulfilled') {
+      drafts[name] = result.value;
+      modelStatus[name] = 'ready';
+    } else {
+      if (result.reason && (result.reason.name === 'TimeoutError' || result.reason.name === 'AbortError')) {
+        modelStatus[name] = 'timeout';
+      }
+    }
+  });
+  if (!Object.keys(drafts).length) {
+    const timeout = results.find(function (result) {
+      return result.status === 'rejected' && result.reason &&
+        (result.reason.name === 'TimeoutError' || result.reason.name === 'AbortError');
+    });
+    if (timeout) throw timeout.reason;
+    throw new Error('تعذر إنشاء مسودة من النماذج المتاحة.');
+  }
+  return { drafts: drafts, modelStatus: modelStatus };
+}
+
+async function sendToTelegram(question, drafts, env, fetchImpl) {
+  const draftMap = typeof drafts === 'string' ? { gemini: drafts } : drafts;
+  const sections = [];
+  if (draftMap.gemini) sections.push('مسودة Gemini (غير معتمدة):\n' + draftMap.gemini.slice(0, 900));
+  if (draftMap.grok) sections.push('مسودة Grok (غير معتمدة):\n' + draftMap.grok.slice(0, 900));
+  const message = 'سؤال للمراجعة من التطبيق:\n\n' + question + '\n\n' + sections.join('\n\n');
   let result;
   try {
     result = await fetchImpl(
@@ -320,18 +406,27 @@ async function sendToTelegram(question, draft, env, fetchImpl) {
     throw new Error('تعذر تأكيد إرسال السؤال إلى Telegram.');
   }
 }
-
 function createServer(options) {
   options = options || {};
   const env = options.env || process.env;
   const fetchImpl = options.fetch || global.fetch;
   const limits = new Map();
+  const analyticsLimits = new Map();
+  let lastAnalyticsCleanupDate = null;
   const adminApi = createAdminApi({ env: env, fetch: fetchImpl });
   const rateLimit = function (request) {
     return consumeRateLimit(limits, clientAddress(request, env), Date.now());
   };
   const suggestionService = options.suggestionService || createSuggestionService({ env: env, fetch: fetchImpl });
   const taskService = options.taskService || createTaskService({ env: env, fetch: fetchImpl });
+  const platformAnalysisApi = createPlatformAnalysisApi({
+    env: env,
+    fetch: fetchImpl,
+    suggestionService: suggestionService,
+    taskService: taskService,
+    analyze: analyzeSuggestion,
+    rateLimit: rateLimit
+  });
   const suggestionsApi = createSuggestionsApi({
     env: env,
     fetch: fetchImpl,
@@ -344,10 +439,12 @@ function createServer(options) {
     taskService: taskService,
     rateLimit: rateLimit
   });
+  const telegramAssistant = createTelegramAssistant({ env: env, fetch: fetchImpl });
   const mediaLibrary = options.mediaLibrary || createMediaLibrary({
     env: env,
     fetch: fetchImpl,
-    storageDirectory: options.storageDirectory
+    storageDirectory: options.storageDirectory,
+    handleAssistantUpdate: function (update) { return telegramAssistant.processUpdate(update); }
   });
 
   return http.createServer(async function (request, response) {
@@ -367,6 +464,76 @@ function createServer(options) {
         return;
       }
     }
+    if (requestUrl.pathname === '/api/analytics/visit' && request.method === 'POST') {
+      if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+        sendJson(response, 503, { error: 'إحصاء الزوار غير مهيأ بعد.' });
+        return;
+      }
+      if (!consumeRateLimit(analyticsLimits, clientAddress(request), Date.now(), 30)) {
+        sendJson(response, 429, { error: 'تم تجاوز عدد المحاولات. حاول لاحقًا.' });
+        return;
+      }
+      const body = await readJsonBody(request, response);
+      if (!body) return;
+      if (typeof body.visitorId !== 'string' ||
+          !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.visitorId)) {
+        sendJson(response, 400, { error: 'معرّف الزائر غير صالح.' });
+        return;
+      }
+      const visitDate = cairoDateKey(new Date());
+      const visitorHash = crypto.createHash('sha256')
+        .update(visitDate + ':' + body.visitorId)
+        .digest('hex');
+      const supabaseBase = env.SUPABASE_URL.replace(/\/$/, '');
+      try {
+        if (lastAnalyticsCleanupDate !== visitDate) {
+          const cutoffDate = cairoDateKey(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000));
+          const cleanup = await fetchImpl(supabaseBase +
+            '/rest/v1/daily_visitors?visit_date=lt.' + cutoffDate, {
+            method: 'DELETE',
+            headers: {
+              apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+              Authorization: 'Bearer ' + env.SUPABASE_SERVICE_ROLE_KEY,
+              Prefer: 'return=minimal'
+            },
+            signal: AbortSignal.timeout(10000)
+          });
+          if (!cleanup.ok) throw new Error('Analytics retention cleanup failed');
+          lastAnalyticsCleanupDate = visitDate;
+        }
+        const insert = await fetchImpl(supabaseBase +
+          '/rest/v1/daily_visitors?on_conflict=visit_date,visitor_hash', {
+          method: 'POST',
+          headers: {
+            apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+            Authorization: 'Bearer ' + env.SUPABASE_SERVICE_ROLE_KEY,
+            'Content-Type': 'application/json',
+            Prefer: 'resolution=ignore-duplicates,return=minimal'
+          },
+          body: JSON.stringify({ visit_date: visitDate, visitor_hash: visitorHash }),
+          signal: AbortSignal.timeout(10000)
+        });
+        if (!insert.ok) throw new Error('Analytics insert failed');
+        const countResponse = await fetchImpl(supabaseBase +
+          '/rest/v1/daily_visitors?select=visitor_hash&visit_date=eq.' + visitDate, {
+          headers: {
+            apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+            Authorization: 'Bearer ' + env.SUPABASE_SERVICE_ROLE_KEY,
+            Prefer: 'count=exact',
+            Range: '0-0'
+          },
+          signal: AbortSignal.timeout(10000)
+        });
+        if (!countResponse.ok) throw new Error('Analytics count failed');
+        const contentRange = countResponse.headers && countResponse.headers.get('content-range');
+        const countMatch = typeof contentRange === 'string' && contentRange.match(/\/(\d+)$/);
+        sendJson(response, 200, { date: visitDate, visitors: countMatch ? Number(countMatch[1]) : null });
+      } catch {
+        sendJson(response, 502, { error: 'تعذر تحميل إحصاء الزوار الآن.' });
+      }
+      return;
+    }
+    if (await platformAnalysisApi(request, response, requestUrl.pathname)) return;
     if (await suggestionsApi(request, response, requestUrl.pathname)) return;
     if (await approvalApi(request, response, requestUrl.pathname)) return;
     if (await adminApi(request, response, requestUrl.pathname)) return;
@@ -494,25 +661,31 @@ function createServer(options) {
       }
 
       try {
-        const draft = await createQuestionDraft(question, env, fetchImpl);
+        const generated = await createQuestionDrafts(question, env, fetchImpl);
+        const draft = generated.drafts.gemini || generated.drafts.grok;
+        const modelDetails = env.GROK_API_KEY
+          ? { drafts: generated.drafts, modelStatus: generated.modelStatus }
+          : {};
         try {
-          await sendToTelegram(question, draft, env, fetchImpl);
+          await sendToTelegram(question, generated.drafts, env, fetchImpl);
         } catch (error) {
-          sendJson(response, 502, {
+          sendJson(response, 502, Object.assign({
             error: error.message,
             draft: draft,
             telegramSent: false
-          });
+          }, modelDetails));
           return;
         }
-        sendJson(response, 200, { draft: draft, telegramSent: true });
+        sendJson(response, 200, Object.assign({
+          draft: draft,
+          telegramSent: true
+        }, modelDetails));
       } catch (error) {
         if (error.name === 'TimeoutError' || error.name === 'AbortError') {
           sendJson(response, 504, { error: 'انتهت مهلة الاتصال بالخدمة. حاول لاحقًا.' });
           return;
         }
-        if (error.message === 'تعذر إنشاء مسودة الآن. حاول لاحقًا.' ||
-            error.message === 'لم تُنتج الخدمة مسودة صالحة. حاول لاحقًا.') {
+        if (error.message === 'تعذر إنشاء مسودة من النماذج المتاحة.') {
           sendJson(response, 502, { error: error.message });
           return;
         }

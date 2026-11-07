@@ -100,6 +100,9 @@ function createMediaLibrary(options) {
   const indexPath = path.join(storageDirectory, 'media-index.json');
   const botToken = env.TELEGRAM_BOT_TOKEN;
   const mediaGroupId = env.TELEGRAM_MEDIA_GROUP_ID || env.TELEGRAM_CHAT_ID;
+  const mediaEnabled = env.TELEGRAM_MEDIA_ENABLED === 'true';
+  const assistantEnabled = env.TELEGRAM_BOT_ENABLED === 'true';
+  const handleAssistantUpdate = options.handleAssistantUpdate;
   let items = [];
   let offset = null;
   let initialized = false;
@@ -360,12 +363,17 @@ function createMediaLibrary(options) {
   async function processUpdate(update) {
     await initialize();
     const message = update.message;
-    if (message && String(message.chat.id) === String(mediaGroupId)) {
+    if ((mediaEnabled || !assistantEnabled) && message && mediaGroupId && String(message.chat.id) === String(mediaGroupId)) {
       if (await removeApprovedMedia(message)) return;
       await receiveFile(message);
       return;
     }
-    if (update.callback_query) await processCallback(update.callback_query);
+    if ((mediaEnabled || !assistantEnabled) && update.callback_query &&
+        String(update.callback_query.data || '').startsWith('media:')) {
+      await processCallback(update.callback_query);
+      return;
+    }
+    if (assistantEnabled && handleAssistantUpdate) await handleAssistantUpdate(update);
   }
 
   async function pollLoop() {
@@ -390,9 +398,9 @@ function createMediaLibrary(options) {
   }
 
   async function start() {
-    if (env.TELEGRAM_MEDIA_ENABLED !== 'true') return;
-    if (!botToken || !mediaGroupId) {
-      throw new Error('Telegram media requires a bot token and a group ID.');
+    if (!mediaEnabled && !assistantEnabled) return;
+    if (!botToken || (mediaEnabled && !mediaGroupId)) {
+      throw new Error('Telegram requires a bot token and a group ID when media intake is enabled.');
     }
     await initialize();
     running = true;

@@ -41,7 +41,7 @@ function mockFetch() {
       calls.push({ url: url, options: options });
       if (url.includes('generativelanguage.googleapis.com')) {
         return jsonResponse({
-          candidates: [{ content: { parts: [{ text: 'هذه مسودة للمراجعة.' }] } }]
+          steps: [{ type: 'model_output', content: [{ type: 'text', text: 'هذه مسودة للمراجعة.' }] }]
         });
       }
       return jsonResponse({ ok: true });
@@ -450,7 +450,7 @@ test('verifies Turnstile before contacting Gemini or Telegram and checks action 
         ok: true,
         arrayBuffer: async function () {
           return Buffer.from(JSON.stringify({
-            candidates: [{ content: { parts: [{ text: 'هذه مسودة للمراجعة.' }] } }]
+            steps: [{ type: 'model_output', content: [{ type: 'text', text: 'هذه مسودة للمراجعة.' }] }]
           }), 'utf8');
         }
       };
@@ -532,7 +532,7 @@ test('rejects provider responses that are not valid UTF-8', async function () {
     });
     assert.equal(response.status, 502);
     assert.deepEqual(await response.json(), {
-      error: 'تعذر معالجة السؤال الآن. حاول لاحقًا.'
+      error: 'تعذر إنشاء مسودة من النماذج المتاحة.'
     });
   });
 });
@@ -545,7 +545,7 @@ test('reports Telegram delivery failure while preserving the generated draft', a
         ok: true,
         arrayBuffer: async function () {
           return Buffer.from(JSON.stringify({
-            candidates: [{ content: { parts: [{ text: 'مسودة صالحة للمراجعة.' }] } }]
+            steps: [{ type: 'model_output', content: [{ type: 'text', text: 'مسودة صالحة للمراجعة.' }] }]
           }), 'utf8');
         }
       };
@@ -734,5 +734,98 @@ test('adds allowlisted CORS headers to library and media responses', async funct
     assert.equal(file.status, 200);
     assert.equal(file.headers.get('access-control-allow-origin'), 'https://app.example');
     assert.match(file.headers.get('access-control-expose-headers'), /Content-Range/i);
+  });
+});
+
+test('runs Gemini Interactions and Grok Responses in parallel with provider storage disabled', async function () {
+  const calls = [];
+  const env = { ...configuredEnv, GROK_API_KEY: 'test-grok-key', GROK_MODEL: 'grok-4.7' };
+  const provider = async function (url, options) {
+    calls.push({ url: url, options: options });
+    if (url.includes('generativelanguage.googleapis.com')) {
+      return {
+        ok: true,
+        status: 200,
+        arrayBuffer: async function () {
+          return Buffer.from(JSON.stringify({
+            steps: [{ type: 'model_output', content: [{ type: 'text', text: 'مسودة Gemini للمراجعة.' }] }]
+          }), 'utf8');
+        }
+      };
+    }
+    if (url.includes('api.x.ai/v1/responses')) {
+      return {
+        ok: true,
+        status: 200,
+        arrayBuffer: async function () {
+          return Buffer.from(JSON.stringify({ output_text: 'مسودة Grok للمراجعة.' }), 'utf8');
+        }
+      };
+    }
+    return {
+      ok: true,
+      status: 200,
+      arrayBuffer: async function () { return Buffer.from(JSON.stringify({ ok: true }), 'utf8'); }
+    };
+  };
+  await withServer({ env: env, fetch: provider }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/questions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({ question: 'ما حكم هذا السؤال؟' })
+    });
+    assert.equal(response.status, 200);
+    const payload = await response.json();
+    assert.equal(payload.draft, 'مسودة Gemini للمراجعة.');
+    assert.equal(payload.drafts.grok, 'مسودة Grok للمراجعة.');
+    assert.deepEqual(payload.modelStatus, { gemini: 'ready', grok: 'ready' });
+    const gemini = calls.find(function (call) { return call.url.includes('generativelanguage.googleapis.com'); });
+    const grok = calls.find(function (call) { return call.url.includes('api.x.ai/v1/responses'); });
+    const telegram = calls.find(function (call) { return call.url.includes('api.telegram.org'); });
+    assert.ok(gemini && grok && telegram);
+    assert.equal(gemini.options.headers['x-goog-api-key'], 'test-gemini-key');
+    assert.equal(JSON.parse(gemini.options.body).store, false);
+    assert.equal(grok.options.headers.Authorization, 'Bearer test-grok-key');
+    assert.equal(JSON.parse(grok.options.body).store, false);
+    assert.equal(JSON.parse(grok.options.body).model, 'grok-4.7');
+    const telegramText = JSON.parse(telegram.options.body).text;
+    assert.match(telegramText, /مسودة Gemini/);
+    assert.match(telegramText, /مسودة Grok/);
+    assert.ok(!telegramText.includes('test-grok-key'));
+  });
+});
+
+test('keeps Gemini available when the optional Grok provider fails', async function () {
+  const env = { ...configuredEnv, GROK_API_KEY: 'test-grok-key' };
+  const provider = async function (url) {
+    if (url.includes('generativelanguage.googleapis.com')) {
+      return {
+        ok: true,
+        status: 200,
+        arrayBuffer: async function () {
+          return Buffer.from(JSON.stringify({
+            steps: [{ type: 'model_output', content: [{ type: 'text', text: 'مسودة Gemini صالحة.' }] }]
+          }), 'utf8');
+        }
+      };
+    }
+    if (url.includes('api.x.ai/v1/responses')) return { ok: false, status: 503 };
+    return {
+      ok: true,
+      status: 200,
+      arrayBuffer: async function () { return Buffer.from(JSON.stringify({ ok: true }), 'utf8'); }
+    };
+  };
+  await withServer({ env: env, fetch: provider }, async function (baseUrl) {
+    const response = await fetch(baseUrl + '/api/questions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({ question: 'ما حكم هذا السؤال؟' })
+    });
+    assert.equal(response.status, 200);
+    const payload = await response.json();
+    assert.equal(payload.draft, 'مسودة Gemini صالحة.');
+    assert.equal(payload.modelStatus.gemini, 'ready');
+    assert.equal(payload.modelStatus.grok, 'failed');
   });
 });

@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 const config = window.AHL_SUPABASE_CONFIG || {};
+const captchaSiteKey = typeof config.captchaSiteKey === 'string' ? config.captchaSiteKey.trim() : '';
 let projectUrl = null;
 try {
   projectUrl = new URL(config.url);
@@ -34,6 +35,76 @@ function requireClient() {
   return client;
 }
 
+
+let turnstileLoadPromise = null;
+let turnstileWidgetId = null;
+let turnstileToken = null;
+
+function loadTurnstile() {
+  if (window.turnstile) return Promise.resolve();
+  if (turnstileLoadPromise) return turnstileLoadPromise;
+
+  turnstileLoadPromise = new Promise(function (resolve, reject) {
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    script.async = true;
+    script.defer = true;
+    script.onload = function () {
+      if (window.turnstile) resolve();
+      else {
+        turnstileLoadPromise = null;
+        reject(new Error('تعذر تهيئة خدمة التحقق الأمني.'));
+      }
+    };
+    script.onerror = function () {
+      turnstileLoadPromise = null;
+      reject(new Error('تعذر تحميل خدمة التحقق الأمني. تحقق من اتصال الإنترنت.'));
+    };
+    document.head.appendChild(script);
+  });
+
+  return turnstileLoadPromise;
+}
+
+window.ahlCaptcha = {
+  enabled: Boolean(captchaSiteKey),
+  render: async function (containerId) {
+    if (!captchaSiteKey) return false;
+    const container = typeof containerId === 'string'
+      ? document.getElementById(containerId)
+      : containerId;
+    if (!container) throw new Error('مكان عرض التحقق الأمني غير موجود.');
+
+    await loadTurnstile();
+    if (turnstileWidgetId !== null) {
+      window.turnstile.remove(turnstileWidgetId);
+      turnstileWidgetId = null;
+    }
+    turnstileToken = null;
+    turnstileWidgetId = window.turnstile.render(container, {
+      sitekey: captchaSiteKey,
+      theme: 'dark',
+      callback: function (token) { turnstileToken = token; },
+      'expired-callback': function () { turnstileToken = null; },
+      'error-callback': function () { turnstileToken = null; }
+    });
+    return true;
+  },
+  getToken: function () {
+    if (!captchaSiteKey) return null;
+    if (typeof turnstileToken !== 'string' || !turnstileToken) {
+      throw new Error('أكمل اختبار التحقق الأمني قبل المتابعة.');
+    }
+    return turnstileToken;
+  },
+  reset: function () {
+    turnstileToken = null;
+    if (window.turnstile && turnstileWidgetId !== null) {
+      window.turnstile.reset(turnstileWidgetId);
+    }
+  }
+};
+
 window.ahlAuth = {
   configured,
   init: function (onStateChange) {
@@ -49,16 +120,84 @@ window.ahlAuth = {
       });
     });
   },
-  signIn: function (email, password) {
-    return requireClient().auth.signInWithPassword({ email: email, password: password });
+  signIn: function (email, password, captchaToken) {
+    const credentials = { email: email, password: password };
+    if (captchaSiteKey) {
+      if (typeof captchaToken !== 'string' || !captchaToken.trim()) throw new Error('أكمل اختبار التحقق الأمني قبل المتابعة.');
+      credentials.options = { captchaToken: captchaToken };
+    }
+    return requireClient().auth.signInWithPassword(credentials);
   },
-  signUp: function (email, password) {
-    return requireClient().auth.signUp({ email: email, password: password });
+  signUp: function (email, password, captchaToken) {
+    const credentials = { email: email, password: password };
+    if (captchaSiteKey) {
+      if (typeof captchaToken !== 'string' || !captchaToken.trim()) throw new Error('أكمل اختبار التحقق الأمني قبل المتابعة.');
+      credentials.options = { captchaToken: captchaToken };
+    }
+    return requireClient().auth.signUp(credentials);
+  },
+  signInWithGoogle: function () {
+    const redirectTo = window.location.origin + window.location.pathname;
+    return requireClient().auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: redirectTo, queryParams: { prompt: 'select_account' } }
+    });
+  },
+  getCurrentUser: async function () {
+    const result = await requireClient().auth.getUser();
+    if (result.error) throw result.error;
+    return result.data.user || null;
+  },
+  saveMemberProfile: async function (user) {
+    if (!user || typeof user.id !== 'string') throw new TypeError('Invalid member profile');
+    const metadata = user.user_metadata || {};
+    const displayName = String(metadata.full_name || metadata.name || '').trim().slice(0, 100) || null;
+    let avatarUrl = null;
+    try {
+      const parsed = new URL(String(metadata.avatar_url || metadata.picture || ''));
+      if (parsed.protocol === 'https:') avatarUrl = parsed.href.slice(0, 2048);
+    } catch (error) {}
+    const result = await requireClient().from('member_profiles').upsert({
+      user_id: user.id,
+      email: String(user.email || '').slice(0, 320) || null,
+      display_name: displayName,
+      avatar_url: avatarUrl,
+      last_seen_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+    if (result.error) throw result.error;
+  },
+  logActivity: async function (userId, eventType, metadata) {
+    const allowedEvents = ['login', 'section_view', 'dhikr_progress'];
+    if (typeof userId !== 'string' || !allowedEvents.includes(eventType)) throw new TypeError('Invalid member activity');
+    const safeMetadata = {};
+    const input = metadata && typeof metadata === 'object' && !Array.isArray(metadata) ? metadata : {};
+    for (const key of ['provider', 'section', 'period', 'item', 'count']) {
+      const value = input[key];
+      if (typeof value === 'string') safeMetadata[key] = value.slice(0, 100);
+      else if (typeof value === 'number' && Number.isFinite(value)) safeMetadata[key] = value;
+    }
+    const result = await requireClient().from('member_activity').insert({
+      user_id: userId,
+      event_type: eventType,
+      metadata: safeMetadata
+    });
+    if (result.error) throw result.error;
   },
   getAccessToken: async function () {
     const result = await requireClient().auth.getSession();
     if (result.error) throw result.error;
     return result.data.session ? result.data.session.access_token : null;
+  },
+  requestPasswordReset: function (email, redirectTo, captchaToken) {
+    const options = { redirectTo: redirectTo };
+    if (captchaSiteKey) {
+      if (typeof captchaToken !== 'string' || !captchaToken.trim()) throw new Error('أكمل اختبار التحقق الأمني قبل المتابعة.');
+      options.captchaToken = captchaToken;
+    }
+    return requireClient().auth.resetPasswordForEmail(email, options);
+  },
+  updatePassword: function (password) {
+    return requireClient().auth.updateUser({ password: password });
   },
   signOut: function () {
     return requireClient().auth.signOut();

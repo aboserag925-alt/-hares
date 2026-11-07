@@ -31,6 +31,8 @@ class HaresAISupervisor {
       });
     }
     for (const name of names) {
+      // The developer agent is invoked only by implement(), after the approval gate.
+      if (name==='developer') continue;
       const agent=this.agents[name];
       if (!agent || typeof agent.run!=='function') {
         continue;

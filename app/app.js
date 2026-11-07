@@ -9,8 +9,9 @@ var S = [
   ['الخميس', 'عظماء الإسلام', 'منوعات ومقتطفات وحوارات']
 ];
 var names = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-var prayerSections = ['sched', 'prayers', 'qibla', 'adhkar', 'media', 'q', 'account', 'about'];
-var prayerTabs = ['t1', 't2', 't3', 't4', 't5', 't6', 't8', 't7'];
+var prayerSections = ['sched', 'prayers', 'qibla', 'adhkar', 'media', 'q', 'account', 'about', 'debates', 'forum'];
+var prayerTabs = ['t1', 't2', 't3', 't4', 't5', 't6', 't8', 't7', 't9', 't10'];
+var sectionStack = ['sched'];
 var prayerNames = {
   fajr: 'الفجر',
   sunrise: 'الشروق',
@@ -29,8 +30,10 @@ var compassHeading = null;
 var currentDhikrPeriod = 'morning';
 var deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 var accountUser = null;
+var passwordRecoveryMode = false;
 var accountSyncTimer = null;
 var activeSyncUserId = null;
+var lastActivitySection = null;
 var mediaItems = [];
 var activeMediaCategory = 'all';
 var prayerStatus = document.getElementById('locationStatus');
@@ -195,36 +198,79 @@ function updateLessonCountdown() {
   }
 }
 
-function show(sectionId) {
+function renderSectionStack() {
+  var activeSection = sectionStack[sectionStack.length - 1];
+  var isSchedule = activeSection === 'sched';
+  var scheduleHeading = document.querySelector('.section-heading');
+  var nextLesson = document.querySelector('.next');
+  if (scheduleHeading) scheduleHeading.hidden = !isSchedule;
+  if (nextLesson) nextLesson.hidden = !isSchedule;
   prayerSections.forEach(function (id, index) {
-    var active = id === sectionId;
+    var position = sectionStack.indexOf(id);
+    var visible = position !== -1;
     var section = document.getElementById(id);
-    section.hidden = !active;
+    section.hidden = !visible;
+    section.classList.toggle('app-section-overlay', visible && position > 0);
+    if (visible && position > 0) section.style.zIndex = String(15 + position);
+    else section.style.removeProperty('z-index');
     var tab = document.getElementById(prayerTabs[index]);
+    var active = id === activeSection;
     tab.className = 'tab' + (active ? ' on' : '');
     tab.setAttribute('aria-pressed', active ? 'true' : 'false');
   });
+}
 
-  var isSchedule = sectionId === 'sched';
+function closeTopSection() {
+  if (sectionStack.length <= 1) return;
+  sectionStack.pop();
+  renderSectionStack();
+  var active = sectionStack[sectionStack.length - 1];
+  if (active === 'qibla') updateQibla();
+}
+
+function show(sectionId) {
+  if (prayerSections.indexOf(sectionId) === -1) return;
+  var top = sectionStack[sectionStack.length - 1];
+  if (sectionId === 'sched') {
+    sectionStack = ['sched'];
+  } else if (sectionId !== top) {
+    var existing = sectionStack.indexOf(sectionId);
+    if (existing >= 0) sectionStack = sectionStack.slice(0, existing + 1);
+    else sectionStack.push(sectionId);
+  }
+  renderSectionStack();
+
+  var isSchedule = sectionStack[sectionStack.length - 1] === 'sched';
   var scheduleHeading = document.querySelector('.section-heading');
   var nextLesson = document.querySelector('.next');
   if (scheduleHeading) scheduleHeading.hidden = !isSchedule;
   if (nextLesson) nextLesson.hidden = !isSchedule;
 
-  var target = document.getElementById(sectionId);
-  if (target) {
-    target.setAttribute('tabindex', '-1');
-    target.scrollIntoView({
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-      block: 'start'
-    });
-    target.focus({ preventScroll: true });
+  if (accountUser && window.ahlAuth && window.ahlAuth.configured && lastActivitySection !== sectionId) {
+    lastActivitySection = sectionId;
+    window.ahlAuth.logActivity(accountUser.id, 'section_view', { section: sectionId }).catch(function () {});
   }
-
   if (sectionId === 'qibla') updateQibla();
   if (sectionId === 'adhkar') renderAdhkar();
   if (sectionId === 'media') loadMediaLibrary();
+  if ((sectionId === 'debates' || sectionId === 'forum') && window.ahlCommunity) window.ahlCommunity.load(sectionId);
 }
+
+prayerSections.forEach(function (id) {
+  if (id === 'sched') return;
+  var section = document.getElementById(id);
+  section.addEventListener('click', function (event) {
+    var contentSelector = [
+      '.card', '.note', 'button', 'a', 'input', 'select', 'textarea', 'label',
+      'audio', '[role="button"]', '[contenteditable="true"]'
+    ].join(', ');
+    if (!event.target.closest(contentSelector)) closeTopSection();
+  });
+});
+
+document.addEventListener('keydown', function (event) {
+  if (event.key === 'Escape') closeTopSection();
+});
 
 function renderMediaLibrary() {
   var container = document.getElementById('mediaItems');
@@ -741,18 +787,31 @@ function setAccountState(state) {
   var configMissing = document.getElementById('authConfigMissing');
   var form = document.getElementById('authForm');
   var signedIn = document.getElementById('accountSignedIn');
+  var recovery = document.getElementById('passwordRecoveryPanel');
   var message = document.getElementById('authMessage');
+  if (state.event === 'PASSWORD_RECOVERY') passwordRecoveryMode = true;
+  if (state.event === 'SIGNED_OUT') { passwordRecoveryMode = false; lastActivitySection = null; }
   if (!state.configured) {
     accountUser = null;
     activeSyncUserId = null;
     configMissing.hidden = false;
     form.hidden = true;
     signedIn.hidden = true;
+    document.getElementById('googleSignInBtn').hidden = true;
     setStatus(message, 'أضف إعدادات Supabase لتفعيل الحسابات.');
     return;
   }
   configMissing.hidden = true;
   accountUser = state.user;
+  document.getElementById('googleSignInBtn').hidden = Boolean(state.user) || passwordRecoveryMode;
+  if (passwordRecoveryMode) {
+    form.hidden = true;
+    signedIn.hidden = true;
+    recovery.hidden = false;
+    setStatus(message, 'تم التحقق من رابط الاستعادة. أدخل كلمة مرور جديدة.');
+    return;
+  }
+  recovery.hidden = true;
   if (!state.user) {
     activeSyncUserId = null;
     form.hidden = false;
@@ -764,6 +823,16 @@ function setAccountState(state) {
   signedIn.hidden = false;
   document.getElementById('accountEmail').textContent = state.user.email || '';
   setStatus(message, 'تسجيل الدخول محفوظ تلقائيًا على هذا الجهاز.');
+  if (state.event === 'SIGNED_IN' || state.event === 'INITIAL_SESSION') {
+    window.ahlAuth.saveMemberProfile(state.user).then(function () {
+      if (state.event !== 'SIGNED_IN') return;
+      return window.ahlAuth.logActivity(state.user.id, 'login', {
+        provider: state.user.app_metadata && state.user.app_metadata.provider || 'email'
+      });
+    }).catch(function (error) {
+      setStatus(message, 'تم الدخول، لكن تعذر حفظ سجل العضوية. تأكد من تطبيق ترحيل حسابات الأعضاء.', true);
+    });
+  }
   if (activeSyncUserId !== state.user.id) {
     activeSyncUserId = state.user.id;
     window.setTimeout(function () {
@@ -775,6 +844,8 @@ function setAccountState(state) {
 function setAuthBusy(busy) {
   document.getElementById('signInBtn').disabled = busy;
   document.getElementById('signUpBtn').disabled = busy;
+  document.getElementById('resetPasswordBtn').disabled = busy;
+  document.getElementById('googleSignInBtn').disabled = busy;
 }
 
 function handleSignIn(event) {
@@ -783,15 +854,23 @@ function handleSignIn(event) {
   if (!form.reportValidity()) return;
   var email = document.getElementById('authEmail').value.trim();
   var password = document.getElementById('authPassword').value;
+  var captchaToken = null;
+  try {
+    if (window.ahlCaptcha) captchaToken = window.ahlCaptcha.getToken();
+  } catch (error) {
+    setStatus(document.getElementById('authMessage'), error.message, true);
+    return;
+  }
   setAuthBusy(true);
   setStatus(document.getElementById('authMessage'), 'جاري تسجيل الدخول…');
-  window.ahlAuth.signIn(email, password).then(function (result) {
+  window.ahlAuth.signIn(email, password, captchaToken).then(function (result) {
     if (result.error) throw result.error;
     setStatus(document.getElementById('authMessage'), 'تم تسجيل الدخول.');
   }).catch(function (error) {
     setStatus(document.getElementById('authMessage'),
       'تعذر تسجيل الدخول: ' + error.message, true);
   }).finally(function () {
+    if (window.ahlCaptcha && window.ahlCaptcha.enabled) window.ahlCaptcha.reset();
     setAuthBusy(false);
   });
 }
@@ -801,9 +880,16 @@ function handleSignUp() {
   if (!form.reportValidity()) return;
   var email = document.getElementById('authEmail').value.trim();
   var password = document.getElementById('authPassword').value;
+  var captchaToken = null;
+  try {
+    if (window.ahlCaptcha) captchaToken = window.ahlCaptcha.getToken();
+  } catch (error) {
+    setStatus(document.getElementById('authMessage'), error.message, true);
+    return;
+  }
   setAuthBusy(true);
   setStatus(document.getElementById('authMessage'), 'جاري إنشاء الحساب…');
-  window.ahlAuth.signUp(email, password).then(function (result) {
+  window.ahlAuth.signUp(email, password, captchaToken).then(function (result) {
     if (result.error) throw result.error;
     if (result.data.session) {
       setStatus(document.getElementById('authMessage'), 'تم إنشاء الحساب وتسجيل الدخول.');
@@ -815,7 +901,80 @@ function handleSignUp() {
     setStatus(document.getElementById('authMessage'),
       'تعذر إنشاء الحساب: ' + error.message, true);
   }).finally(function () {
+    if (window.ahlCaptcha && window.ahlCaptcha.enabled) window.ahlCaptcha.reset();
     setAuthBusy(false);
+  });
+}
+
+
+function handleGoogleSignIn() {
+  setAuthBusy(true);
+  setStatus(document.getElementById('authMessage'), 'جارٍ تحويلك إلى Google لتسجيل الدخول…');
+  window.ahlAuth.signInWithGoogle().then(function (result) {
+    if (result.error) throw result.error;
+  }).catch(function (error) {
+    setStatus(document.getElementById('authMessage'), 'تعذر تسجيل الدخول باستخدام Google: ' + error.message, true);
+    setAuthBusy(false);
+  });
+}
+
+function handlePasswordReset() {
+  var emailInput = document.getElementById('authEmail');
+  var email = emailInput.value.trim();
+  if (!emailInput.checkValidity() || !email) {
+    emailInput.reportValidity();
+    setStatus(document.getElementById('authMessage'), 'اكتب بريدك الإلكتروني أولًا.', true);
+    return;
+  }
+  var captchaToken = null;
+  try {
+    if (window.ahlCaptcha) captchaToken = window.ahlCaptcha.getToken();
+  } catch (error) {
+    setStatus(document.getElementById('authMessage'), error.message, true);
+    return;
+  }
+  setAuthBusy(true);
+  setStatus(document.getElementById('authMessage'), 'جاري إرسال رابط الاستعادة…');
+  var redirectUrl = window.location.origin + window.location.pathname;
+  window.ahlAuth.requestPasswordReset(email, redirectUrl, captchaToken).then(function (result) {
+    if (result.error) throw result.error;
+    setStatus(document.getElementById('authMessage'),
+      'لو كان البريد مسجلًا، سيصلك رابط استعادة كلمة المرور. افحص الوارد والرسائل غير المرغوب فيها.');
+  }).catch(function (error) {
+    setStatus(document.getElementById('authMessage'),
+      'تعذر طلب استعادة كلمة المرور: ' + error.message, true);
+  }).finally(function () {
+    if (window.ahlCaptcha && window.ahlCaptcha.enabled) window.ahlCaptcha.reset();
+    setAuthBusy(false);
+  });
+}
+
+function handlePasswordUpdate() {
+  var password = document.getElementById('newPassword').value;
+  var confirmPassword = document.getElementById('confirmNewPassword').value;
+  if (password.length < 8) {
+    setStatus(document.getElementById('authMessage'), 'كلمة المرور يجب ألا تقل عن 8 أحرف.', true);
+    return;
+  }
+  if (password !== confirmPassword) {
+    setStatus(document.getElementById('authMessage'), 'كلمتا المرور غير متطابقتين.', true);
+    return;
+  }
+  document.getElementById('saveNewPasswordBtn').disabled = true;
+  setStatus(document.getElementById('authMessage'), 'جاري تحديث كلمة المرور…');
+  window.ahlAuth.updatePassword(password).then(function (result) {
+    if (result.error) throw result.error;
+    passwordRecoveryMode = false;
+    document.getElementById('passwordRecoveryPanel').hidden = true;
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmNewPassword').value = '';
+    setAccountState({ configured: true, user: accountUser, event: 'USER_UPDATED' });
+    setStatus(document.getElementById('authMessage'), 'تم تحديث كلمة المرور بنجاح.');
+  }).catch(function (error) {
+    setStatus(document.getElementById('authMessage'),
+      'تعذر تحديث كلمة المرور: ' + error.message, true);
+  }).finally(function () {
+    document.getElementById('saveNewPasswordBtn').disabled = false;
   });
 }
 
@@ -826,8 +985,30 @@ function initAuth() {
     return;
   }
   window.ahlAuth.init(setAccountState);
+  if (window.ahlCaptcha && window.ahlCaptcha.enabled) {
+    var captchaBox = document.getElementById('authCaptcha');
+    captchaBox.hidden = false;
+    window.ahlCaptcha.render('authCaptcha').catch(function (error) {
+      setStatus(document.getElementById('authMessage'), 'تعذر تحميل التحقق الأمني: ' + error.message, true);
+    });
+  }
   document.getElementById('authForm').addEventListener('submit', handleSignIn);
   document.getElementById('signUpBtn').addEventListener('click', handleSignUp);
+  document.getElementById('googleSignInBtn').addEventListener('click', handleGoogleSignIn);
+  document.getElementById('resetPasswordBtn').addEventListener('click', handlePasswordReset);
+  document.getElementById('saveNewPasswordBtn').addEventListener('click', handlePasswordUpdate);
+  document.getElementById('cancelPasswordRecoveryBtn').addEventListener('click', function () {
+    passwordRecoveryMode = false;
+    document.getElementById('passwordRecoveryPanel').hidden = true;
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmNewPassword').value = '';
+    window.ahlAuth.signOut().then(function (result) {
+      if (result.error) throw result.error;
+      setStatus(document.getElementById('authMessage'), 'تم إلغاء استعادة كلمة المرور. سجّل الدخول مجددًا.');
+    }).catch(function (error) {
+      setStatus(document.getElementById('authMessage'), 'تعذر إلغاء الاستعادة: ' + error.message, true);
+    });
+  });
   document.getElementById('signOutBtn').addEventListener('click', function () {
     setStatus(document.getElementById('authMessage'), 'جاري تسجيل الخروج…');
     window.ahlAuth.signOut().then(function (result) {
@@ -966,7 +1147,7 @@ async function sendQuestion() {
     return;
   }
   if (!consent) {
-    setStatus(status, 'وافق على إرسال السؤال إلى Gemini وTelegram أولًا.', true);
+    setStatus(status, 'وافق على إرسال السؤال إلى نماذج Gemini وGrok المتاحة وTelegram للمراجعة أولًا.', true);
     return;
   }
 
@@ -1003,12 +1184,22 @@ async function sendQuestion() {
       throw new Error('استجابة الخادم غير صالحة. حاول لاحقًا.');
     }
 
-    if (typeof result.draft === 'string') {
-      document.getElementById('questionDraftText').textContent = result.draft;
+    var draftText = '';
+    if (result.drafts && typeof result.drafts === 'object') {
+      if (typeof result.drafts.gemini === 'string') draftText += 'مسودة Gemini (غير معتمدة):\n' + result.drafts.gemini;
+      if (typeof result.drafts.grok === 'string') draftText += (draftText ? '\n\n' : '') + 'مسودة Grok (غير معتمدة):\n' + result.drafts.grok;
+    } else if (typeof result.draft === 'string') {
+      draftText = result.draft;
+    }
+    if (draftText) {
+      document.getElementById('questionDraftText').textContent = draftText;
       draftBox.hidden = false;
     }
     if (!response.ok) throw new Error(result.error || 'تعذر إرسال السؤال. حاول لاحقًا.');
-    setStatus(status, 'وصل السؤال والمسودة إلى Telegram للمراجعة. المسودة ليست فتوى معتمدة.');
+    var modelNotice = result.modelStatus && result.modelStatus.grok === 'failed'
+      ? 'تعذر Grok في هذه المحاولة؛ أُرسلت مسودة Gemini للمراجعة.'
+      : 'وصلت المسودات المتاحة إلى Telegram للمراجعة.';
+    setStatus(status, modelNotice + ' المسودات ليست فتوى معتمدة.' );
   } catch (error) {
     var message = error instanceof TypeError
       ? 'تعذر الاتصال بالخادم الخلفي. تأكد من تشغيل الخادم ثم حاول مجددًا.'
@@ -1101,6 +1292,135 @@ document.getElementById('adhanAudio').addEventListener('ended', function () {
   setStatus(audioStatus, 'انتهى التسجيل.');
 });
 
+function initQuranRadio() {
+  var button = document.getElementById('quranRadioButton');
+  var panel = document.getElementById('quranRadioPanel');
+  var station = document.getElementById('quranRadioStation');
+  var audio = document.getElementById('quranRadioAudio');
+  var openButton = document.getElementById('quranRadioOpen');
+  var muteButton = document.getElementById('quranRadioMute');
+  var status = document.getElementById('quranRadioStatus');
+  if (!button || !panel || !station || !audio || !openButton || !muteButton || !status) return;
+
+  var stations = {
+    cairo: {
+      name: 'إذاعة القرآن الكريم من القاهرة',
+      streamUrl: 'https://stream.radiojar.com/8s5u5tpdtwzuv',
+      officialUrl: 'https://misrquran.gov.eg/'
+    },
+    saudi: {
+      name: 'إذاعة القرآن الكريم من السعودية',
+      streamUrl: null,
+      officialUrl: 'https://radioplus.sba.sa/ar/live/4'
+    }
+  };
+  var volumeTimer = null;
+
+  function selectedStation() {
+    return stations[station.value] || stations.cairo;
+  }
+  function setStatus(message) {
+    status.textContent = message;
+  }
+  function syncPanel() {
+    button.setAttribute('aria-expanded', panel.hidden ? 'false' : 'true');
+    button.textContent = panel.hidden
+      ? (station.value === 'cairo' && !audio.paused ? 'إذاعة القرآن الكريم • تعمل' : 'إذاعة القرآن الكريم')
+      : 'إغلاق الإذاعة';
+  }
+  function syncMute() {
+    muteButton.textContent = audio.muted ? 'إلغاء الكتم' : 'كتم الإذاعة';
+    muteButton.setAttribute('aria-pressed', audio.muted ? 'true' : 'false');
+  }
+  function scheduleVolumeRise() {
+    if (volumeTimer) window.clearTimeout(volumeTimer);
+    volumeTimer = window.setTimeout(function () {
+      if (!audio.paused && !audio.muted && station.value === 'cairo') audio.volume = 0.16;
+    }, 5000);
+  }
+  function startCairoStream() {
+    var selected = selectedStation();
+    if (!selected.streamUrl) return;
+    if (audio.src !== selected.streamUrl) {
+      audio.src = selected.streamUrl;
+      audio.load();
+    }
+    audio.volume = 0.06;
+    if (audio.muted) {
+      setStatus('الإذاعة مكتومة حسب اختيارك السابق. اضغط «إلغاء الكتم» للاستماع.');
+      return;
+    }
+    var playResult = audio.play();
+    if (playResult && typeof playResult.catch === 'function') {
+      playResult.catch(function () {
+        setStatus('المتصفح منع التشغيل التلقائي. افتح الإذاعة واضغط تشغيل من مشغل الصوت.');
+        button.textContent = 'إذاعة القرآن الكريم — اضغط للتشغيل';
+      });
+    }
+  }
+  function selectStation() {
+    var selected = selectedStation();
+    if (selected.streamUrl) {
+      startCairoStream();
+      setStatus('المحطة المختارة: ' + selected.name + '. يبدأ البث بمستوى منخفض ثم يرتفع تدريجيًا بعد خمس ثوانٍ.');
+    } else {
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
+      setStatus('للاستماع إلى الإذاعة السعودية، اضغط «فتح الموقع الرسمي».');
+    }
+    syncPanel();
+  }
+
+  button.addEventListener('click', function () {
+    panel.hidden = !panel.hidden;
+    syncPanel();
+  });
+  station.addEventListener('change', selectStation);
+  openButton.addEventListener('click', function () {
+    var selected = selectedStation();
+    var opened = window.open(selected.officialUrl, '_blank', 'noopener,noreferrer');
+    if (!opened) setStatus('منع المتصفح فتح نافذة جديدة. اسمح بالنوافذ المنبثقة ثم أعد المحاولة.');
+  });
+  muteButton.addEventListener('click', function () {
+    audio.muted = !audio.muted;
+    try {
+      if (audio.muted) localStorage.setItem('ahl_quran_radio_muted', '1');
+      else localStorage.removeItem('ahl_quran_radio_muted');
+    } catch (error) {}
+    syncMute();
+    if (!audio.muted && station.value === 'cairo') {
+      if (audio.paused) startCairoStream();
+      else {
+        audio.volume = 0.06;
+        scheduleVolumeRise();
+        setStatus('تم إلغاء الكتم. سيرتفع مستوى الصوت قليلًا بعد خمس ثوانٍ.');
+      }
+    }
+    if (audio.muted) setStatus('تم كتم الإذاعة وحفظ اختيارك.');
+  });
+  audio.addEventListener('play', function () {
+    setStatus('يُبث الآن: ' + selectedStation().name + '. مستوى الصوت سيرتفع قليلًا بعد خمس ثوانٍ.');
+    scheduleVolumeRise();
+    syncPanel();
+  });
+  audio.addEventListener('pause', syncPanel);
+  audio.addEventListener('error', function () {
+    setStatus('تعذر تحميل البث المباشر. يمكنك فتح الموقع الرسمي للمحطة المختارة.');
+  });
+
+  try {
+    audio.muted = localStorage.getItem('ahl_quran_radio_muted') === '1';
+  } catch (error) {
+    audio.muted = false;
+  }
+  audio.volume = 0.06;
+  syncMute();
+  syncPanel();
+  if (audio.muted) setStatus('تم حفظ اختيار الكتم. اضغط «إلغاء الكتم» للاستماع.');
+  else startCairoStream();
+}
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(function () {
     setStatus(prayerStatus, 'تعذر تفعيل الاستخدام دون اتصال في هذا المتصفح.', true);
@@ -1113,6 +1433,27 @@ updateLessonCountdown();
 loadSavedSettings();
 renderAdhkar();
 initAuth();
+initQuranRadio();
 setInterval(updateLessonCountdown, 1000);
 setInterval(function () { updatePrayerTimes(false); }, 60000);
 setInterval(updateNextPrayerCountdown, 1000);
+
+
+function openAppSupportDialog() {
+  var dialog = document.getElementById('supportDialog');
+  if (!dialog || dialog.open) return;
+  dialog.showModal();
+  history.pushState({ supportDialogOpen: true }, '', location.pathname + location.search + '#support');
+}
+var appSupportDialog = document.getElementById('supportDialog');
+if (appSupportDialog) {
+  appSupportDialog.addEventListener('click', function (event) {
+    if (event.target === appSupportDialog) appSupportDialog.close();
+  });
+  appSupportDialog.addEventListener('close', function () {
+    if (history.state && history.state.supportDialogOpen) history.back();
+  });
+}
+window.addEventListener('popstate', function () {
+  if (appSupportDialog && appSupportDialog.open) appSupportDialog.close();
+});
