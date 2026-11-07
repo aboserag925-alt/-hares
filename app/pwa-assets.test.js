@@ -156,8 +156,6 @@ test('support dialogs close by backdrop or mobile back without navigating away',
   assert.ok(rootHtml.includes('function openSiteSupportDialog()'));
   assert.ok(rootHtml.includes('event.target===siteSupportDialog'));
   for (const documentText of [html, rootHtml]) {
-    for (const match of documentText.matchAll(/<script(?:\\s[^>]*)?>([\s\S]*?)<\/script>/g)) {
-      if (match[1].trim()) new vm.Script(match[1]);
-    }
-  }
-});
+    const scripts = documentText.split('<script>').slice(1).map(function (part) { return part.split('</script>')[0]; });
+    for (const script of scripts) if (script.trim()) new vm.Script(script);
+  }});
