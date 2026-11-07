@@ -27,6 +27,27 @@ function createTaskService({env,fetch:fetchImpl=global.fetch}) {
       const rows=await request('/rest/v1/ai_tasks?id=eq.'+encodeURIComponent(id)+'&select=*&limit=1');
       return rows[0]||null;
     },
+    async findBySuggestion(suggestionId) {
+      const rows=await request('/rest/v1/ai_tasks?suggestion_id=eq.'+encodeURIComponent(suggestionId)+'&select=*&order=created_at.desc&limit=1');
+      return rows[0]||null;
+    },
+    async recordAnalysis(taskId, analysis) {
+      const reports=Array.isArray(analysis.reports)?analysis.reports.slice(0,20):[];
+      const models=analysis.models&&typeof analysis.models==='object'?analysis.models:{};
+      for(const report of reports) {
+        const result=['PASS','FAIL','NEEDS_REVIEW','BLOCKED'].includes(report.status)?report.status:'NEEDS_REVIEW';
+        const body={task_id:taskId,agent:String(report.agent||'unknown').slice(0,80),result,report:{data:report.data||{},warnings:Array.isArray(report.warnings)?report.warnings.slice(0,10):[]}};
+        await request('/rest/v1/ai_reviews',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(body)});
+      }
+      for(const [name,value] of Object.entries(models).slice(0,2)) {
+        const body={task_id:taskId,agent:String(name).slice(0,80),result:'NEEDS_REVIEW',report:{analysis:value.analysis||{},text:String(value.text||'').slice(0,4000)}};
+        await request('/rest/v1/ai_reviews',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(body)});
+      }
+      const status=analysis.task&&analysis.task.status==='FAILED'?'FAILED':'ANALYZED';
+      await request('/rest/v1/ai_tasks?id=eq.'+encodeURIComponent(taskId),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({status,updated_at:new Date().toISOString()})});
+      try{await audit.record({event:'ai.analysis.completed',metadata:{task_id:taskId,status,agent_reports:reports.length,model_reports:Object.keys(models).length,tainted:true}});}catch{console.error('AI analysis audit event could not be recorded');}
+      return {status};
+    },
     async recordHumanApproval({taskId,actorUserId,action,decision,reason=''}) {
       const validRejectionReason=decision!=='REJECTED'||(typeof reason==='string'&&reason.trim().length>0);
       if(!taskId||!actorUserId||!['IMPLEMENT','MERGE'].includes(action)||!['APPROVED','REJECTED'].includes(decision)||!validRejectionReason) throw new TypeError('Invalid approval request');
