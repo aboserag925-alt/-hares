@@ -55,7 +55,11 @@ test('AI approval RPC is hardened with an empty search_path and service-role-onl
  assert.match(migration,/grant execute on function public\.record_ai_approval\([^;]+\) to service_role;/i);
  assert.match(migration,/public\.admin_users/);
  assert.match(migration,/public\.ai_tasks/);
- assert.doesNotMatch(migration,/set search_path = public/i);\n assert.match(migration,/pg_catalog\\.now\\(\\)/);\n assert.match(migration,/pg_catalog\\.jsonb_build_object/);\n assert.match(migration,/pg_catalog\\.left/);\n assert.match(migration,/A reason is required when rejecting an approval/);
+ assert.doesNotMatch(migration,/set search_path = public/i);
+ assert.match(migration,/pg_catalog\\.now\\(\\)/);
+ assert.match(migration,/pg_catalog\\.jsonb_build_object/);
+ assert.match(migration,/pg_catalog\\.left/);
+ assert.match(migration,/A reason is required when rejecting an approval/);
 });
 
 test('untrusted AI tasks remain tainted unless created by a trusted internal caller',()=>{
