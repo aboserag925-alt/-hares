@@ -28,7 +28,8 @@ function createTaskService({env,fetch:fetchImpl=global.fetch}) {
       return rows[0]||null;
     },
     async recordHumanApproval({taskId,actorUserId,action,decision,reason=''}) {
-      if(!taskId||!actorUserId||!['IMPLEMENT','MERGE'].includes(action)||!['APPROVED','REJECTED'].includes(decision)||(decision==='REJECTED'&&typeof reason!=='string'||decision==='REJECTED'&&!reason.trim())) throw new TypeError('Invalid approval request');
+      const validRejectionReason=decision!=='REJECTED'||(typeof reason==='string'&&reason.trim().length>0);
+      if(!taskId||!actorUserId||!['IMPLEMENT','MERGE'].includes(action)||!['APPROVED','REJECTED'].includes(decision)||!validRejectionReason) throw new TypeError('Invalid approval request');
       const rows=await request('/rest/v1/rpc/record_ai_approval',{method:'POST',body:JSON.stringify({p_task_id:taskId,p_actor_user_id:actorUserId,p_action:action,p_decision:decision,p_reason:String(reason).slice(0,1000)})});
       return rows;
     }
