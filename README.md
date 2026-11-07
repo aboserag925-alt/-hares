@@ -124,3 +124,29 @@ select id from auth.users where email = 'admin@example.com';
 اضبط متغيرات البيئة على خادم Node.js: `SUPABASE_URL` و`SUPABASE_ANON_KEY` و`SUPABASE_SERVICE_ROLE_KEY`. مفتاح `service_role` سري ولا يوضع في المتصفح أو GitHub Pages أو ملفات المشروع. أضف أصل الموقع إلى `ALLOWED_ORIGINS`. إذا كان الخادم على نطاق منفصل عن GitHub Pages، اضبط `AHL_API_BASE_URL` في إعدادات بناء Pages على أصل الخادم، وأعد تشغيل النشر. يحتاج بناء واجهة المصادقة إلى `SUPABASE_URL` و`SUPABASE_ANON_KEY` العامين؛ ينشئ `build:app` ملف إعداد المتصفح منهما، ولا يضمّن مفتاح `service_role`.
 
 تسمح واجهة القراءة العامة بعرض المحاضرات المنشورة فقط. إنشاء المحاضرات وتعديلها وحذفها يتطلبان جلسة Supabase صالحة ووجود المستخدم في `admin_users`؛ يتحقق الخادم من الاثنين في كل طلب. روابط البث والتسجيل تقبل HTTPS فقط. لا تعتبر اللوحة جاهزة للإنتاج قبل إضافة مفاتيح الخادم، وتسجيل مشرف موثوق، واختبار النشر على بيئة فعلية.
+
+
+## إعداد الإضافات الجديدة في فرع التجميع
+
+هذه الملفات جاهزة في الفرع، لكنها **لا تُفعّل على الإنتاج بمجرد إضافتها**. قبل تفعيل الميزات، راجع ثم طبّق ترحيلات Supabase بالترتيب:
+
+1. `supabase/migrations/202611020001_suggestions_ai.sql` — الاقتراحات ومهام الذكاء الاصطناعي، ودالة الموافقة محمية بـ `SET search_path = ''`.
+2. `supabase/migrations/202611070002_member_accounts.sql` — ملفات الأعضاء وسجل النشاط مع RLS لكل عضو.
+3. `supabase/migrations/202611070003_community_moderation.sql` — المنتدى والمناظرات ومراجعة المشاركات وحدود المعدل.
+4. `supabase/migrations/202611070004_daily_visitors.sql` — عداد الزوار اليومي؛ لا يقرأ الجدول إلا دور الخادم `service_role`.
+
+### تسجيل Google والتحقق الأمني
+- فعّل مزوّد Google في Supabase Auth وأضف رابط التطبيق المنشور إلى قائمة Redirect URLs.
+- `TURNSTILE_SITE_KEY` مفتاح علني اختياري يمر عبر إعدادات بناء الموقع.
+- سر CAPTCHA الخاص بـSupabase Auth يُضبط في لوحة Supabase، ولا يوضع في ملفات الواجهة.
+- `TURNSTILE_SECRET_KEY` في الخادم مخصص للتحقق من إرسال الأسئلة إلى API؛ لا تضعه في المتصفح.
+
+### Telegram
+- اترك `TELEGRAM_BOT_ENABLED=false` حتى تضبط البوت.
+- عند التفعيل، ضع `TELEGRAM_BOT_TOKEN` و`TELEGRAM_CHAT_ID` في بيئة الخادم فقط، ويمكن ضبط `SITE_URL` لرابط الموقع.
+- استقبال ملفات المكتبة مستقل عبر `TELEGRAM_MEDIA_ENABLED` و`TELEGRAM_MEDIA_GROUP_ID`. تظل الملفات خاصة حتى اعتماد المشرف؛ لا يوجد نشر تلقائي للملفات.
+
+### إحصاء الزوار
+- يحتاج API إلى `SUPABASE_URL` و`SUPABASE_SERVICE_ROLE_KEY` في الخادم فقط.
+- يحتاج الموقع إلى `AHL_API_BASE_URL` في إعداد البناء، ويجب أن تسمح `ALLOWED_ORIGINS` بعنوان GitHub Pages أو النطاق المنشور.
+- يُحترم خيار Do Not Track، ويُخزَّن تجزؤ يومي لمعرّف عشوائي محلي بدل عنوان IP أو المعرّف الخام، وتُحذف السجلات الأقدم من 90 يومًا.
