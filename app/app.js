@@ -1108,6 +1108,126 @@ document.getElementById('adhanAudio').addEventListener('ended', function () {
   setStatus(audioStatus, 'انتهى التسجيل.');
 });
 
+
+function initQuranRadio() {
+  var audio = document.getElementById('quranRadioAudio');
+  var button = document.getElementById('quranRadioButton');
+  var panel = document.getElementById('quranRadioPanel');
+  var playButton = document.getElementById('quranRadioPlay');
+  var muteButton = document.getElementById('quranRadioMute');
+  var volume = document.getElementById('quranRadioVolume');
+  var status = document.getElementById('quranRadioStatus');
+  if (!audio || !button || !panel || !playButton || !muteButton || !volume || !status) return;
+
+  var streamUrl = 'https://stream.radiojar.com/8s5u5tpdtwzuv';
+  var rampTimer = null;
+  var mutedByVisitor = false;
+  try { mutedByVisitor = localStorage.getItem('ahl-athar-radio-muted') === '1'; } catch (error) {}
+  audio.src = streamUrl;
+  audio.preload = 'none';
+  audio.volume = 0.05;
+  audio.muted = mutedByVisitor;
+  volume.value = '0.18';
+
+  function setRadioStatus(message) { status.textContent = message; }
+  function stopRamp() {
+    if (rampTimer !== null) window.clearTimeout(rampTimer);
+    rampTimer = null;
+  }
+  function scheduleVolumeRise() {
+    stopRamp();
+    rampTimer = window.setTimeout(function () {
+      if (!mutedByVisitor && !audio.muted && !audio.paused) {
+        audio.volume = Math.min(Number(volume.value) || 0.18, 0.18);
+        setRadioStatus('إذاعة القرآن الكريم تعمل الآن.');
+      }
+      rampTimer = null;
+    }, 5000);
+  }
+  function syncButtons() {
+    playButton.textContent = audio.paused ? 'تشغيل' : 'إيقاف';
+    muteButton.textContent = mutedByVisitor || audio.muted ? 'إلغاء الكتم' : 'كتم';
+    muteButton.setAttribute('aria-pressed', mutedByVisitor || audio.muted ? 'true' : 'false');
+    button.setAttribute('aria-expanded', panel.hidden ? 'false' : 'true');
+    button.textContent = audio.paused ? 'إذاعة القرآن الكريم' : 'إذاعة تعمل';
+  }
+  function startPlayback(fromUser) {
+    if (mutedByVisitor && !fromUser) return;
+    if (fromUser && mutedByVisitor) {
+      mutedByVisitor = false;
+      audio.muted = false;
+      try { localStorage.setItem('ahl-athar-radio-muted', '0'); } catch (error) {}
+    }
+    audio.volume = 0.05;
+    audio.muted = false;
+    setRadioStatus('جارٍ الاتصال بالبث…');
+    var promise = audio.play();
+    if (promise && typeof promise.then === 'function') {
+      promise.then(function () {
+        syncButtons();
+        setRadioStatus('بدأ البث بصوت منخفض، وسيزداد تدريجيًا بعد 5 ثوانٍ ما لم تكتمه.');
+        scheduleVolumeRise();
+      }).catch(function () {
+        stopRamp();
+        syncButtons();
+        setRadioStatus('المتصفح منع التشغيل التلقائي. اضغط «تشغيل» لبدء الإذاعة.');
+      });
+    } else {
+      syncButtons();
+      scheduleVolumeRise();
+    }
+  }
+
+  button.addEventListener('click', function () {
+    panel.hidden = !panel.hidden;
+    button.setAttribute('aria-expanded', panel.hidden ? 'false' : 'true');
+    if (!panel.hidden && audio.paused) startPlayback(true);
+  });
+  playButton.addEventListener('click', function () {
+    if (audio.paused) startPlayback(true);
+    else {
+      stopRamp();
+      audio.pause();
+      setRadioStatus('تم إيقاف الإذاعة.');
+      syncButtons();
+    }
+  });
+  muteButton.addEventListener('click', function () {
+    stopRamp();
+    mutedByVisitor = !mutedByVisitor;
+    audio.muted = mutedByVisitor;
+    if (mutedByVisitor) {
+      audio.pause();
+      try { localStorage.setItem('ahl-athar-radio-muted', '1'); } catch (error) {}
+      setRadioStatus('تم كتم الإذاعة وإيقاف البث. لن تعمل تلقائيًا عند دخولك مرة أخرى حتى تلغي الكتم.');
+    } else {
+      try { localStorage.setItem('ahl-athar-radio-muted', '0'); } catch (error) {}
+      startPlayback(true);
+    }
+    syncButtons();
+  });
+  volume.addEventListener('input', function () {
+    stopRamp();
+    var selected = Number(volume.value);
+    audio.volume = Number.isFinite(selected) ? selected : 0.18;
+    if (audio.volume > 0 && mutedByVisitor) {
+      mutedByVisitor = false;
+      audio.muted = false;
+      try { localStorage.setItem('ahl-athar-radio-muted', '0'); } catch (error) {}
+    }
+    setRadioStatus('تم ضبط مستوى الصوت يدويًا.');
+  });
+  audio.addEventListener('playing', syncButtons);
+  audio.addEventListener('pause', syncButtons);
+  audio.addEventListener('error', function () {
+    stopRamp();
+    setRadioStatus('تعذر الوصول إلى البث حاليًا. جرّب مرة أخرى من زر التشغيل.');
+    syncButtons();
+  });
+  syncButtons();
+  if (!mutedByVisitor) startPlayback(false);
+}
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(function () {
     setStatus(prayerStatus, 'تعذر تفعيل الاستخدام دون اتصال في هذا المتصفح.', true);
@@ -1121,6 +1241,7 @@ loadPublishedLectures();
 updateLessonCountdown();
 loadSavedSettings();
 renderAdhkar();
+initQuranRadio();
 initAuth();
 setInterval(updateLessonCountdown, 1000);
 setInterval(function () { updatePrayerTimes(false); }, 60000);
