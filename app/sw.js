@@ -20,6 +20,7 @@ var APP_FILES = [
   './admin-suggestions.js',
   './auth-client.js',
   './supabase-config.js',
+  './turnstile-config.js',
   './runtime-config.js',
   './vendor/adhan.umd.min.js',
   './vendor/ADHAN-LICENSE.txt',
