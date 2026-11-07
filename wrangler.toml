@@ -1,0 +1,6 @@
+name = "hares"
+compatibility_date = "2026-11-05"
+previews = {}
+
+[assets]
+directory = "./app"
