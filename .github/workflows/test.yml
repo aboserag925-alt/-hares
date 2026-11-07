@@ -4,6 +4,7 @@ on:
   push:
     branches: ["**"]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -50,6 +51,6 @@ jobs:
       - run: docker build --tag ahl-athar:verify .
       - name: Check patch whitespace
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || github.sha + '^' }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: git diff --check "$BASE_SHA...$HEAD_SHA"
