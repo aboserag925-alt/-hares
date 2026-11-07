@@ -292,63 +292,63 @@ button,a{ -webkit-tap-highlight-color:transparent }
 }
 
 /* App dashboard: keep the same brand while giving controls room on narrow phones. */
-body:not(.site){min-width:0}
-body:not(.site) .wrap{width:min(calc(100% - 2*var(--layout-gutter)),1120px)}
-body:not(.site) .tabs{grid-template-columns:repeat(auto-fit,minmax(94px,1fr));}
-body:not(.site) .tab{min-width:0;white-space:normal;overflow-wrap:anywhere}
-body:not(.site) .card,body:not(.site) .radio-panel,
-body:not(.site) .community-topic,body:not(.site) .community-form{min-width:0;max-width:100%}
-body:not(.site) .slot>span:last-child,
-body:not(.site) .community-topic p{min-width:0;overflow-wrap:anywhere}
-body:not(.site) input,body:not(.site) select,body:not(.site) textarea{min-width:0;max-width:100%}
-body:not(.site) .radio-panel{background:#fff!important;color:#173b2c!important;border-color:rgba(11,94,60,.18)!important;box-shadow:0 10px 28px rgba(17,58,42,.07)!important}
-body:not(.site) .radio-panel strong{color:#0b5e3c!important}
-body:not(.site) .radio-panel label,body:not(.site) .radio-status{color:#557263!important}
-body:not(.site) .radio-panel button{background:#edf4ee!important;color:#0b5e3c!important;border-color:rgba(11,94,60,.2)!important;min-height:42px}
-body:not(.site) .radio-panel input[type=range]{max-width:34vw}
+.app-shell{min-width:0}
+.app-shell .wrap{width:min(calc(100% - 2*var(--layout-gutter)),1120px)}
+.app-shell .tabs{grid-template-columns:repeat(auto-fit,minmax(94px,1fr));}
+.app-shell .tab{min-width:0;white-space:normal;overflow-wrap:anywhere}
+.app-shell .card,.app-shell .radio-panel,
+.app-shell .community-topic,.app-shell .community-form{min-width:0;max-width:100%}
+.app-shell .slot>span:last-child,
+.app-shell .community-topic p{min-width:0;overflow-wrap:anywhere}
+.app-shell input,.app-shell select,.app-shell textarea{min-width:0;max-width:100%}
+.app-shell .radio-panel{background:#fff!important;color:#173b2c!important;border-color:rgba(11,94,60,.18)!important;box-shadow:0 10px 28px rgba(17,58,42,.07)!important}
+.app-shell .radio-panel strong{color:#0b5e3c!important}
+.app-shell .radio-panel label,.app-shell .radio-status{color:#557263!important}
+.app-shell .radio-panel button{background:#edf4ee!important;color:#0b5e3c!important;border-color:rgba(11,94,60,.2)!important;min-height:42px}
+.app-shell .radio-panel input[type=range]{max-width:34vw}
 @media(min-width:1100px){
- body:not(.site) #sched{grid-template-columns:repeat(3,minmax(0,1fr))}
- body:not(.site) .panel-grid,body:not(.site) .media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .app-shell #sched{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .app-shell .panel-grid,.app-shell .media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media(max-width:680px){
- body:not(.site) .wrap{width:calc(100% - 28px);padding-top:16px}
- body:not(.site) header{grid-template-columns:54px minmax(0,1fr);column-gap:11px}
- body:not(.site) .logo{width:52px;height:52px}
- body:not(.site) .tabs{display:flex;flex-wrap:nowrap;gap:5px;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin;padding:6px}
- body:not(.site) .tab{flex:0 0 auto;min-width:88px;min-height:46px;padding:8px 10px}
- body:not(.site) #sched{grid-template-columns:repeat(2,minmax(0,1fr))}
- body:not(.site) .panel-grid,body:not(.site) .media-grid{grid-template-columns:1fr}
- body:not(.site) .radio-panel{align-items:stretch;gap:8px;padding:12px}
- body:not(.site) .radio-panel strong{flex-basis:100%;margin:0}
- body:not(.site) .radio-panel button{flex:1 1 90px}
- body:not(.site) .radio-panel label{flex:1 1 100%;justify-content:space-between}
+ .app-shell .wrap{width:calc(100% - 28px);padding-top:16px}
+ .app-shell header{grid-template-columns:54px minmax(0,1fr);column-gap:11px}
+ .app-shell .logo{width:52px;height:52px}
+ .app-shell .tabs{display:flex;flex-wrap:nowrap;gap:5px;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin;padding:6px}
+ .app-shell .tab{flex:0 0 auto;min-width:88px;min-height:46px;padding:8px 10px}
+ .app-shell #sched{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .app-shell .panel-grid,.app-shell .media-grid{grid-template-columns:1fr}
+ .app-shell .radio-panel{align-items:stretch;gap:8px;padding:12px}
+ .app-shell .radio-panel strong{flex-basis:100%;margin:0}
+ .app-shell .radio-panel button{flex:1 1 90px}
+ .app-shell .radio-panel label{flex:1 1 100%;justify-content:space-between}
 }
 @media(max-width:480px){
- body:not(.site) .wrap{width:calc(100% - 22px);padding-top:12px}
- body:not(.site) header{grid-template-columns:48px minmax(0,1fr);column-gap:9px}
- body:not(.site) .logo{width:46px;height:46px;padding:4px;border-radius:14px}
- body:not(.site) h1{font-size:clamp(21px,6vw,27px);line-height:1.45}
- body:not(.site) header p{font-size:12px;line-height:1.6}
- body:not(.site) .doctor{font-size:11px}
- body:not(.site) #sched{grid-template-columns:minmax(0,1fr)}
- body:not(.site) .card{padding:14px;border-radius:16px}
- body:not(.site) .slot{flex-wrap:wrap}
- body:not(.site) .time{min-width:72px}
- body:not(.site) .settings-grid{grid-template-columns:minmax(0,1fr)}
- body:not(.site) .prayer-list{grid-template-columns:repeat(2,minmax(0,1fr))}
- body:not(.site) .question-actions{display:grid;grid-template-columns:1fr}
- body:not(.site) .question-actions .btn{width:100%}
- body:not(.site) .radio-panel input[type=range]{width:min(46vw,180px);max-width:46vw}
+ .app-shell .wrap{width:calc(100% - 22px);padding-top:12px}
+ .app-shell header{grid-template-columns:48px minmax(0,1fr);column-gap:9px}
+ .app-shell .logo{width:46px;height:46px;padding:4px;border-radius:14px}
+ .app-shell h1{font-size:clamp(21px,6vw,27px);line-height:1.45}
+ .app-shell header p{font-size:12px;line-height:1.6}
+ .app-shell .doctor{font-size:11px}
+ .app-shell #sched{grid-template-columns:minmax(0,1fr)}
+ .app-shell .card{padding:14px;border-radius:16px}
+ .app-shell .slot{flex-wrap:wrap}
+ .app-shell .time{min-width:72px}
+ .app-shell .settings-grid{grid-template-columns:minmax(0,1fr)}
+ .app-shell .prayer-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .app-shell .question-actions{display:grid;grid-template-columns:1fr}
+ .app-shell .question-actions .btn{width:100%}
+ .app-shell .radio-panel input[type=range]{width:min(46vw,180px);max-width:46vw}
 }
 @media(max-width:360px){
- body:not(.site) .wrap{width:calc(100% - 18px)}
- body:not(.site) .tabs{gap:4px}
- body:not(.site) .tab{min-width:82px;font-size:11px}
- body:not(.site) .next{padding:16px 13px}
- body:not(.site) .prayer-time{padding:10px 8px}
- body:not(.site) .prayer-time span{font-size:11px}
- body:not(.site) .prayer-time time{font-size:13px}
+ .app-shell .wrap{width:calc(100% - 18px)}
+ .app-shell .tabs{gap:4px}
+ .app-shell .tab{min-width:82px;font-size:11px}
+ .app-shell .next{padding:16px 13px}
+ .app-shell .prayer-time{padding:10px 8px}
+ .app-shell .prayer-time span{font-size:11px}
+ .app-shell .prayer-time time{font-size:13px}
 }
 @media(prefers-reduced-motion:reduce){
- .site *,body:not(.site) *{scroll-behavior:auto!important;animation:none!important;transition:none!important}
+ .site *,.app-shell *{scroll-behavior:auto!important;animation:none!important;transition:none!important}
 }
