@@ -134,6 +134,7 @@ select id from auth.users where email = 'admin@example.com';
 2. `supabase/migrations/202611070002_member_accounts.sql` — ملفات الأعضاء وسجل النشاط مع RLS لكل عضو.
 3. `supabase/migrations/202611070003_community_moderation.sql` — المنتدى والمناظرات ومراجعة المشاركات وحدود المعدل.
 4. `supabase/migrations/202611070004_daily_visitors.sql` — عداد الزوار اليومي؛ لا يقرأ الجدول إلا دور الخادم `service_role`.
+5. `supabase/migrations/202611070005_ai_approval_hardening.sql` — ترقية أمان لمن سبق أن طبق ترحيل الذكاء الاصطناعي؛ تجعل `tainted` افتراضيًا true وتعيد تثبيت دالة الموافقة بـ`search_path` فارغ.
 
 ### تسجيل Google والتحقق الأمني
 - فعّل مزوّد Google في Supabase Auth وأضف رابط التطبيق المنشور إلى قائمة Redirect URLs.
@@ -155,3 +156,9 @@ select id from auth.users where email = 'admin@example.com';
 - يحتاج API إلى `SUPABASE_URL` و`SUPABASE_SERVICE_ROLE_KEY` في الخادم فقط.
 - يحتاج الموقع إلى `AHL_API_BASE_URL` في إعداد البناء، ويجب أن تسمح `ALLOWED_ORIGINS` بعنوان GitHub Pages أو النطاق المنشور.
 - يُحترم خيار Do Not Track، ويُخزَّن تجزؤ يومي لمعرّف عشوائي محلي بدل عنوان IP أو المعرّف الخام، وتُحذف السجلات الأقدم من 90 يومًا.
+
+### حدود تنفيذ وكلاء الذكاء الاصطناعي
+- المهام المشتقة من اقتراحات أو مدخلات غير موثوقة تبدأ `tainted=true`؛ ولا يمكن اعتمادها أو تنفيذها أو دمجها قبل إنشاء مهمة داخلية موثوقة بعد مراجعة مناسبة.
+- وكيل المطوّر لا يعمل أثناء التحليل؛ يُستدعى فقط عبر بوابة التنفيذ بعد موافقة بشرية مسجلة في الخادم.
+- موافقة المشرف تتحقق من جلسة Supabase ومن وجود المستخدم في `admin_users`، ثم تستدعي RPC بصلاحية الخادم فقط.
+- حالة `HUMAN_APPROVED` تعني موافقة بشرية، ولا تنفذ دمج GitHub أو نشر الإنتاج تلقائيًا. الدمج والنشر خارج صلاحيات الوكلاء.
