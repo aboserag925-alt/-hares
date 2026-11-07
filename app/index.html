@@ -147,6 +147,8 @@ textarea::placeholder{color:#777e75}
 .auth-form{display:grid;gap:14px;max-width:520px;margin-top:18px}
 .auth-actions{display:flex;gap:10px;flex-wrap:wrap}
 .auth-actions .btn{margin:0}
+.captcha-box{display:flex;justify-content:flex-start;min-height:65px;margin-top:2px}
+.auth-recovery{display:grid;gap:12px;max-width:520px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
 .account-email{color:var(--gold2);font-weight:700;direction:ltr;text-align:right}
 .social-account{margin-top:14px}
 .tab:focus-visible,.btn:focus-visible,textarea:focus-visible,.dhikr-count:focus-visible,.adhkar-choice:focus-visible{outline:2px solid var(--gold2);outline-offset:3px}
@@ -480,11 +482,27 @@ body,.app-shell,button,input,textarea,select{
 <label class="field" for="authPassword">كلمة المرور
 <input id="authPassword" type="password" autocomplete="current-password" minlength="8" required placeholder="ثمانية أحرف على الأقل">
 </label>
+<div id="authCaptcha" class="captcha-box" hidden role="group" aria-label="التحقق الأمني"></div>
 <div class="auth-actions">
 <button id="signInBtn" class="btn" type="submit">تسجيل الدخول</button>
 <button id="signUpBtn" class="btn" type="button">إنشاء حساب</button>
+<button id="resetPasswordBtn" class="btn" type="button">نسيت كلمة المرور؟</button>
 </div>
 </form>
+<div id="passwordRecoveryPanel" class="auth-recovery" hidden>
+<h3 class="section-title">تعيين كلمة مرور جديدة</h3>
+<p class="section-subtitle">افتح رابط الاستعادة الذي وصلك على بريدك، ثم أدخل كلمة مرور جديدة.</p>
+<label class="field" for="newPassword">كلمة المرور الجديدة
+<input id="newPassword" type="password" autocomplete="new-password" minlength="8" required placeholder="ثمانية أحرف على الأقل">
+</label>
+<label class="field" for="confirmNewPassword">تأكيد كلمة المرور
+<input id="confirmNewPassword" type="password" autocomplete="new-password" minlength="8" required placeholder="أعد كتابة كلمة المرور">
+</label>
+<div class="auth-actions">
+<button id="saveNewPasswordBtn" class="btn" type="button">حفظ كلمة المرور</button>
+<button id="cancelPasswordRecoveryBtn" class="btn" type="button">إلغاء</button>
+</div>
+</div>
 <div id="accountSignedIn" hidden>
 <p>تم تسجيل الدخول بالبريد:</p>
 <p id="accountEmail" class="account-email"></p>
