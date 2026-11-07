@@ -12,7 +12,7 @@ function createTelegramAssistant(options) {
   const reviewChatId = env.TELEGRAM_CHAT_ID;
   const siteUrl = (env.SITE_URL || 'https://aboserag925-alt.github.io/Haress/').replace(/\/$/, '') + '/';
   const limits = new Map();
-  const optedOut = new Set();
+  const optedOut = new Map();
 
   async function call(method, payload) {
     if (!token) throw new Error('Telegram bot token is not configured.');
@@ -25,6 +25,53 @@ function createTelegramAssistant(options) {
     const result = await response.json();
     if (!response.ok || !result.ok) throw new Error('Telegram API request failed: ' + method);
     return result.result;
+  }
+
+  function preferencesUrl(userId) {
+    if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error('Telegram privacy preferences storage is not configured.');
+    }
+    const base = env.SUPABASE_URL.replace(/\/$/, '');
+    return base + '/rest/v1/telegram_user_preferences?telegram_user_id=eq.' + encodeURIComponent(String(userId));
+  }
+
+  async function isOptedOut(userId) {
+    const key = String(userId);
+    if (optedOut.has(key)) return optedOut.get(key);
+    const response = await fetchImpl(preferencesUrl(key) + '&select=opted_out&limit=1', {
+      headers: {
+        apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: 'Bearer ' + env.SUPABASE_SERVICE_ROLE_KEY,
+        Accept: 'application/json'
+      },
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!response.ok) throw new Error('Telegram privacy preference lookup failed.');
+    const rows = await response.json();
+    const value = Boolean(rows[0] && rows[0].opted_out === true);
+    optedOut.set(key, value);
+    return value;
+  }
+
+  async function saveOptOut(userId, value) {
+    const key = String(userId);
+    const response = await fetchImpl(preferencesUrl(key) + '&on_conflict=telegram_user_id', {
+      method: 'POST',
+      headers: {
+        apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: 'Bearer ' + env.SUPABASE_SERVICE_ROLE_KEY,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates,return=minimal'
+      },
+      signal: AbortSignal.timeout(10000),
+      body: JSON.stringify({
+        telegram_user_id: Number(key),
+        opted_out: Boolean(value),
+        updated_at: new Date().toISOString()
+      })
+    });
+    if (!response.ok) throw new Error('Telegram privacy preference could not be saved.');
+    optedOut.set(key, Boolean(value));
   }
 
   function limited(userId) {
@@ -84,8 +131,14 @@ function createTelegramAssistant(options) {
     if (!message || !message.chat || message.chat.type !== 'private' || !message.from || message.from.is_bot) return false;
     const chatId = message.chat.id;
     const text = typeof message.text === 'string' ? message.text.trim() : '';
+    const userId = message.from.id;
     if (/^\/start(?:@\w+)?(?:\s|$)/i.test(text) || /^\/menu(?:@\w+)?$/i.test(text)) {
-      optedOut.delete(String(message.from.id));
+      try {
+        await saveOptOut(userId, false);
+      } catch {
+        await send(chatId, 'تعذر تحديث تفضيل الخصوصية الآن. لم أفعّل استقبال الرسائل؛ حاول لاحقًا.');
+        return true;
+      }
       await send(chatId, 'مرحبًا بك في المساعد الرسمي لمنصة استراحة أهل الأثر. كيف أستطيع مساعدتك؟', mainMenu());
       return true;
     }
@@ -94,11 +147,24 @@ function createTelegramAssistant(options) {
       return true;
     }
     if (/^\/stop(?:@\w+)?$/i.test(text)) {
-      optedOut.add(String(message.from.id));
-      await send(chatId, 'تم إيقاف معالجة الرسائل العادية في هذه المحادثة. لن تُرسل رسائلك التالية للمراجعة. لإعادة الاستخدام أرسل /start.');
+      try {
+        await saveOptOut(userId, true);
+        await send(chatId, 'تم حفظ إيقاف استقبال رسائلك. لن تُرسل رسائلك التالية للمراجعة، وسيظل الإيقاف محفوظًا بعد إعادة تشغيل الخادم. لإعادة الاستخدام أرسل /start.');
+      } catch {
+        optedOut.set(String(userId), true);
+        await send(chatId, 'تعذر حفظ تفضيل الإيقاف في قاعدة البيانات. أوقفت معالجة رسائلك في هذه الجلسة احتياطيًا؛ أعد /stop لاحقًا لتأكيد الحفظ الدائم.');
+      }
       return true;
     }
-    if (optedOut.has(String(message.from.id))) return true;
+    if (/^\/help(?:@\w+)?$/i.test(text)) return true;
+    let stopped;
+    try {
+      stopped = await isOptedOut(userId);
+    } catch {
+      await send(chatId, 'تعذر التحقق من تفضيل الخصوصية الآن؛ أوقفت إحالة الرسائل مؤقتًا لحماية خصوصيتك. حاول لاحقًا.');
+      return true;
+    }
+    if (stopped) return true;
     if (!text) {
       await send(chatId, 'أستقبل الرسائل النصية فقط حاليًا. أرسل /menu للمساعدة.');
       return true;
@@ -107,7 +173,7 @@ function createTelegramAssistant(options) {
       await send(chatId, 'اجعل رسالتك بين 5 و1200 حرف.');
       return true;
     }
-    if (limited(message.from.id)) {
+    if (limited(userId)) {
       await send(chatId, 'وصلت إلى الحد المؤقت للرسائل (5 رسائل كل 15 دقيقة). حاول لاحقًا.');
       return true;
     }
@@ -119,7 +185,7 @@ function createTelegramAssistant(options) {
     await call('sendMessage', {
       chat_id: reviewChatId,
       text: 'رسالة جديدة من مساعد استراحة أهل الأثر للمراجعة البشرية\nالاسم الظاهر: ' + sender +
-        '\nTelegram ID: ' + String(message.from.id) + '\n\nالرسالة:\n' + text
+        '\nTelegram ID: ' + String(userId) + '\n\nالرسالة:\n' + text
     });
     await send(chatId, 'وصلت رسالتك إلى فريق المراجعة بنجاح. سيُراجعها المختصون، ولا يُعد هذا الإشعار فتوى أو إجابة شرعية.');
     return true;
