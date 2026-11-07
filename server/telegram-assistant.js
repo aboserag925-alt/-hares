@@ -27,18 +27,18 @@ function createTelegramAssistant(options) {
     return result.result;
   }
 
-  function preferencesUrl(userId) {
+  function preferencesUrl() {
     if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
       throw new Error('Telegram privacy preferences storage is not configured.');
     }
     const base = env.SUPABASE_URL.replace(/\/$/, '');
-    return base + '/rest/v1/telegram_user_preferences?telegram_user_id=eq.' + encodeURIComponent(String(userId));
+    return base + '/rest/v1/telegram_user_preferences';
   }
 
   async function isOptedOut(userId) {
     const key = String(userId);
     if (optedOut.has(key)) return optedOut.get(key);
-    const response = await fetchImpl(preferencesUrl(key) + '&select=opted_out&limit=1', {
+    const response = await fetchImpl(preferencesUrl() + '?select=opted_out&telegram_user_id=eq.' + encodeURIComponent(key) + '&limit=1', {
       headers: {
         apikey: env.SUPABASE_SERVICE_ROLE_KEY,
         Authorization: 'Bearer ' + env.SUPABASE_SERVICE_ROLE_KEY,
@@ -55,7 +55,9 @@ function createTelegramAssistant(options) {
 
   async function saveOptOut(userId, value) {
     const key = String(userId);
-    const response = await fetchImpl(preferencesUrl(key) + '&on_conflict=telegram_user_id', {
+    const numericId = Number(key);
+    if (!Number.isSafeInteger(numericId) || numericId <= 0) throw new Error('Invalid Telegram user ID.');
+    const response = await fetchImpl(preferencesUrl() + '?on_conflict=telegram_user_id', {
       method: 'POST',
       headers: {
         apikey: env.SUPABASE_SERVICE_ROLE_KEY,
@@ -65,7 +67,7 @@ function createTelegramAssistant(options) {
       },
       signal: AbortSignal.timeout(10000),
       body: JSON.stringify({
-        telegram_user_id: Number(key),
+        telegram_user_id: numericId,
         opted_out: Boolean(value),
         updated_at: new Date().toISOString()
       })
