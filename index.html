@@ -363,7 +363,7 @@ window.copySupportNumber = async function(button) {
 <script src="app/runtime-config.js"></script>
 <script>
 (function(){
-  var base=typeof window.AHL_API_BASE_URL==='string'?window.AHL_API_BASE_URL.replace(/\\/+$/,''):'';
+  var base=typeof window.AHL_API_BASE_URL==='string'?window.AHL_API_BASE_URL.replace(/\/+$/,''):'';
   var schedule=document.getElementById('scheduleRows'), archive=document.getElementById('lectureArchive'), broadcast=document.getElementById('broadcastNotice');
   function link(text,url){var a=document.createElement('a');a.className='btn line';a.textContent=text;a.href=url;a.target='_blank';a.rel='noopener noreferrer';return a;}
   fetch(base+'/api/lectures',{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('request failed');return r.json();}).then(function(data){
