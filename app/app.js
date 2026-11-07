@@ -1147,7 +1147,7 @@ async function sendQuestion() {
     return;
   }
   if (!consent) {
-    setStatus(status, 'وافق على إرسال السؤال إلى Gemini وTelegram أولًا.', true);
+    setStatus(status, 'وافق على إرسال السؤال إلى نماذج Gemini وGrok المتاحة وTelegram للمراجعة أولًا.', true);
     return;
   }
 
@@ -1184,12 +1184,22 @@ async function sendQuestion() {
       throw new Error('استجابة الخادم غير صالحة. حاول لاحقًا.');
     }
 
-    if (typeof result.draft === 'string') {
-      document.getElementById('questionDraftText').textContent = result.draft;
+    var draftText = '';
+    if (result.drafts && typeof result.drafts === 'object') {
+      if (typeof result.drafts.gemini === 'string') draftText += 'مسودة Gemini (غير معتمدة):\n' + result.drafts.gemini;
+      if (typeof result.drafts.grok === 'string') draftText += (draftText ? '\n\n' : '') + 'مسودة Grok (غير معتمدة):\n' + result.drafts.grok;
+    } else if (typeof result.draft === 'string') {
+      draftText = result.draft;
+    }
+    if (draftText) {
+      document.getElementById('questionDraftText').textContent = draftText;
       draftBox.hidden = false;
     }
     if (!response.ok) throw new Error(result.error || 'تعذر إرسال السؤال. حاول لاحقًا.');
-    setStatus(status, 'وصل السؤال والمسودة إلى Telegram للمراجعة. المسودة ليست فتوى معتمدة.');
+    var modelNotice = result.modelStatus && result.modelStatus.grok === 'failed'
+      ? 'تعذر Grok في هذه المحاولة؛ أُرسلت مسودة Gemini للمراجعة.'
+      : 'وصلت المسودات المتاحة إلى Telegram للمراجعة.';
+    setStatus(status, modelNotice + ' المسودات ليست فتوى معتمدة.' );
   } catch (error) {
     var message = error instanceof TypeError
       ? 'تعذر الاتصال بالخادم الخلفي. تأكد من تشغيل الخادم ثم حاول مجددًا.'
