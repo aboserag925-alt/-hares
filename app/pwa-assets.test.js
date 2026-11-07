@@ -159,3 +159,13 @@ test('support dialogs close by backdrop or mobile back without navigating away',
     const scripts = documentText.split('<script>').slice(1).map(function (part) { return part.split('</script>')[0]; });
     for (const script of scripts) if (script.trim()) new vm.Script(script);
   }});
+
+test('approved shield identity and blessing remain visible at mobile widths', function () {
+  const rootHtml = fs.readFileSync(path.join(appDirectory, '../index.html'), 'utf8');
+  assert.ok(html.includes('غفر الله لهم'));
+  assert.ok(rootHtml.includes('غفر الله لهم'));
+  assert.ok(rootHtml.includes('assets/brand-mark.svg'));
+  assert.ok(!rootHtml.includes('assets/logo.jpg'));
+  assert.ok(html.includes('@media(max-width:390px)'));
+  assert.ok(html.includes('grid-template-columns:40px minmax(0,1fr)'));
+});
