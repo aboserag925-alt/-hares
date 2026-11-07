@@ -86,3 +86,13 @@ test('account recovery and optional CAPTCHA are wired on user and admin screens'
   assert.ok(buildScript.includes('TURNSTILE_SITE_KEY'));
   assert.ok(pagesWorkflow.includes('TURNSTILE_SITE_KEY'));
 });
+
+test('app sections support stacked overlays and outside-tap dismissal', function () {
+  const appScript = fs.readFileSync(path.join(appDirectory, 'app.js'), 'utf8');
+  assert.ok(appScript.includes("var sectionStack = ['sched'];"));
+  assert.ok(appScript.includes('function renderSectionStack()'));
+  assert.ok(appScript.includes('function closeTopSection()'));
+  assert.ok(appScript.includes('event.target.closest(contentSelector)'));
+  assert.ok(appScript.includes("event.key === 'Escape'"));
+  assert.ok(html.includes('Context-preserving section overlays'));
+});
