@@ -199,6 +199,11 @@ function updateLessonCountdown() {
 
 function renderSectionStack() {
   var activeSection = sectionStack[sectionStack.length - 1];
+  var isSchedule = activeSection === 'sched';
+  var scheduleHeading = document.querySelector('.section-heading');
+  var nextLesson = document.querySelector('.next');
+  if (scheduleHeading) scheduleHeading.hidden = !isSchedule;
+  if (nextLesson) nextLesson.hidden = !isSchedule;
   prayerSections.forEach(function (id, index) {
     var position = sectionStack.indexOf(id);
     var visible = position !== -1;
