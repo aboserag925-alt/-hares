@@ -286,6 +286,20 @@ body,.app-shell,button,input,textarea,select{
 .radio-panel button{background:#c7a45b;color:#142c23;cursor:pointer}
 .radio-status{flex-basis:100%;margin:0;overflow-wrap:anywhere}
 @media(max-width:600px){.radio-panel{margin:.65rem .5rem;padding:.75rem}.radio-panel label{width:100%}.radio-panel select{flex:1;min-width:0}}
+
+/* Context-preserving section overlays; tapping the dimmed area returns one level. */
+.tabs{z-index:20}
+.app-section-overlay{
+  position:fixed;inset:0;z-index:15;display:flex;flex-direction:column;align-items:center;gap:12px;
+  overflow-y:auto;overscroll-behavior:contain;padding:clamp(14px,3vw,28px) 14px calc(24px + env(safe-area-inset-bottom));
+  background:rgba(5,8,7,.76);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  animation:section-sheet-in .22s ease-out both
+}
+.app-section-overlay>*{width:min(100%,760px);flex:0 0 auto}
+.app-section-overlay>.card{margin:0;box-shadow:0 18px 54px rgba(0,0,0,.32)}
+@keyframes section-sheet-in{from{opacity:0;backdrop-filter:blur(0)}to{opacity:1;backdrop-filter:blur(12px)}}
+@media(min-width:760px){.app-section-overlay{justify-content:center;padding:28px}}
+@media(prefers-reduced-motion:reduce){.app-section-overlay{animation:none}}
 </style>
 </head>
 <body>
