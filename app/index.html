@@ -149,6 +149,10 @@ textarea::placeholder{color:#777e75}
 .auth-actions .btn{margin:0}
 .captcha-box{display:flex;justify-content:flex-start;min-height:65px;margin-top:2px}
 .auth-recovery{display:grid;gap:12px;max-width:520px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.google-signin{display:flex;width:100%;min-height:46px;align-items:center;justify-content:center;gap:10px;margin:0 0 12px;border:1px solid rgba(213,171,100,.35);border-radius:14px;background:#18221d;color:var(--gold2);font:700 14px Cairo,sans-serif}
+.google-signin span{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#f8f7f4;color:#4285f4;font:800 15px Arial,sans-serif}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:8px 0 12px;color:var(--muted);font-size:12px}
+.auth-divider:before,.auth-divider:after{height:1px;flex:1;background:var(--line);content:''}
 .account-email{color:var(--gold2);font-weight:700;direction:ltr;text-align:right}
 .social-account{margin-top:14px}
 .tab:focus-visible,.btn:focus-visible,textarea:focus-visible,.dhikr-count:focus-visible,.adhkar-choice:focus-visible{outline:2px solid var(--gold2);outline-offset:3px}
@@ -490,6 +494,8 @@ body,.app-shell,button,input,textarea,select{
 <p id="authMessage" class="status" role="status" aria-live="polite"></p>
 <div id="authConfigMissing" class="notice" hidden>تسجيل الدخول غير مفعّل بعد. أنشئ مشروع Supabase، ونفّذ <code>supabase/schema.sql</code> في SQL Editor، ثم أضف رابط المشروع والمفتاح العام إلى <code>app/supabase-config.js</code> وشغّل <code>npm.cmd run build:app</code>. لا تضع مفتاح service_role هنا.</div>
 <form id="authForm" class="auth-form" hidden>
+<button id="googleSignInBtn" class="google-signin" type="button" hidden><span aria-hidden="true">G</span> المتابعة باستخدام Google</button>
+<div class="auth-divider">أو باستخدام البريد الإلكتروني</div>
 <label class="field" for="authEmail">البريد الإلكتروني
 <input id="authEmail" type="email" autocomplete="email" inputmode="email" required placeholder="name@example.com">
 </label>
