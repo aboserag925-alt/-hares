@@ -29,6 +29,10 @@ jobs:
           node --check server/suggestions/suggestion-validator.js
           node --check server/ai/approval-api.js
           node --check server/ai/task-service.js
+          node --check server/ai/platform-analysis.js
+          node --check server/ai/platform-analysis-api.js
+          node --check server/ai/platform-analysis.test.js
+          node --check server/ai/platform-analysis-api.test.js
           node --check app/app.js
           node --check app/suggestions.js
           node --check app/admin-suggestions.js
