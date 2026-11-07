@@ -357,6 +357,10 @@ body,.app-shell,button,input,textarea,select{
 @media(max-width:680px){.methodology{font-size:9px}}
 
 header h1,header p,.doctor,.blessing,.methodology{font-family:'Noto Naskh Arabic','Cairo',serif!important;letter-spacing:0!important}
+
+.radio-panel audio{display:block;width:100%;min-height:42px}
+.radio-controls{display:flex;flex-wrap:wrap;gap:8px}
+.radio-controls button{flex:1 1 150px}
 </style>
 </head>
 <body>
@@ -421,16 +425,20 @@ header h1,header p,.doctor,.blessing,.methodology{font-family:'Noto Naskh Arabic
 <button class="tab" id="t9" type="button" aria-pressed="false" onclick="show('debates')">المناظرات</button>
 <button class="tab" id="t10" type="button" aria-pressed="false" onclick="show('forum')">المنتدى</button>
 </nav>
-<section class="radio-panel" id="quranRadioPanel" hidden aria-label="روابط البث الرسمي لإذاعة القرآن الكريم">
-<strong>إذاعة القرآن الكريم — البث الرسمي</strong>
+<section class="radio-panel" id="quranRadioPanel" hidden aria-label="مشغل إذاعة القرآن الكريم">
+<strong>إذاعة القرآن الكريم — القاهرة افتراضيًا</strong>
 <label for="quranRadioStation">اختر الإذاعة
 <select id="quranRadioStation">
 <option value="cairo" selected>القاهرة — مصر (الافتراضي)</option>
 <option value="saudi">إذاعة القرآن الكريم — السعودية</option>
 </select>
 </label>
-<button id="quranRadioOpen" type="button">فتح البث الرسمي</button>
-<p class="radio-status" id="quranRadioStatus" role="status" aria-live="polite">المحطة الافتراضية: إذاعة القرآن الكريم من القاهرة.</p>
+<audio id="quranRadioAudio" controls preload="none" playsinline aria-label="بث إذاعة القرآن الكريم من القاهرة"></audio>
+<div class="radio-controls">
+<button id="quranRadioMute" type="button" aria-pressed="false">كتم الإذاعة</button>
+<button id="quranRadioOpen" type="button">فتح الموقع الرسمي</button>
+</div>
+<p class="radio-status" id="quranRadioStatus" role="status" aria-live="polite">يحاول المشغل بدء البث بمستوى صوت منخفض. إذا منع المتصفح التشغيل التلقائي، اضغط تشغيل.</p>
 </section>
 <section id="sched" aria-label="جدول الدروس الأسبوعي"></section>
 <section id="prayers" hidden>
