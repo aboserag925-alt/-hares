@@ -156,7 +156,7 @@ test('support dialogs close by backdrop or mobile back without navigating away',
   assert.ok(rootHtml.includes('function openSiteSupportDialog()'));
   assert.ok(rootHtml.includes('event.target===siteSupportDialog'));
   for (const documentText of [html, rootHtml]) {
-    for (const match of documentText.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/g)) {
+    for (const match of documentText.matchAll(/<script(?:\\s[^>]*)?>([\s\S]*?)<\/script>/g)) {
       if (match[1].trim()) new vm.Script(match[1]);
     }
   }
