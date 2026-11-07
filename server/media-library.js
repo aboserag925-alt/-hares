@@ -100,6 +100,9 @@ function createMediaLibrary(options) {
   const indexPath = path.join(storageDirectory, 'media-index.json');
   const botToken = env.TELEGRAM_BOT_TOKEN;
   const mediaGroupId = env.TELEGRAM_MEDIA_GROUP_ID || env.TELEGRAM_CHAT_ID;
+  const mediaEnabled = env.TELEGRAM_MEDIA_ENABLED === 'true';
+  const assistantEnabled = env.TELEGRAM_BOT_ENABLED === 'true';
+  const handleAssistantUpdate = options.handleAssistantUpdate;
   let items = [];
   let offset = null;
   let initialized = false;
