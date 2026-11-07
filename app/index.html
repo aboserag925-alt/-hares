@@ -277,13 +277,16 @@ textarea::placeholder{color:#777e75}
 <button class="tab" id="t9" type="button" aria-pressed="false" onclick="show('debates')">المناظرات</button>
 <button class="tab" id="t10" type="button" aria-pressed="false" onclick="show('forum')">المنتدى</button>
 </nav>
-<section class="radio-panel" id="quranRadioPanel" hidden aria-label="مشغل إذاعة القرآن الكريم">
-  <strong>إذاعة القرآن الكريم من القاهرة</strong>
-  <button id="quranRadioPlay" type="button">تشغيل</button>
-  <button id="quranRadioMute" type="button" aria-pressed="false">كتم</button>
-  <label for="quranRadioVolume">مستوى الصوت <input id="quranRadioVolume" type="range" min="0" max="1" step="0.05" value="0.18"></label>
-  <p class="radio-status" id="quranRadioStatus" role="status" aria-live="polite">محاولة بدء البث عند دخول المنصة. قد يتطلب المتصفح ضغطة منك للسماح بالصوت.</p>
-  <audio id="quranRadioAudio" preload="none" playsinline></audio>
+<section class="radio-panel" id="quranRadioPanel" hidden aria-label="روابط البث الرسمي لإذاعة القرآن الكريم">
+  <strong>إذاعة القرآن الكريم — البث الرسمي</strong>
+  <label for="quranRadioStation">اختر الإذاعة
+    <select id="quranRadioStation">
+      <option value="cairo" selected>القاهرة — مصر (الافتراضي)</option>
+      <option value="saudi">إذاعة القرآن الكريم — السعودية</option>
+    </select>
+  </label>
+  <button id="quranRadioOpen" type="button">فتح البث الرسمي</button>
+  <p class="radio-status" id="quranRadioStatus" role="status" aria-live="polite">المحطة الافتراضية: إذاعة القرآن الكريم من القاهرة. سيتم فتح موقع الإذاعة الرسمي عند الضغط.</p>
 </section>
 <section id="sched" aria-label="جدول الدروس الأسبوعي"></section>
 <section id="prayers" hidden>
