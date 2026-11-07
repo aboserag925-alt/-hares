@@ -363,12 +363,12 @@ function createMediaLibrary(options) {
   async function processUpdate(update) {
     await initialize();
     const message = update.message;
-    if (mediaEnabled && message && mediaGroupId && String(message.chat.id) === String(mediaGroupId)) {
+    if ((mediaEnabled || !assistantEnabled) && message && mediaGroupId && String(message.chat.id) === String(mediaGroupId)) {
       if (await removeApprovedMedia(message)) return;
       await receiveFile(message);
       return;
     }
-    if (mediaEnabled && update.callback_query &&
+    if ((mediaEnabled || !assistantEnabled) && update.callback_query &&
         String(update.callback_query.data || '').startsWith('media:')) {
       await processCallback(update.callback_query);
       return;
