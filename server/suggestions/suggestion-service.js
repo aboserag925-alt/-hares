@@ -18,6 +18,14 @@ function createSuggestionService({env,fetch:fetchImpl=global.fetch}) {
     },
     async list() { return request('/rest/v1/suggestions?select=*&order=created_at.desc&limit=200'); },
     async get(id) { const rows=await request('/rest/v1/suggestions?id=eq.'+encodeURIComponent(id)+'&select=*&limit=1'); return rows[0]||null; },
+    async recordAnalysis(id, analysis, risk) {
+      const rows=await request('/rest/v1/suggestions?id=eq.'+encodeURIComponent(id)+'&select=*',{
+        method:'PATCH',
+        headers:{Prefer:'return=representation'},
+        body:JSON.stringify({status:'ANALYZED',risk:risk,ai_analysis:analysis,updated_at:new Date().toISOString()})
+      });
+      return rows[0]||null;
+    },
     async update(id,patch,actorUserId=null) { const rows=await request('/rest/v1/suggestions?id=eq.'+encodeURIComponent(id)+'&select=*',{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({...patch,updated_at:new Date().toISOString()})}); const item=rows[0]||null; if(item) { try { await audit.record({event:patch.status==='REJECTED'?'suggestion.rejected':'suggestion.updated',suggestionId:item.id,actorUserId,metadata:{status:item.status,priority:item.priority,risk:item.risk}}); } catch { console.error('Suggestion audit event could not be recorded'); } } return item; }
   });
 }
