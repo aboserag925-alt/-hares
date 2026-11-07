@@ -1,7 +1,7 @@
 'use strict';
 (function(){
   const panel=document.getElementById('adminPanel');if(!panel||document.getElementById('haresSuggestionsAdmin'))return;
-  const section=document.createElement('section');section.id='haresSuggestionsAdmin';section.className='panel';section.dir='rtl';section.hidden=true;section.innerHTML='<h2>لوحة تطوير المنصة بالذكاء الاصطناعي</h2><p>اقتراحات المستخدمين — عرض إداري للقراءة فقط في هذه المرحلة.</p><button type="button" id="haresLoadSuggestions">تحميل الاقتراحات</button><div id="haresSuggestionsList" aria-live="polite"></div>';
+  const section=document.createElement('section');section.id='haresSuggestionsAdmin';section.className='panel';section.dir='rtl';section.hidden=true;section.innerHTML='<h2>لوحة تطوير المنصة بالذكاء الاصطناعي</h2><p>اقتراحات المستخدمين — تحليل مساعد، وتظل كل النتائج بحاجة إلى مراجعة بشرية.</p><button type="button" id="haresLoadSuggestions">تحميل الاقتراحات</button><div id="haresSuggestionsList" aria-live="polite"></div>';
   const anchor=document.getElementById('listPanel');if(anchor)anchor.after(section);else panel.after(section);
   if(typeof MutationObserver==='function')new MutationObserver(()=>{section.hidden=panel.hidden;}).observe(panel,{attributes:true,attributeFilter:['hidden']});
   section.querySelector('button').addEventListener('click',async()=>{
@@ -13,7 +13,7 @@
         analyzeButton.disabled=true;analysisStatus.textContent='جارٍ التحليل الآمن…';
         try{
           const token=await window.ahlAuth.getAccessToken();
-          const base=String(window.AHL_API_BASE_URL||'').replace(/\\/+$/,'');
+          const base=String(window.AHL_API_BASE_URL||'').replace(/\/+$/,'');
           const response=await fetch(base+'/api/admin/suggestions/'+encodeURIComponent(item.id)+'/analyze',{method:'POST',headers:{Authorization:'Bearer '+token}});
           const data=await response.json();
           if(!response.ok)throw Error(data.error||'تعذر تحليل الاقتراح');
