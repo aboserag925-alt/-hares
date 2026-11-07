@@ -169,3 +169,17 @@ test('approved shield identity and blessing remain visible at mobile widths', fu
   assert.ok(html.includes('@media(max-width:390px)'));
   assert.ok(html.includes('grid-template-columns:40px minmax(0,1fr)'));
 });
+
+test('Quran radio defaults to Cairo with best-effort low-volume autoplay and persistent mute', function () {
+  const appScript = fs.readFileSync(path.join(appDirectory, 'app.js'), 'utf8');
+  assert.ok(html.includes('id="quranRadioAudio"'));
+  assert.ok(html.includes('id="quranRadioMute"'));
+  assert.ok(html.includes('<option value="cairo" selected>'));
+  assert.ok(html.includes('<option value="saudi">'));
+  assert.ok(appScript.includes('https://stream.radiojar.com/8s5u5tpdtwzuv'));
+  assert.ok(appScript.includes("audio.volume = 0.06"));
+  assert.ok(appScript.includes("}, 5000)"));
+  assert.ok(appScript.includes("ahl_quran_radio_muted"));
+  assert.ok(appScript.includes("المتصفح منع التشغيل التلقائي"));
+  assert.ok(appScript.includes("https://radioplus.sba.sa/ar/live/4"));
+});
