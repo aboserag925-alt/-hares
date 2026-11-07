@@ -141,6 +141,11 @@ select id from auth.users where email = 'admin@example.com';
 - سر CAPTCHA الخاص بـSupabase Auth يُضبط في لوحة Supabase، ولا يوضع في ملفات الواجهة.
 - `TURNSTILE_SECRET_KEY` في الخادم مخصص للتحقق من إرسال الأسئلة إلى API؛ لا تضعه في المتصفح.
 
+### Gemini وGrok
+- `GEMINI_API_KEY` مطلوب لإنشاء المسودة الأساسية، والنموذج الافتراضي `gemini-3.8-flash`.
+- `GROK_API_KEY` اختياري لتشغيل المسودة الثانية بالتوازي، والنموذج الافتراضي `grok-4.7`. ضع المفتاح في بيئة الخادم فقط، وليس في GitHub Pages أو ملفات الواجهة.
+- يرسل الخادم إلى واجهتي Gemini Interactions وGrok Responses مع `store=false`، ثم يرسل المسودات المتاحة إلى Telegram للمراجعة البشرية. تعذر أحد النموذجين لا يمنع استخدام الآخر.
+
 ### Telegram
 - اترك `TELEGRAM_BOT_ENABLED=false` حتى تضبط البوت.
 - عند التفعيل، ضع `TELEGRAM_BOT_TOKEN` و`TELEGRAM_CHAT_ID` في بيئة الخادم فقط، ويمكن ضبط `SITE_URL` لرابط الموقع.
