@@ -174,3 +174,55 @@ p,li,label,.btn,.nav a,.card,.row,.stat,.item{font-family:var(--font-ui)!importa
 h1.big{font-weight:800;letter-spacing:-.055em;line-height:1.28}
 h2.t,.t{font-weight:800;letter-spacing:-.04em}
 .haress-intro__tag{font-family:var(--font-ui)!important;font-weight:600}
+
+/* Identity Motion v2 — restrained 3D depth and time-based reveals */
+@keyframes haress-shield-float{
+  0%,100%{transform:translateY(0) rotateX(0) rotateY(0)}
+  50%{transform:translateY(-5px) rotateX(2deg) rotateY(-2deg)}
+}
+@keyframes haress-depth-in{
+  from{opacity:0;transform:perspective(900px) translateY(28px) rotateX(7deg) scale(.985);filter:blur(3px)}
+  to{opacity:1;transform:perspective(900px) translateY(0) rotateX(0) scale(1);filter:blur(0)}
+}
+.haress-intro__logo{
+  transform-style:preserve-3d;
+  animation:haress-shield-float 5.8s ease-in-out infinite;
+  filter:drop-shadow(0 16px 24px rgba(11,94,60,.18));
+}
+.haress-intro__content{perspective:1000px;transform-style:preserve-3d}
+.haress-intro__name{
+  font-family:'Noto Naskh Arabic',serif!important;
+  letter-spacing:0!important;
+  color:#0b5e3c!important;
+}
+.haress-intro__tag{font-family:'Noto Naskh Arabic',serif!important;letter-spacing:0!important}
+@media(hover:hover) and (pointer:fine){
+  .hero .emblem{
+    transform-style:preserve-3d;
+    transition:transform .65s cubic-bezier(.2,.75,.25,1),box-shadow .65s ease;
+  }
+  .hero .emblem:hover{
+    transform:perspective(900px) rotateX(5deg) rotateY(-7deg) translateY(-5px);
+    box-shadow:inset 0 0 0 1px rgba(212,175,55,.24),0 32px 80px rgba(11,94,60,.16)!important;
+  }
+  .card,.quick-item,.next{
+    transform-style:preserve-3d;
+    transition:transform .38s cubic-bezier(.2,.75,.25,1),box-shadow .38s ease!important;
+  }
+  .card:hover,.quick-item:hover,.next:hover{
+    transform:perspective(850px) translateY(-5px) rotateX(2deg) rotateY(-1deg)!important;
+  }
+}
+/* Scroll/time choreography: supported browsers reveal each card as it enters view. */
+@supports(animation-timeline:view()){
+  .card,.quick-item{
+    animation:haress-depth-in linear both;
+    animation-timeline:view();
+    animation-range:entry 0% entry 78%;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .haress-intro__logo{animation:none!important}
+  .hero .emblem,.card,.quick-item,.next{transform:none!important;transition:none!important}
+  .card,.quick-item{animation:none!important}
+}
