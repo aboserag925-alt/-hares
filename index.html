@@ -256,6 +256,12 @@ body,.app-shell,button,input,textarea,select{
 @media(prefers-reduced-motion:reduce){.development-notice-dot{animation:none}}
 
 .visitor-count{display:flex;align-items:center;justify-content:center;gap:6px;color:var(--muted,#a9ada2);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}.visitor-count b{color:var(--gold2,#f2d9a4)}
+
+.nav .logo .brand-copy{display:grid;gap:3px;line-height:1.25;min-width:0}
+.nav .logo .brand-copy strong{font-size:15px;font-weight:800;white-space:nowrap}
+.nav .logo .blessing{display:block;color:#d5ab64;font-size:10px;font-weight:700;line-height:1.4}
+@media(max-width:680px){.nav .logo{gap:8px!important}.nav .logo img{width:40px!important;height:40px!important}.nav .logo .brand-copy strong{font-size:13px}.nav .logo .blessing{font-size:9px}}
+@media(max-width:390px){.nav .logo img{width:36px!important;height:36px!important}.nav .logo .brand-copy strong{font-size:12px}}
 </style>
 
 </head>
@@ -265,7 +271,7 @@ body,.app-shell,button,input,textarea,select{
 <div class="orb" style="width:420px;height:420px;background:rgba(212,162,76,.18);top:40px;right:-80px"></div>
 <div class="orb" style="width:340px;height:340px;background:rgba(138,100,32,.22);top:520px;left:-100px;animation-delay:-4s"></div>
 <header class="nav"><div class="wrap">
-<a class="logo" href="#top" style="display:flex;align-items:center;gap:12px"><img src="assets/logo.jpg" alt="" style="width:44px;height:44px;border-radius:50%;border:1px solid #d5ab64">استراحة أهل الأثر</a>
+<a class="logo" href="#top" style="display:flex;align-items:center;gap:10px"><img src="assets/brand-mark.svg" alt="حرس الحدود" style="width:46px;height:46px;object-fit:contain"><span class="brand-copy"><strong>استراحة أهل الأثر</strong><small class="blessing">غفر الله لهم</small></span></a>
 <nav class="desktop-links" aria-label="التنقل الرئيسي"><a class="nl" href="#sections">الأقسام</a><a class="nl" href="#schedule">الجدول</a><a class="nl" href="#archive">الأرشيف</a><a class="nl" href="#majlis">المجلس</a></nav>
 <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobileSiteMenu" onclick="toggleSiteMenu()" aria-label="فتح قائمة التنقل"><span></span><span></span><span></span></button>
 <a class="btn fill nav-cta" href="#live" style="height:42px;padding:0 20px;color:#0b0e0d">تابع البث</a>
