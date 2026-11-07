@@ -17,3 +17,14 @@ test('AI approval endpoint rejects client attempts to supply actor or approval f
  const api=createApprovalApi({env:{SUPABASE_URL:'https://project.example',SUPABASE_ANON_KEY:'anon',SUPABASE_SERVICE_ROLE_KEY:'service'},fetch:async url=>url.endsWith('/auth/v1/user')?{ok:true,json:async()=>({id:'admin-1'})}:{ok:true,json:async()=>[{user_id:'admin-1'}]},taskService:{recordHumanApproval:async()=>{throw Error('must not be called');}}});
  const res=response();await api(request('POST',{authorization:'Bearer good.token.value','content-type':'application/json'},{action:'IMPLEMENT',decision:'APPROVED',actorUserId:'attacker',approved:true}),res,'/api/admin/ai/tasks/123e4567-e89b-42d3-a456-426614174000/approval');assert.equal(res.status,400);
 });
+
+test('AI approval endpoint requires a reason for rejected decisions',async()=>{
+ const api=createApprovalApi({
+  env:{SUPABASE_URL:'https://project.example',SUPABASE_ANON_KEY:'anon',SUPABASE_SERVICE_ROLE_KEY:'service'},
+  fetch:async url=>url.endsWith('/auth/v1/user')?{ok:true,json:async()=>({id:'admin-1'})}:{ok:true,json:async()=>[{user_id:'admin-1'}]},
+  taskService:{recordHumanApproval:async()=>{throw Error('must not be called');}}
+ });
+ const res=response();
+ await api(request('POST',{authorization:'Bearer good.token.value','content-type':'application/json'},{action:'MERGE',decision:'REJECTED'}),res,'/api/admin/ai/tasks/123e4567-e89b-42d3-a456-426614174000/approval');
+ assert.equal(res.status,400);
+});
